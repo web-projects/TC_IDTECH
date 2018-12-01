@@ -1,2 +1,0 @@
-C:\Development\CSharp\IDTech\Augusta\IdTechCfg\Services\obj\Debug\Services.csprojAssemblyReference.cache
-C:\Development\CSharp\IDTech\Augusta\IdTechCfg\Services\obj\Debug\Services.csproj.CoreCompileInputs.cache

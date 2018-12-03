@@ -173,6 +173,7 @@ namespace IPA.DAL.RBADAL.Services.Devices.IDTech
         public const string SecureMag = "ID TECH TM3 SecureMag";
         public const string SRedKey = "ID TECH SREDKey";
         public const string SecuRED = "ID TECH TM3 SecuRED";
+        public const string Augusta = "ID TECH Augusta";
     }
 
     public class DeviceModelNumber
@@ -185,6 +186,8 @@ namespace IPA.DAL.RBADAL.Services.Devices.IDTech
         public const string SecureKeyM130NewFormat = "IDKE-534833BEM";
         public const string SecureMag = "IDRE-33X133B";
         public const string SecuRED = "IDSR-334133TEB";
+        public const string AugustKYB = "IDEM-24XX";
+        public const string AugustHID = "IDEM-25XX";
     }
 
     public class IDTSetStatus

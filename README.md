@@ -26,4 +26,5 @@ This an application to test IDTech Augusta Devices.
 ### HISTORY ###
 
 * 20181130 - initial repository.
+* 20181203 - modeled after current IPA.
 

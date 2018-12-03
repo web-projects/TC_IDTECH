@@ -1,5 +1,5 @@
 ﻿using System;
-///using IPA.Core.Data.Entity.Other;
+using IPA.Core.Data.Entity.Other;
 using IPA.Core.Shared.Enums;
 using IPA.DAL.RBADAL.Interfaces;
 using IPA.DAL.RBADAL.Models;
@@ -16,6 +16,7 @@ namespace IPA.DAL.RBADAL.Services
         #region -- member variables --
 
         private IDevice deviceInterface;
+        private IDTECH_DEVICE_PID deviceMode;
 
         public delegate void EventHandler(object sender, NotificationEventArgs args);
         public event EventHandler<NotificationEventArgs> OnNotification = delegate { };
@@ -25,7 +26,7 @@ namespace IPA.DAL.RBADAL.Services
 
         #region -- public methods --
 
-        public void Init(string[] available)
+        public void Init(string[] available, ref bool useUniversalSDK, ref IDTECH_DEVICE_PID mode, ref object [] deviceMsg)
         {
             BaudRate = int.Parse(ConfigurationManager.AppSettings["IPA.DAL.Device.COMBaudRate"]);
             DataBits = int.Parse(ConfigurationManager.AppSettings["IPA.DAL.Device.COMDataBits"]);
@@ -45,15 +46,59 @@ namespace IPA.DAL.RBADAL.Services
                 switch (devices[0].Vendor)
                 {
                     case DeviceManufacturer.IDTech:
-                        deviceInterface = new Device_IDTech();
+                    {
+                        var deviceID = devices[0].DeviceID;
+                        string [] worker = deviceID.Split('&');
+ 
+                        // should contain PID_XXXX...
+                        if(System.Text.RegularExpressions.Regex.IsMatch(worker[1], "PID_"))
+                        {
+                          string [] worker2 = System.Text.RegularExpressions.Regex.Split(worker[1], @"PID_");
+                          string pid = worker2[1].Substring(0, 4);
+
+                          // See if device matches
+                          int pidId = Int32.Parse(pid);
+
+                          switch(pidId)
+                          {
+                            case (int) IDTECH_DEVICE_PID.AUGUSTA_KYB:
+                            {
+                              useUniversalSDK = true;
+                              mode = IDTECH_DEVICE_PID.AUGUSTA_KYB;
+                              deviceMsg[0] = "USB-HID";
+                              break;
+                            }
+
+                            case (int) IDTECH_DEVICE_PID.AUGUSTA_HID:
+                            {
+                              useUniversalSDK = true;
+                              mode = IDTECH_DEVICE_PID.AUGUSTA_HID;
+                              deviceMsg[0] = "USB-KB";
+                              break;
+                            }
+
+                            default:
+                            {
+                                deviceMsg[0] = "UNKNOWN";
+                                break;
+                            }
+                          }
+                        }
+                        deviceMode = mode;
+                        deviceInterface = new Device_IDTech(deviceMode);
                         deviceInterface.OnNotification += DeviceOnNotification;
                         break;
+                    }
                     case DeviceManufacturer.Ingenico:
+                    {
 ///                        deviceInterface = new Device_Ingenico();
 ///                        deviceInterface.OnNotification += DeviceOnNotification;
                         break;
+                    }
                     default:
+                    {
                         throw new ArgumentOutOfRangeException(nameof(vendor), vendor, null);
+                    }
                 }
             }
             else if(devices.Count > 1)
@@ -84,11 +129,6 @@ namespace IPA.DAL.RBADAL.Services
             await deviceInterface?.CardRead(paymentAmount, promptText);
 
             return ;
-        }
-        
-        public void SetDeviceType(int type)
-        {
-            deviceInterface.SetDeviceType(type);
         }
 
         //necessary because Device.Init happens before Company Configs are read.

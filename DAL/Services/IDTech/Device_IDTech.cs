@@ -1,5 +1,5 @@
 ﻿using IPA.Core.Data.Entity;
-///using IPA.Core.Data.Entity.Other;
+using IPA.Core.Data.Entity.Other;
 using IPA.Core.Shared.Enums;
 using IPA.DAL.RBADAL.Interfaces;
 using IPA.DAL.RBADAL.Models;
@@ -62,7 +62,7 @@ namespace IPA.DAL.RBADAL.Services
         private string currentPaymentAmount;
 //        private bool IsDebit;
 //        private bool IsEMV;
-        private int deviceType;
+        private IDTECH_DEVICE_PID deviceMode;
 
         public EventWaitHandle waitForReply = new EventWaitHandle(false, EventResetMode.AutoReset);
 
@@ -93,6 +93,11 @@ namespace IPA.DAL.RBADAL.Services
 
         #region -- public methods --
 
+        public Device_IDTech(IDTECH_DEVICE_PID mode)
+        {
+            deviceMode = mode;
+        }
+
         void IDevice.Init(string[] accepted, string[] available, int baudRate, int dataBits)
         {
             acceptedPorts = accepted;
@@ -105,11 +110,6 @@ namespace IPA.DAL.RBADAL.Services
             //Add event handlers
             //ingenicoDevice.DeviceInputReceived += (sender3, deviceArgs) => DeviceInputReceived(deviceArgs.MessageID, deviceArgs.DeviceForm, deviceArgs.KeyPressID);
             //ingenicoDevice.DeviceConnectionChanged += (sender4, deviceConnectionArgs) => UpdateDeviceIngenico(deviceConnectionArgs.ConnectionStatus);
-        }
-
-        public void SetDeviceType(int type)
-        {
-            deviceType = type;
         }
 
         DeviceStatus IDevice.Connect()
@@ -536,7 +536,7 @@ namespace IPA.DAL.RBADAL.Services
         private IDTSetStatus DeviceReset()
         {
             var configStatus = new IDTSetStatus { Success = true };
-            bool AUGUSTA_DEVICE = (deviceType == (int)IDTECH_DEVICE_PID.AUGUSTA_HID || deviceType == (int)IDTECH_DEVICE_PID.AUGUSTA_KYB);
+            bool AUGUSTA_DEVICE = (deviceMode == IDTECH_DEVICE_PID.AUGUSTA_HID || deviceMode == IDTECH_DEVICE_PID.AUGUSTA_KYB);
             if(AUGUSTA_DEVICE)
             {
                 // WIP: no resets for these device types
@@ -745,7 +745,7 @@ namespace IPA.DAL.RBADAL.Services
 
         public string ParseFirmwareVersion(string firmwareInfo)
         {
-            bool AUGUSTA_DEVICE = (deviceType == (int)IDTECH_DEVICE_PID.AUGUSTA_HID || deviceType == (int)IDTECH_DEVICE_PID.AUGUSTA_KYB);
+            bool AUGUSTA_DEVICE = (deviceMode == IDTECH_DEVICE_PID.AUGUSTA_HID || deviceMode == IDTECH_DEVICE_PID.AUGUSTA_KYB);
             // Validate the format firmwareInfo see if the version # exists
             var version = firmwareInfo.Substring(firmwareInfo.IndexOf('V') + ((AUGUSTA_DEVICE) ? 1 : 2),
                 firmwareInfo.Length - firmwareInfo.IndexOf('V') - 3);
@@ -875,6 +875,9 @@ namespace IPA.DAL.RBADAL.Services
                     break;
                 case DeviceModelType.SecuRED:
                     model = DeviceModelNumber.SecuRED;
+                    break;
+                case DeviceModelType.Augusta:
+                    model = DeviceModelNumber.AugustKYB;
                     break;
             }
 
@@ -1709,6 +1712,8 @@ if(empty)
         private void DeviceRemovedHandler()
         {
             //TODO: When device is rmoved raise an user message?
+            System.Diagnostics.Debug.WriteLine("device: removed.");
+            NotificationRaise(new NotificationEventArgs { NotificationType = NotificationType.DeviceEvent, DeviceEvent = DeviceEvent.DeviceDisconnected });
         }
 
 

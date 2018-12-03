@@ -1,5 +1,5 @@
 ﻿using System;
-///using IPA.Core.Data.Entity.Other;
+using IPA.Core.Data.Entity.Other;
 using IPA.Core.Shared.Enums;
 using IPA.DAL.RBADAL.Models;
 using System.Collections.Generic;
@@ -27,7 +27,6 @@ namespace IPA.DAL.RBADAL.Interfaces
         
         //Public methods
         void Init(string[] accepted, string[] available, int baudRate, int dataBits);
-        void SetDeviceType(int type);
         DeviceStatus Connect();
         void Disconnect();
         void Abort(DeviceAbortType abortType);

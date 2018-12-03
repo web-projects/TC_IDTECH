@@ -37,16 +37,6 @@ namespace IPA.DAL.RBADAL
     private static DeviceInformation deviceInformation;
 
     // Device Events back to Main Form
-//    public event DeviceEventHandler initializeDevice;
-//    public event DeviceEventHandler unloadDeviceconfigDomain;
-//    public event DeviceEventHandler processCardData;
-//    public event DeviceEventHandler processCardDataError;
-//    public event DeviceEventHandler getDeviceConfiguration;
-//    public event DeviceEventHandler setDeviceConfiguration;
-//    public event DeviceEventHandler setDeviceMode;
-//    public event DeviceEventHandler setExecuteResult;
-//    public event DeviceEventHandler showJsonConfig;
-
     public event EventHandler<DeviceNotificationEventArgs> OnDeviceNotification;
 
     private bool useUniversalSDK;
@@ -89,7 +79,7 @@ namespace IPA.DAL.RBADAL
       deviceInformation = new DeviceInformation();
 
       // Device Discovery
-      useUniversalSDK = DeviceDiscovery();
+      //useUniversalSDK = DeviceDiscovery();
 
       try
       {
@@ -117,25 +107,40 @@ namespace IPA.DAL.RBADAL
 			Debug.WriteLine("  Number of Feature Value Caps   : " + device.Capabilities.NumberFeatureValueCaps);
 			Debug.WriteLine("  Number of Feature Data Indices : " + device.Capabilities.NumberFeatureDataIndices);
 
+            // Using the device notifier to detect device removed event
             device.Removed += DeviceRemovedHandler;
+            Device.OnNotification += OnNotification;
+            object [] deviceMsg = { "" };
 
-            //if (!useUniversalSDK)
+            Device.Init(SerialPortService.GetAvailablePorts(), ref useUniversalSDK, ref deviceInformation.deviceMode, ref deviceMsg);
+
+            // Notify Main Form
+            NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_SET_DEVICE_MODE, Message = deviceMsg });
+
+            // connect to device
+            Device.Connect();
+
             if(deviceInformation.deviceMode != IDTECH_DEVICE_PID.AUGUSTA_HID)
             {
-                Device.OnNotification += OnNotification;
-
-                Device.Init(SerialPortService.GetAvailablePorts());
-                Device.SetDeviceType((int)deviceInformation.deviceMode);
-                Device.Connect();
+                Debug.WriteLine("device information ----------------------------------------------------------------");
                 DeviceInfo di = Device.GetDeviceInfo();
                 deviceInformation.SerialNumber = di.SerialNumber;
+                Debug.WriteLine("device INFO[Serial Number]   : {0}", (object) deviceInformation.SerialNumber);
                 deviceInformation.FirmwareVersion = di.FirmwareVersion;
+                Debug.WriteLine("device INFO[Firmware Version]: {0}", (object) deviceInformation.FirmwareVersion);
                 deviceInformation.ModelNumber = di.ModelNumber;
+                Debug.WriteLine("device INFO[Model Number]    : {0}", (object) deviceInformation.ModelNumber);
                 deviceInformation.ModelName = di.ModelName;
+                Debug.WriteLine("device INFO[Model Name]      : {0}", (object) deviceInformation.ModelName);
                 deviceInformation.Port = di.Port;
+                Debug.WriteLine("device INFO[Port]            : {0}", (object) deviceInformation.Port);
             }
-            else
+
+            if(deviceInformation.deviceMode == IDTECH_DEVICE_PID.AUGUSTA_HID)
             {
+                // Initialize Universal SDK
+                IDT_Device.setCallback(MessageCallBack);
+                IDT_Device.startUSBMonitoring();
                 GetDeviceInformation();
             }
 
@@ -145,7 +150,6 @@ namespace IPA.DAL.RBADAL
       }
       catch (Exception xcp)
       {
-          //TODO Handle Exception
           throw xcp;
       }
 
@@ -188,98 +192,27 @@ namespace IPA.DAL.RBADAL
     {
       formClosing = state;
     }
-
-    /*protected virtual void OnInitializeDevice(DeviceEventArgs e) 
-    {
-        if (initializeDevice != null)
-        {
-          initializeDevice(this, e);
-        }
-    }
-
-    protected virtual void OnUnloadDeviceConfigDomain(DeviceEventArgs e) 
-    {
-        if (unloadDeviceconfigDomain != null)
-        {
-          unloadDeviceconfigDomain(this, e);
-        }
-    }
-
-    protected virtual void OnProcessCardData(DeviceEventArgs e) 
-    {
-        if (processCardData != null)
-        {
-          processCardData(this, e);
-        }
-    }
-    protected virtual void OnProcessCardDataError(DeviceEventArgs e) 
-    {
-        if (processCardDataError != null)
-        {
-          processCardDataError(this, e);
-        }
-    }
-
-    protected virtual void OnGetDeviceConfiguration(DeviceEventArgs e) 
-    {
-        if (getDeviceConfiguration != null)
-        {
-          getDeviceConfiguration(this, e);
-        }
-    }
     
-    protected virtual void OnSetDeviceConfiguration(DeviceEventArgs e) 
-    {
-        if (setDeviceConfiguration != null)
-        {
-          setDeviceConfiguration(this, e);
-        }
-    }
-    
-    protected virtual void OnSetDeviceMode(DeviceEventArgs e) 
-    {
-        if (setDeviceMode != null)
-        {
-          setDeviceMode(this, e);
-        }
-    }
-    
-    protected virtual void OnSetExecuteResult(DeviceEventArgs e) 
-    {
-        if (setExecuteResult != null)
-        {
-          setExecuteResult(this, e);
-        }
-    }
-
-    protected virtual void OnShowJsonConfig(DeviceEventArgs e) 
-    {
-        if (showJsonConfig != null)
-        {
-          showJsonConfig(this, e);
-        }
-    }*/
-    
-
     protected void OnNotification(object sender, Models.NotificationEventArgs args)
     {
         Debug.WriteLine("device: notification type={0}", args.NotificationType);
 
         switch (args.NotificationType)
         {
-
+            case NotificationType.DeviceEvent:
+            {
+                switch(args.DeviceEvent)
+                {
+                    case DeviceEvent.DeviceDisconnected:
+                    {
+                        DeviceRemovedHandler();
+                        break;
+                    }
+                }
+                break;
+            }
         }
     }
-
-    /*protected void OnDeviceNotification(object sender, DeviceNotificationEventArgs args)
-    {
-        Debug.WriteLine("device: notification type={0}", args.NotificationType);
-
-        switch (args.NotificationType)
-        {
-
-        }
-    }*/
 
     public void NotificationRaise(DeviceNotificationEventArgs e)
     {
@@ -290,7 +223,7 @@ namespace IPA.DAL.RBADAL
 
     /********************************************************************************************************/
     // DISCOVERY
-    /********************************************************************************************************/
+    /******************************************************************************************************** /
     #region -- device discovery ---
     private bool DeviceDiscovery()
     {
@@ -320,7 +253,6 @@ namespace IPA.DAL.RBADAL
                       // See if device matches
                       int pidId = Int32.Parse(pid);
 
-                      //DeviceEventArgs args = new DeviceEventArgs();
                       object [] message = { "" };
 
                       switch(pidId)
@@ -349,7 +281,6 @@ namespace IPA.DAL.RBADAL
                       }
 
                       // Notify Main Form
-                      //OnSetDeviceMode(args);
                       NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_SET_DEVICE_MODE, Message = message });
                     }
 
@@ -396,17 +327,19 @@ namespace IPA.DAL.RBADAL
     {
       Debug.WriteLine("\ndevice: removed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 
-      attached = false;
-
-      // Last device was USDK Type
-      if(useUniversalSDK)
+      if(attached)
       {
-          IDT_Device.stopUSBMonitoring();
-      }
+          attached = false;
 
-      // Unload Device Domain
-      //OnUnloadDeviceConfigDomain(new DeviceEventArgs());
-      NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_UNLOAD_DEVICE_CONFIGDOMAIN });
+          // Last device was USDK Type
+          if(useUniversalSDK)
+          {
+              IDT_Device.stopUSBMonitoring();
+          }
+
+          // Unload Device Domain
+          NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_UNLOAD_DEVICE_CONFIGDOMAIN });
+      }
     }
 
     private void DeviceAttachedHandler()
@@ -454,7 +387,7 @@ namespace IPA.DAL.RBADAL
           if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
           {
               deviceInformation.SerialNumber = serialNumber;
-              Debug.WriteLine("device INFO[Serial Number]: " + deviceInformation.SerialNumber);
+              Debug.WriteLine("device INFO[Serial Number]   : {0}", (object) deviceInformation.SerialNumber);
           }
           else
           {
@@ -469,20 +402,20 @@ namespace IPA.DAL.RBADAL
               if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
               {
                   deviceInformation.FirmwareVersion = ParseFirmwareVersion(firmwareVersion);
-                  Debug.WriteLine("device INFO[Firmware Version]: ", deviceInformation.FirmwareVersion);
+                  Debug.WriteLine("device INFO[Firmware Version]: {0}", (object) deviceInformation.FirmwareVersion);
 
                   deviceInformation.Port = firmwareVersion.Substring(firmwareVersion.IndexOf("USB", StringComparison.Ordinal), 7);
-                  Debug.WriteLine("device INFO[Port]: ", deviceInformation.Port);
+                  Debug.WriteLine("device INFO[Port]            : {0}", (object) deviceInformation.Port);
               }
 
               deviceInformation.ModelName = IDTechSDK.Profile.IDT_DEVICE_String(deviceType, deviceConnect);
-              Debug.WriteLine("device INFO[Model Name]: " + deviceInformation.ModelName);
- 
+              Debug.WriteLine("device INFO[Model Name]      : {0}", (object) deviceInformation.ModelName);
+
               rt = IDT_Augusta.SharedController.config_getModelNumber(ref deviceInformation.ModelNumber);
 
               if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
               {
-                  Debug.WriteLine("device INFO[Model Number]: " + deviceInformation.ModelNumber);
+                  Debug.WriteLine("device INFO[Model Number]    : {0}", (object) deviceInformation.ModelNumber);
               }
           }
       }
@@ -536,6 +469,9 @@ namespace IPA.DAL.RBADAL
 
           // Populate Device Configuration
           SetDeviceConfig();
+
+          // Get Device Information
+//          GetDeviceInformation();
 
           break;
         }
@@ -717,9 +653,6 @@ namespace IPA.DAL.RBADAL
           Debug.WriteLine("Transaction Failed: {0}\r\n", (object) text);
 
           // Allow for GUI Recovery
-          //DeviceEventArgs args = new DeviceEventArgs();
-          //args.payload[0] = "***** TRANSACTION FAILED: " + text + " *****";
-          //OnProcessCardDataError(args);
           string [] message = { "" };
           message[0] = "***** TRANSACTION FAILED: " + text + " *****";
           NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_PROCESS_CARDDATA_ERROR, Message = message });
@@ -1371,9 +1304,6 @@ namespace IPA.DAL.RBADAL
         Debug.WriteLine(text);
 
         // Process Card Data
-//        DeviceEventArgs args = new DeviceEventArgs();
-//        args.payload[0] = text;
-//        OnProcessCardData(args);
         string [] message = { text };
         NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_PROCESS_CARDDATA, Message = message });
 
@@ -1615,9 +1545,6 @@ namespace IPA.DAL.RBADAL
         serializer.WriteConfig();
 
         // Display JSON Config to User
-        //DeviceEventArgs args = new DeviceEventArgs();
-        //args.payload[0] = serializer.GetFileName();
-        //OnShowJsonConfig(args);
         object [] message = { serializer.GetFileName() };
         NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_SHOW_JSON_CONFIG, Message = message });
     }
@@ -2245,9 +2172,6 @@ namespace IPA.DAL.RBADAL
     {
       if (!device.IsConnected)
       {
-        //DeviceEventArgs args = new DeviceEventArgs();
-        //args.payload[0] = "***** REQUEST FAILED: DEVICE IS NOT CONNECTED *****";
-        //OnProcessCardDataError(args);
         string [] message = { "" };
         message[0] = "***** REQUEST FAILED: DEVICE IS NOT CONNECTED *****";
         NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_PROCESS_CARDDATA_ERROR, Message = message });
@@ -2297,505 +2221,7 @@ namespace IPA.DAL.RBADAL
         Device.CardRead(amount, "HELLO");
       }
     }
-/*
-    private void ProcessCardData(TrackData cardData)
-    {
-      string text = "";
 
-        //if (cardData.Event == EVENT_TRANSACTION_DATA_Types.EVENT_TRANSACTION_PIN_DATA)
-        //{
-        //    Debug.WriteLine("PIN Data received:\r\nKSN: " + cardData.pin_KSN + "\r\nPINBLOCK: " + cardData.pin_pinblock + "\r\nKey Entry: " + cardData.pin_KeyEntry + "\r\n");
-        //    return;
-        //}
-
-        //if (cardData.Event == EVENT_TRANSACTION_DATA_Types.EVENT_TRANSACTION_DATA_CARD_DATA)
-        //{
-        //    if (cardData.msr_rawData != null)
-        //    {
-        //        Debug.WriteLine("Data received: (Length [" + cardData.msr_rawData.Length.ToString() + "])\n" + string.Concat(cardData.msr_rawData.ToArray().Select(b => b.ToString("X2")).ToArray()) + "\r\n");
-        //        Debug.WriteLine("Data received: (Length [" + cardData.msr_rawData.Length.ToString() + "])\n" + string.Concat(cardData.msr_rawData.ToArray().Select(b => b.ToString("X2")).ToArray()));
-        //    }
-        //}
-
-      if (cardData.SerialNumber != null && cardData.SerialNumber.Length > 0)
-      {
-          text += "Serial Number: " + CardReader.ConvertHexStringToAscii(cardData.SerialNumber) + "\r\n";
-      }
-        
-      if (cardData.Track1.Length > 0)
-      {
-          text += "Track 1: " + cardData.Track1 + "\r\n";
-      }
-
-      if (cardData.T1Crypto != null && cardData.T1Crypto.Length > 0)
-      {
-          text += "Track 1 Encrypted: " + cardData.T1Crypto + "\r\n";
-      }
-
-      if (cardData.T1Hash != null && cardData.T1Hash.Length > 0)
-      {
-          text += "Track 1 Hash: " + cardData.T1Hash + "\r\n";
-      }
-
-      if (cardData.Track2.Length > 0)
-      {
-        text += "Track 2: " + cardData.Track2 + "\r\n";
-      }
-
-      if (cardData.T2Crypto != null && cardData.T2Crypto.Length > 0)
-      {
-        text += "Track 2 Encrypted: " + cardData.T2Crypto.ToUpper() + "\r\n";
-      }
-
-      if (cardData.T2Hash != null && cardData.T2Hash.Length > 0)
-      {
-        text += "Track 2 Hash: " + cardData.T2Hash + "\r\n";
-      }
-
-      if (cardData.Track3.Length > 0)
-      {
-        text += "Track 3: " + cardData.Track3 + "\r\n";
-      }
-
-      if (cardData.T3Crypto != null && cardData.T3Crypto.Length > 0)
-      {
-        text += "Track 3 Encrypted: " + cardData.T3Crypto + "\r\n";
-      }
-
-      if (cardData.T3Hash != null && cardData.T3Hash.Length > 0)
-      {
-        text += "Track 3 Hash: " + cardData.T3Hash + "\r\n";
-      }
-
-      if (cardData.Ksn != null  && cardData.Ksn.Length > 0)
-      {
-          text += "KSN: " + cardData.Ksn.ToUpper() + "\r\n";
-      }
-
-      #region -- msr emv tags --
-      //if (cardData.emv_clearingRecord != null)
-      //{
-      //    if (cardData.emv_clearingRecord.Length > 0)
-      //    {
-      //        text += "\r\nCTLS Clearing Record: \r\n";
-      //        text += Common.getHexStringFromBytes(cardData.emv_clearingRecord) + "\r\n";
-      //        Dictionary<string, string> dict = Common.processTLVUnencrypted(cardData.emv_clearingRecord);
-      //        foreach (KeyValuePair<string, string> kvp in dict) text += kvp.Key + ": " + kvp.Value + "\r\n";
-      //        text += "\r\n\r\n";
-      //    }
-      //}
-      //if (cardData.emv_unencryptedTags != null)
-      //{
-      //    if (cardData.emv_unencryptedTags.Length > 0)
-      //    {
-      //        text += "\r\n======================== \r\n";
-
-      //        text += "\r\nUnencrypted Tags: \r\n";
-      //        text += Common.getHexStringFromBytes(cardData.emv_unencryptedTags) + "\r\n\r\n";
-      //        text += TLV_To_Values(cardData.emv_unencryptedTags);
-      //        text += "\r\n======================== \r\n";
-      //    }
-      //}
-      //if (cardData.emv_encryptedTags != null)
-      //{
-      //    if (cardData.emv_encryptedTags.Length > 0)
-      //    {
-      //        text += "\r\n======================== \r\n";
-      //        text += "\r\nEncrypted Tags: \r\n";
-      //        text += Common.getHexStringFromBytes(cardData.emv_encryptedTags) + "\r\n\r\n";
-      //        text += TLV_To_Values(cardData.emv_encryptedTags);
-      //        text += "\r\n======================== \r\n";
-      //    }
-
-      //}
-      //if (cardData.emv_maskedTags != null)
-      //{
-      //    if (cardData.emv_maskedTags.Length > 0)
-      //    {
-      //        text += "\r\n======================== \r\n";
-      //        text += "\r\nMasked Tags: \r\n";
-      //        text += Common.getHexStringFromBytes(cardData.emv_maskedTags) + "\r\n\r\n";
-      //        text += TLV_To_Values(cardData.emv_maskedTags);
-      //        text += "\r\n======================== \r\n";
-      //    }
-      //}
-
-      //if (cardData.emv_hasAdvise)
-      //{
-      //  text += "CARD RESPONSE HAS ADVISE" + "\r\n";
-      //}
-
-      //if (cardData.emv_hasReversal)
-      //{
-      //  text += "CARD RESPONSE HAS REFERSAL" + "\r\n";
-      //}
-
-      //if (cardData.iccPresent == 1)
-      //{
-      //  text += "ICC Present: TRUE" + "\r\n";
-      //}
-
-      //if (cardData.iccPresent == 2)
-      //{
-      //  text += "ICC Present: FALSE" + "\r\n";
-      //}
-
-      //if (cardData.isCTLS == 1)
-      //{
-      //  text += "CTLS Capture: TRUE" + "\r\n";
-      //}
-
-      //if (cardData.isCTLS == 2)
-      //{
-      //  text += "CTLS Capture: FALSE" + "\r\n";
-      //}
-
-      //if (cardData.msr_extendedField != null && cardData.msr_extendedField.Length > 0)
-      //{
-      //    text += "Extended Field Bytes: " + Common.getHexStringFromBytes(cardData.msr_extendedField) + "\r\n";
-      //}
-
-      //if (cardData.captureEncryptType == CAPTURE_ENCRYPT_TYPE.CAPTURE_ENCRYPT_TYPE_TDES)
-      //{
-      //    text += "Encryption Type: TDES\r\n";
-      //}
-
-      //if (cardData.captureEncryptType == CAPTURE_ENCRYPT_TYPE.CAPTURE_ENCRYPT_TYPE_AES)
-      //{
-      //    text += "Encryption Type: AES\r\n";
-      //}
-
-      //if (cardData.captureEncryptType == CAPTURE_ENCRYPT_TYPE.CAPTURE_ENCRYPT_TYPE_NONE)
-      //{
-      //    text += "Encryption Type: NONE\r\n";
-      //}
-
-      //if (cardData.captureEncryptType != CAPTURE_ENCRYPT_TYPE.CAPTURE_ENCRYPT_TYPE_NONE)
-      //{
-      //  if (cardData.msr_keyVariantType == KEY_VARIANT_TYPE.KEY_VARIANT_TYPE_DATA)
-      //  {
-      //    text += "Key Type: Data Variant\r\n";
-      //  }
-      //  else if (cardData.msr_keyVariantType == KEY_VARIANT_TYPE.KEY_VARIANT_TYPE_PIN)
-      //  {
-      //    text += "Key Type: PIN Variant\r\n";
-      //  }
-      //}
-
-      //if (cardData.mac != null)
-      //{
-      //  text += "MAC: " + Common.getHexStringFromBytes(cardData.mac) + "\r\n";
-      //}
-
-      //if (cardData.macKSN != null)
-      //{
-      //  text += "MAC KSN: " + Common.getHexStringFromBytes(cardData.macKSN) + "\r\n";
-      //}
-
-      //if (cardData.Event == EVENT_TRANSACTION_DATA_Types.EVENT_TRANSACTION_DATA_EMV_DATA)
-      //{
-      //    if ((cardData.isCTLS != 1) && (cardData.captureEncryptType != CAPTURE_ENCRYPT_TYPE.CAPTURE_ENCRYPT_TYPE_NONE))
-      //    {
-      //      text += "Capture Encrypt Type: " + ((cardData.captureEncryptType == CAPTURE_ENCRYPT_TYPE.CAPTURE_ENCRYPT_TYPE_TDES) ? "TDES" : "AES") + "\r\n";
-      //    }
-
-      //    switch (cardData.emv_resultCode)
-      //    {
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_APPROVED:
-      //      {
-      //        text += ("RESULT: " + "EMV_RESULT_CODE_APPROVED" + "\r\n");
-      //        //Debug.WriteLineLCD("APPROVED");
-      //        break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_APPROVED_OFFLINE:
-      //      {
-      //        //Debug.WriteLineLCD("APPROVED");
-      //        text += ("ERESULT: " + "EMV_RESULT_CODE_APPROVED_OFFLINE" + "\r\n");
-      //        break; 
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_DECLINED_OFFLINE:
-      //      {
-      //        text += ("RESULT: " + "EMV_RESULT_CODE_DECLINED_OFFLINE" + "\r\n");
-      //        break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_DECLINED:
-      //      {
-      //        text += ("RESULT: " + "EMV_RESULT_CODE_DECLINED" + "\r\n");
-      //        break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_GO_ONLINE:
-      //      {
-      //        text += ("RESULT: " + "EMV_RESULT_CODE_GO_ONLINE" + "\r\n");
-      //        break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_CALL_YOUR_BANK:
-      //      {
-      //        //SetOutputTextLCD("CALL YOUR BANK");
-      //        text += ("RESULT: " + "EMV_RESULT_CODE_CALL_YOUR_BANK" + "\r\n");
-      //        break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_NOT_ACCEPTED:
-      //      {
-      //          text += ("RESULT: " + "EMV_RESULT_CODE_NOT_ACCEPTED" + "\r\n");
-      //          break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_FALLBACK_TO_MSR:
-      //      {
-      //          text += ("RESULT: " + "EMV_RESULT_CODE_FALLBACK_TO_MSR" + "\r\n");
-      //          break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_TIMEOUT:
-      //      {
-      //          text += ("RESULT: " + "EMV_RESULT_CODE_TIMEOUT" + "\r\n");
-      //          break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_AUTHENTICATE_TRANSACTION:
-      //      {
-      //          text += ("RESULT: " + "EMV_RESULT_CODE_AUTHENTICATE_TRANSACTION" + "\r\n");
-      //          break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_SWIPE_NON_ICC:
-      //      {
-      //          text += ("RESULT: " + "EMV_RESULT_CODE_SWIPE_NON_ICC" + "\r\n");
-      //          break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_CTLS_TWO_CARDS:
-      //      {
-      //          text += ("RESULT: " + "EMV_RESULT_CODE_CTLS_TWO_CARDS" + "\r\n");
-      //          break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_CTLS_TERMINATE:
-      //      {
-      //          text += ("RESULT: " + "EMV_RESULT_CODE_CTLS_TERMINATE" + "\r\n");
-      //          break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_CTLS_TERMINATE_TRY_ANOTHER:
-      //      {
-      //          text += ("RESULT: " + "EMV_RESULT_CODE_CTLS_TERMINATE_TRY_ANOTHER" + "\r\n");
-      //          break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_GO_ONLINE_CTLS:
-      //      {
-      //          text += ("RESULT: " + "EMV_RESULT_CODE_GO_ONLINE_CTLS" + "\r\n");
-      //          break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_MSR_SWIPE_CAPTURED:
-      //      {
-      //          text += ("RESULT: " + "EMV_RESULT_CODE_MSR_SWIPE_CAPTURED" + "\r\n");
-      //          break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_REQUEST_ONLINE_PIN:
-      //      {
-      //          text += ("RESULT: " + "EMV_RESULT_CODE_REQUEST_ONLINE_PIN" + "\r\n");
-      //          break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_REQUEST_SIGNATURE:
-      //      {
-      //          text += ("RESULT: " + "EMV_RESULT_CODE_REQUEST_SIGNATURE" + "\r\n");
-      //          break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_ADVISE_REQUIRED:
-      //      {
-      //          text += ("RESULT: " + "EMV_RESULT_CODE_ADVISE_REQUIRED" + "\r\n");
-      //          break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_REVERSAL_REQUIRED:
-      //      {
-      //          text += ("RESULT: " + "EMV_RESULT_CODE_REVERSAL_REQUIRED" + "\r\n");
-      //          break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_ADVISE_REVERSAL_REQUIRED:
-      //      {
-      //          text += ("RESULT: " + "EMV_RESULT_CODE_ADVISE_REVERSAL_REQUIRED" + "\r\n");
-      //          break;
-      //      }
-
-      //      case EMV_RESULT_CODE.EMV_RESULT_CODE_NO_ADVISE_REVERSAL_REQUIRED:
-      //      {
-      //          text += ("RESULT: " + "EMV_RESULT_CODE_NO_ADVISE_REVERSAL_REQUIRED" + "\r\n");
-      //          break;
-      //      }
-
-      //      default:
-      //      {
-      //        string val = errorCode.getErrorString((RETURN_CODE)cardData.emv_resultCode);
-      //        if (val == null || val.Length == 0) val = "EMV_ERROR_ENCOUNTERED";
-      //        text += ("RESULT: " + val + "\r\n");
-      //        break;
-      //      }
-      //    }
-      //}
-      //else
-      //{
-      //    text += ("RESULT: " + "TRANSACTION OVER" + "\r\n");
-      //}
-
-      //if (cardData.emv_transaction_Error_Code > 0)
-      //{
-      //  text += ("Transaction Error: " + errorCode.getTransError(cardData.emv_transaction_Error_Code) + "\r\n");
-      //}
-
-      //if (cardData.emv_RF_State > 0)
-      //{
-      //  text += ("RF State: " + errorCode.getRFState(cardData.emv_RF_State) + "\r\n");
-      //}
-
-      //if (cardData.emv_ESC > 0)
-      //{
-      //  text += ("Extended Status Code: " + errorCode.getExtendedStatusCode(cardData.emv_ESC) + "\r\n");
-      //}
-
-      //if (cardData.emv_appErrorFn > 0)
-      //{
-      //  text += ("App Error Function: " + errorCode.getEMVAppErrorFn(cardData.emv_appErrorFn) + "\r\n");
-      //}
-
-      //if (cardData.emv_appErrorState > 0)
-      //{
-      //  text += ("App Error State: " + errorCode.getEMVAppErrorState(cardData.emv_appErrorState) + "\r\n");
-      //}
-
-      //if (cardData.ctlsApplication > 0)
-      //{
-      //    text += "Contactless Application: ";
-
-      //    switch (cardData.ctlsApplication)
-      //    {
-      //      case CTLS_APPLICATION.CTLS_APPLICATION_AMEX:
-      //      {
-      //          text += ("CTLS_APPLICATION_AMEX" + "\r\n");
-      //          break;
-      //      }
-
-      //      case CTLS_APPLICATION.CTLS_APPLICATION_DISCOVER:
-      //      {
-      //          text += ("CTLS_APPLICATION_DISCOVER" + "\r\n");
-      //          break;
-      //      }
-
-      //      case CTLS_APPLICATION.CTLS_APPLICATION_MASTERCARD:
-      //      {
-      //          text += ("CTLS_APPLICATION_MASTERCARD" + "\r\n");
-      //          break;
-      //      }
-
-      //      case CTLS_APPLICATION.CTLS_APPLICATION_VISA:
-      //      {
-      //          text += ("CTLS_APPLICATION_VISA" + "\r\n");
-      //          break;
-      //      }
-
-      //      case CTLS_APPLICATION.CTLS_APPLICATION_SPEEDPASS:
-      //      {
-      //          text += ("CTLS_APPLICATION_SPEEDPASS" + "\r\n");
-      //          break;
-      //      }
-
-      //      case CTLS_APPLICATION.CTLS_APPLICATION_GIFT_CARD:
-      //      {
-      //          text += ("CTLS_APPLICATION_GIFT_CARD" + "\r\n");
-      //          break;
-      //      }
-
-      //      case CTLS_APPLICATION.CTLS_APPLICATION_DINERS_CLUB:
-      //      {
-      //          text += ("CTLS_APPLICATION_DINERS_CLUB" + "\r\n");
-      //          break;
-      //      }
-
-      //      case CTLS_APPLICATION.CTLS_APPLICATION_EN_ROUTE:
-      //      {
-      //          text += ("CTLS_APPLICATION_EN_ROUTE" + "\r\n");
-      //          break;
-      //      }
-
-      //      case CTLS_APPLICATION.CTLS_APPLICATION_JCB:
-      //      {
-      //          text += ("CTLS_APPLICATION_JCB" + "\r\n");
-      //          break;
-      //      }
-
-      //      case CTLS_APPLICATION.CTLS_APPLICATION_VIVO_DIAGNOSTIC:
-      //      {
-      //          text += ("CTLS_APPLICATION_VIVO_DIAGNOSTIC" + "\r\n");
-      //          break;
-      //      }
-
-      //      case CTLS_APPLICATION.CTLS_APPLICATION_HID:
-      //      {
-      //          text += ("CTLS_APPLICATION_HID" + "\r\n");
-      //          break;
-      //      }
-
-      //      case CTLS_APPLICATION.CTLS_APPLICATION_MSR_SWIPE:
-      //      {
-      //          text += ("CTLS_APPLICATION_MSR_SWIPE" + "\r\n");
-      //          break;
-      //      }
-
-      //      case CTLS_APPLICATION.CTLS_APPLICATION_RESERVED:
-      //      {
-      //          text += ("CTLS_APPLICATION_RESERVED" + "\r\n");
-      //          break;
-      //      }
-
-      //      case CTLS_APPLICATION.CTLS_APPLICATION_DES_FIRE_TRACK_DATA:
-      //      {
-      //          text += ("CTLS_APPLICATION_DES_FIRE_TRACK_DATA" + "\r\n");
-      //          break;
-      //      }
-
-      //      case CTLS_APPLICATION.CTLS_APPLICATION_DES_FIRE_RAW_DATA:
-      //      {
-      //          text += ("CTLS_APPLICATION_DES_FIRE_RAW_DATA" + "\r\n");
-      //          break;
-      //      }
-
-      //      case CTLS_APPLICATION.CTLS_APPLICATION_RBS:
-      //      {
-      //          text += ("CTLS_APPLICATION_RBS" + "\r\n");
-      //          break;
-      //      }
-
-      //      case CTLS_APPLICATION.CTLS_APPLICATION_VIVO_COMM:
-      //      {
-      //          text += ("CTLS_APPLICATION_VIVO_COMM" + "\r\n");
-      //          break;
-      //      }
-      //    }
-      //}
-      #endregion
-
-      Debug.WriteLine(text);
-
-      // Process Card Data
-      DeviceEventArgs args = new DeviceEventArgs();
-      args.payload[0] = text;
-      OnProcessCardData(args);
-
-      trackData = null;
-    }
-*/
     private void RaiseTimerExpired(Core.Client.Dal.Models.TimerEventArgs e)
     {
       //MSRTimer?.Invoke(null, e);
@@ -2811,9 +2237,6 @@ namespace IPA.DAL.RBADAL
       }
 
       // Allow for GUI Recovery
-      //DeviceEventArgs args = new DeviceEventArgs();
-      //args.payload[0] = "***** TRANSACTION FAILED: TIMEOUT *****";
-      //OnProcessCardDataError(args);
       string [] message = { "***** TRANSACTION FAILED: TIMEOUT *****" };
       NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_PROCESS_CARDDATA_ERROR, Message = message });
     }
@@ -2826,11 +2249,8 @@ namespace IPA.DAL.RBADAL
     #region -- settings actions --
     public void GetDeviceConfiguration()
     {
-///      if (!device.IsConnected)
+      if (!device.IsConnected)
       {
-        //DeviceEventArgs args = new DeviceEventArgs();
-        //args.payload[0] = "***** REQUEST FAILED: DEVICE IS NOT CONNECTED *****";
-        //OnProcessCardDataError(args);
         string [] message = { "***** REQUEST FAILED: DEVICE IS NOT CONNECTED *****" };
         NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_PROCESS_CARDDATA_ERROR, Message = message });
         return;
@@ -2854,13 +2274,6 @@ namespace IPA.DAL.RBADAL
           string msrSetting = "WIP";
 
           // Set Configuration
-          //DeviceEventArgs args = new DeviceEventArgs();
-          //args.payload[0] = expMask;
-          //args.payload[1] = panDigits;
-          //args.payload[2] = swipeForce;
-          //args.payload[3] = swipeMask;
-          //args.payload[4] = msrSetting;
-          //OnGetDeviceConfiguration(args);
           string [] message = { "" };
           message[0] = expMask;
           message[1] = panDigits;
@@ -2926,12 +2339,6 @@ namespace IPA.DAL.RBADAL
             string swipeMask = SetSwipeMaskOption(paramset4);
 
             // Setup Response
-            //DeviceEventArgs args = new DeviceEventArgs();
-            //args.payload[0] = expMask;
-            //args.payload[1] = panDigits;
-            //args.payload[2] = swipeForceEncrypt;
-            //args.payload[3] = swipeMask;
-            //OnSetDeviceConfiguration(args);
             object [] message = { "" };
             message[0] = expMask;
             message[1] = panDigits;
@@ -2974,12 +2381,19 @@ namespace IPA.DAL.RBADAL
                     DeviceCommand(command);
                     // Set Device to KB MODE
                     RETURN_CODE rt = IDT_Augusta.SharedController.msr_switchUSBInterfaceMode(true);
+                    Debug.WriteLine("DeviceCfg::SetDeviceMode(): - status={0}", rt);
 
                     // code won't be reached: above function reboot device
                     //if(rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
                     //{
                     //    IDT_Augusta.SharedController.device_rebootDevice();
                     //}
+                    /*new Thread(() =>
+                    {
+                        Thread.CurrentThread.IsBackground = true;
+                        Thread.Sleep(100);
+                        DeviceRemovedHandler();
+                    }).Start();*/
                }
             }
         }
@@ -2999,7 +2413,6 @@ namespace IPA.DAL.RBADAL
     {
         if(useUniversalSDK)
         {
-//            DeviceEventArgs args = new DeviceEventArgs();
             string [] message = { "" };
             byte[] response = null;
             RETURN_CODE rt = IDT_Augusta.SharedController.device_sendDataCommand(command, true, ref response);
@@ -3019,7 +2432,6 @@ namespace IPA.DAL.RBADAL
                 }
             }
 
-            //OnSetExecuteResult(args);
             NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_SET_EXECUTE_RESULT, Message = message });
          }
         else
@@ -3065,7 +2477,6 @@ namespace IPA.DAL.RBADAL
     internal string ModelName;
     internal string ModelNumber;
     internal string Port;
-    internal byte[] ConfigValues;
     internal IDTECH_DEVICE_PID deviceMode;
  }
  #endregion

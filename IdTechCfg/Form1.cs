@@ -157,7 +157,7 @@ namespace IPA.MainApp
     /********************************************************************************************************/
     #region -- delegates section --
 
-    private void InitalizeDeviceUI(object sender, DeviceEventArgs e)
+    private void InitalizeDeviceUI(object sender, DeviceNotificationEventArgs e)
     {
         InitalizeDevice(true);
     }
@@ -360,10 +360,10 @@ namespace IPA.MainApp
         this.picBoxConfigWait.Visible  = false;
         this.picBoxJsonWait.Visible = false;
 
-
         // KB Mode
         if(dev_usb_mode == DEV_USB_MODE.USB_KYB_MODE)
         {
+            tabControl1.SelectedTab = this.tabPage1;
             this.txtCardData.ReadOnly = false;
             this.txtCardData.GotFocus += CardDataTextBoxGotFocus;
             this.txtCardData.ForeColor = this.txtCardData.BackColor;
@@ -469,16 +469,6 @@ namespace IPA.MainApp
                 Debug.WriteLine("\nmain: new device detected! +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n");
 
                 // Setup DeviceCfg Event Handlers
-                /*devicePlugin.initializeDevice += new DeviceEventHandler(this.InitalizeDeviceUI);
-                devicePlugin.unloadDeviceconfigDomain += new DeviceEventHandler(this.UnloadDeviceConfigurationDomain);
-                devicePlugin.processCardData += new DeviceEventHandler(this.ProcessCardDataUI);
-                devicePlugin.processCardDataError += new DeviceEventHandler(this.ProcessCardDataErrorUI);
-                devicePlugin.getDeviceConfiguration += new DeviceEventHandler(this.GetDeviceConfigurationUI);
-                devicePlugin.setDeviceConfiguration += new DeviceEventHandler(this.SetDeviceConfigurationUI);
-                devicePlugin.setDeviceMode += new DeviceEventHandler(this.SetDeviceModeUI);
-                devicePlugin.setExecuteResult += new DeviceEventHandler(this.SetExecuteResultUI);
-                devicePlugin.showJsonConfig += new DeviceEventHandler(this.ShowJsonConfigUI);*/
-
                 devicePlugin.OnDeviceNotification += new EventHandler<DeviceNotificationEventArgs>(this.OnDeviceNotificationUI);
 
                 if(tc_show_json_tab && dev_usb_mode == DEV_USB_MODE.USB_HID_MODE)
@@ -490,18 +480,51 @@ namespace IPA.MainApp
                     }));
                 }
 
-                // Initialize Device
-                devicePlugin.DeviceInit();
-                Debug.WriteLine("main: loaded plugin={0} ++++++++++++++++++++++++++++++++++++++++++++", (object)devicePlugin.PluginName);
-
-                UpdateUI();
-
+                try
+                {
+                    // Initialize Device
+                    devicePlugin.DeviceInit();
+                    Debug.WriteLine("main: loaded plugin={0} ++++++++++++++++++++++++++++++++++++++++++++", (object)devicePlugin.PluginName);
+                    UpdateUI();
+                }
+                catch(Exception ex)
+                {
+                    Debug.WriteLine("main: exception={0}", (object)ex.Message);
+                    if(ex.Message.Equals("NoDevice"))
+                    {
+                        WaitForDeviceToConnect();
+                    }
+                }
             }).Start();
         }
     }
 
     private void WaitForDeviceToConnect()
     {
+        if(dev_usb_mode == DEV_USB_MODE.USB_HID_MODE)
+        {
+            this.Invoke(new MethodInvoker(() =>
+            {
+                tabControl1.SelectedTab = this.tabPage1;
+                if(tabControl1.Contains(tabPage2))
+                {
+                    tabControl1.TabPages.Remove(tabPage2);
+                }
+                if(tabControl1.Contains(tabPage3))
+                {
+                    tabControl1.TabPages.Remove(tabPage3);
+                }
+                if(tabControl1.Contains(tabPage4))
+                {
+                    tabControl1.TabPages.Remove(tabPage4);
+                }
+                if(tabControl1.Contains(tabPage5))
+                {
+                    tabControl1.TabPages.Remove(tabPage5);
+                }
+            }));
+        }
+
         // Wait for a new device to connect
         new Thread(() =>
         {
@@ -535,7 +558,7 @@ namespace IPA.MainApp
                 Thread.Sleep(3000);
 
                 // Initialize Device
-                InitalizeDeviceUI(this, new DeviceEventArgs());
+                InitalizeDeviceUI(this, new DeviceNotificationEventArgs());
             }
 
         }).Start();
@@ -822,6 +845,7 @@ namespace IPA.MainApp
                     {
                         tabControl1.TabPages.Remove(tabPage5);
                     }
+                    tabControl1.SelectedTab = this.tabPage1;
                 }
                 else
                 {
@@ -1132,6 +1156,8 @@ namespace IPA.MainApp
 
         // Hide MODE Button
         this.btnMode.Visible = false;
+        // Clear Card Data
+        this.txtCardData.Text = "";
     }
 
     private void OnTextChanged(object sender, EventArgs e)

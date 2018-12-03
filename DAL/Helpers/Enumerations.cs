@@ -17,7 +17,9 @@ namespace IPA.Core.Shared.Enums
         AUGUSTA_HID   = 3820,
         AUGUSTAS_HID  = 3920,
         AUGUSTAS_KYB  = 3910,
-        SECUREKEY_HID = 2610
+        SECUREKEY_HID = 2610,
+        // ^^^ ADDITIONAL PID's HERE ^^^
+        UNKNOWN       = 9999
     }
     public enum DeviceStatus
     {

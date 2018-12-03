@@ -26,7 +26,7 @@ namespace IPA.CommonInterface
     // Configuration
     void SetDeviceConfiguration(object data);
     void SetDeviceMode(string mode);
-    void DeviceCommand(string command);
+    string DeviceCommand(string command, bool notify);
     // Messaging
     string GetErrorMessage(string data);
   }

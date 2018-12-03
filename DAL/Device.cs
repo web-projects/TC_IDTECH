@@ -26,7 +26,7 @@ namespace IPA.DAL.RBADAL.Services
 
         #region -- public methods --
 
-        public void Init(string[] available, ref bool useUniversalSDK, ref IDTECH_DEVICE_PID mode, ref object [] deviceMsg)
+        public void Init(string[] available, ref bool useUniversalSDK, ref IDTECH_DEVICE_PID mode)
         {
             BaudRate = int.Parse(ConfigurationManager.AppSettings["IPA.DAL.Device.COMBaudRate"]);
             DataBits = int.Parse(ConfigurationManager.AppSettings["IPA.DAL.Device.COMDataBits"]);
@@ -65,7 +65,6 @@ namespace IPA.DAL.RBADAL.Services
                             {
                               useUniversalSDK = true;
                               mode = IDTECH_DEVICE_PID.AUGUSTA_KYB;
-                              deviceMsg[0] = "USB-HID";
                               break;
                             }
 
@@ -73,13 +72,12 @@ namespace IPA.DAL.RBADAL.Services
                             {
                               useUniversalSDK = true;
                               mode = IDTECH_DEVICE_PID.AUGUSTA_HID;
-                              deviceMsg[0] = "USB-KB";
                               break;
                             }
 
                             default:
                             {
-                                deviceMsg[0] = "UNKNOWN";
+                                 mode = IDTECH_DEVICE_PID.UNKNOWN;
                                 break;
                             }
                           }

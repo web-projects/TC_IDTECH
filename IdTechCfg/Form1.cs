@@ -1179,7 +1179,7 @@ namespace IPA.MainApp
         new Thread(() =>
         {
             Thread.CurrentThread.IsBackground = true;
-            devicePlugin.DeviceCommand(command);
+            devicePlugin.DeviceCommand(command, true);
         }).Start();
 
         this.btnExecute.Enabled = false;

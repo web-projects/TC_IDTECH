@@ -51,6 +51,7 @@ namespace IPA.CommonInterface
             try
             {
                 var values = Common.processTLVUnencrypted(tlv);
+                values = values.ToDictionary(kv => kv.Key, kv => (string)((string)kv.Value).ToUpper());
                 Debug.WriteLine("====================== TERMINAL DATA : TLV DUMP ======================");
                 foreach (KeyValuePair<string, string> kvp in values)
                 {

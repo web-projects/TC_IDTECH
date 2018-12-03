@@ -110,12 +110,11 @@ namespace IPA.DAL.RBADAL
             // Using the device notifier to detect device removed event
             device.Removed += DeviceRemovedHandler;
             Device.OnNotification += OnNotification;
-            object [] deviceMsg = { "" };
 
-            Device.Init(SerialPortService.GetAvailablePorts(), ref useUniversalSDK, ref deviceInformation.deviceMode, ref deviceMsg);
+            Device.Init(SerialPortService.GetAvailablePorts(), ref useUniversalSDK, ref deviceInformation.deviceMode);
 
             // Notify Main Form
-            NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_SET_DEVICE_MODE, Message = deviceMsg });
+            SetDeviceMode(deviceInformation.deviceMode);
 
             // connect to device
             Device.Connect();
@@ -223,9 +222,9 @@ namespace IPA.DAL.RBADAL
 
     /********************************************************************************************************/
     // DISCOVERY
-    /******************************************************************************************************** /
+    /********************************************************************************************************/
     #region -- device discovery ---
-    private bool DeviceDiscovery()
+    /*private bool DeviceDiscovery()
     {
       lock(discoveryLock)
       {
@@ -261,7 +260,7 @@ namespace IPA.DAL.RBADAL
                         {
                           useUniversalSDK = true;
                           deviceInformation.deviceMode = IDTECH_DEVICE_PID.AUGUSTA_KYB;
-                          message[0] = "USB-HID";
+                          message[0] = USK_DEVICE_MODE.USB_HID;
                           break;
                         }
 
@@ -269,13 +268,13 @@ namespace IPA.DAL.RBADAL
                         {
                           useUniversalSDK = true;
                           deviceInformation.deviceMode = IDTECH_DEVICE_PID.AUGUSTA_HID;
-                          message[0] = "USB-KB";
+                          message[0] = USK_DEVICE_MODE.USB_KYB;
                           break;
                         }
 
                         default:
                         {
-                            message[0] = "UNKNOWN";
+                            message[0] = USK_DEVICE_MODE.UNKNOWN;
                             break;
                         }
                       }
@@ -314,6 +313,39 @@ namespace IPA.DAL.RBADAL
 
         return useUniversalSDK;
       }
+    }*/
+
+    void SetDeviceMode(IDTECH_DEVICE_PID mode)
+    {
+        object [] message = { "" };
+
+        switch(mode)
+        {
+            case IDTECH_DEVICE_PID.AUGUSTA_KYB:
+            {
+                useUniversalSDK = true;
+                deviceInformation.deviceMode = IDTECH_DEVICE_PID.AUGUSTA_KYB;
+                message[0] = USK_DEVICE_MODE.USB_HID;
+                break;
+            }
+
+            case IDTECH_DEVICE_PID.AUGUSTA_HID:
+            {
+                useUniversalSDK = true;
+                deviceInformation.deviceMode = IDTECH_DEVICE_PID.AUGUSTA_HID;
+                message[0] = USK_DEVICE_MODE.USB_KYB;
+                break;
+            }
+
+            default:
+            {
+                message[0] = USK_DEVICE_MODE.UNKNOWN;
+                break;
+            }
+        }
+
+        // Notify Main Form
+        NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_SET_DEVICE_MODE, Message = message });
     }
 
     #endregion
@@ -469,9 +501,6 @@ namespace IPA.DAL.RBADAL
 
           // Populate Device Configuration
           SetDeviceConfig();
-
-          // Get Device Information
-//          GetDeviceInformation();
 
           break;
         }
@@ -1484,6 +1513,9 @@ namespace IPA.DAL.RBADAL
 
         serializer.ReadConfig();
 
+        // Terminal Configuration
+        string configuration = GetTerminalMajorConfiguration();
+
         // Get Company
         GetCompany();
 
@@ -1603,13 +1635,14 @@ namespace IPA.DAL.RBADAL
         }
     }
 
-    private void GetTerminalData()
+    private byte [] GetTerminalData()
     {
+        byte [] tlv = null;
+
         try
         {
             //int id = IDT_Augusta.SharedController.emv_retrieveTerminalID();
 
-            byte [] tlv = null;
             RETURN_CODE rt = IDT_Augusta.SharedController.emv_retrieveTerminalData(ref tlv);
             
             if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt && tlv != null)
@@ -1635,6 +1668,8 @@ namespace IPA.DAL.RBADAL
         {
             Debug.WriteLine("DeviceCfg::GetTerminalData(): - exception={0}", (object)exp.Message);
         }
+
+        return tlv;
     }
 
     private void GetEncryptionControl()
@@ -2361,7 +2396,7 @@ namespace IPA.DAL.RBADAL
     {
         try
         {
-            if(mode.Equals("USB-HID"))
+            if(mode.Equals(USK_DEVICE_MODE.USB_HID))
             {
                if(deviceInformation.deviceMode == IDTECH_DEVICE_PID.AUGUSTA_KYB)
                {
@@ -2372,13 +2407,13 @@ namespace IPA.DAL.RBADAL
                     }
                }
             }
-            else if(mode.Equals("USB-KB"))
+            else if(mode.Equals(USK_DEVICE_MODE.USB_KYB))
             {
                if(deviceInformation.deviceMode == IDTECH_DEVICE_PID.AUGUSTA_HID)
                {
                     // TURN ON QUICK CHIP MODE
-                    string command = "72 53 01 29 01 31";
-                    DeviceCommand(command);
+                    string command = USDK_CONFIGURATION_COMMANDS.ENABLE_QUICK_CHIP_MODE;
+                    DeviceCommand(command, true);
                     // Set Device to KB MODE
                     RETURN_CODE rt = IDT_Augusta.SharedController.msr_switchUSBInterfaceMode(true);
                     Debug.WriteLine("DeviceCfg::SetDeviceMode(): - status={0}", rt);
@@ -2388,12 +2423,6 @@ namespace IPA.DAL.RBADAL
                     //{
                     //    IDT_Augusta.SharedController.device_rebootDevice();
                     //}
-                    /*new Thread(() =>
-                    {
-                        Thread.CurrentThread.IsBackground = true;
-                        Thread.Sleep(100);
-                        DeviceRemovedHandler();
-                    }).Start();*/
                }
             }
         }
@@ -2403,17 +2432,115 @@ namespace IPA.DAL.RBADAL
         }
     }
 
+    private string GetTerminalMajorConfiguration()
+    {
+        string command = USDK_CONFIGURATION_COMMANDS.GET_MAJOR_TERMINAL_CFG;
+        string response = DeviceCommand(command, false);
+        Debug.WriteLine("Terminal Major Configuration: ----------- =[{0}]", (object) response);
+
+        if(response.StartsWith("06"))
+        {
+            // TerminalConfig-2C: "32" => TerminalConfig-5C: "35"
+            string terminal = response.Substring(response.Length -2, 2);
+
+            switch(terminal)
+            {
+                case TerminalMajorConfiguration.TERMCFG_2:
+                {
+                    SetTerminalData(TerminalMajorConfiguration.CONFIG_2C);
+                    break;
+                }
+                case TerminalMajorConfiguration.TERMCFG_5:
+                {
+                    SetTerminalData(TerminalMajorConfiguration.CONFIG_5C);
+                    break;
+                }
+            }
+        }
+
+        return response;
+    }
+
+    private string SetTerminalMajorConfiguration(string mode)
+    {
+        string command = "";
+        string response = "";
+
+        switch(mode)
+        {
+            case TerminalMajorConfiguration.CONFIG_2C:
+            {
+                // 2C: 0206007253012801323b2103
+                command = USDK_CONFIGURATION_COMMANDS.SET_TERMINAL_MAJOR_2C;
+                break;
+            }
+            case TerminalMajorConfiguration.CONFIG_5C:
+            {
+                // 5C: 0206007253012801353c2403
+                command = USDK_CONFIGURATION_COMMANDS.SET_TERMINAL_MAJOR_5C;
+                break;
+            }
+        }
+
+        if(command.Length > 0)
+        {
+            response = DeviceCommand(command, false);
+            Debug.WriteLine("device::SetTerminalMajorConfiguration() reply=[{0}]", (object) response);
+        }
+
+        return response;
+    }
+
+    private byte [] GetEMVTerminalData()
+    {
+        byte [] response = null;
+        string command = USDK_CONFIGURATION_COMMANDS.GET_EMV_TERMINAL_DATA;
+        RETURN_CODE rt = IDT_Augusta.SharedController.device_sendDataCommand(command, true, ref response);
+        if(rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS && response != null)
+        {
+            byte [] tags = response.Skip(3).Take(response.Length - 3).ToArray();
+            TerminalData td = new TerminalData(tags);
+            string text = td.ConvertTLVToValuePairs();
+        }
+
+        return response;
+    }
+
+    private void SetTerminalData(string configuration)
+    {
+        string response = SetTerminalMajorConfiguration(configuration);
+
+        // Retrieve all EMV L2 Terminal Data from the reader
+        byte[] data =  GetEMVTerminalData();
+
+        if(data != null)
+        {
+            byte [] tags = data.Skip(3).Take(data.Length - 3).ToArray();
+
+            // Set Terminal Data) command : "72 46 02 03"
+            RETURN_CODE rt = IDT_Augusta.SharedController.emv_setTerminalData(tags);
+            if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS) 
+            {
+                Debug.WriteLine("device: SetTerminalData() Successful:" + " nrnn");
+            }
+            else 
+            {
+                Debug.WriteLine("device: SetTerminalData() failed error=0x{0}: {1}", String.Format("{0:X}", (ushort)rt), IDTechSDK.errorCode.getErrorString(rt) + "nrnn");
+            }
+        }
+    }
     #endregion
 
     /********************************************************************************************************/
     // DEVICE ACTIONS
     /********************************************************************************************************/
     #region -- device actions --
-    public void DeviceCommand(string command)
+    public string DeviceCommand(string command, bool notify)
     {
+        string [] message = { "" };
+
         if(useUniversalSDK)
         {
-            string [] message = { "" };
             byte[] response = null;
             RETURN_CODE rt = IDT_Augusta.SharedController.device_sendDataCommand(command, true, ref response);
             if(rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
@@ -2432,12 +2559,17 @@ namespace IPA.DAL.RBADAL
                 }
             }
 
-            NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_SET_EXECUTE_RESULT, Message = message });
+            if(notify)
+            {
+                NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_SET_EXECUTE_RESULT, Message = message });
+            }
          }
         else
         {
 
         }
+
+        return message[0];
     }
 
     public string GetErrorMessage(string data)
@@ -2479,5 +2611,29 @@ namespace IPA.DAL.RBADAL
     internal string Port;
     internal IDTECH_DEVICE_PID deviceMode;
  }
+ public static class USK_DEVICE_MODE
+ {
+    public const string USB_HID = "USB-HID";
+    public const string USB_KYB = "USB-KB";
+    public const string UNKNOWN = "UNKNOWN";
+ }
+
+ internal static class TerminalMajorConfiguration
+ {
+    internal const string CONFIG_2C = "2C";
+    internal const string CONFIG_5C = "5C";
+    internal const string TERMCFG_2 = "32";
+    internal const string TERMCFG_5 = "35";
+ }
+
+ internal static class USDK_CONFIGURATION_COMMANDS
+ {
+    internal const string GET_MAJOR_TERMINAL_CFG = "72 52 01 28";
+    internal const string SET_TERMINAL_MAJOR_2C  = "72 53 01 28 01 32";
+    internal const string SET_TERMINAL_MAJOR_5C  = "72 53 01 28 01 35";
+    internal const string GET_EMV_TERMINAL_DATA  = "72 46 02 01";
+    internal const string ENABLE_QUICK_CHIP_MODE = "72 53 01 29 01 31";
+ }
+
  #endregion
 }

@@ -1641,6 +1641,8 @@ namespace IPA.DAL.RBADAL
 
         try
         {
+            serializer.general_configuration.Contact.terminal_ics_type = GetTerminalType();
+
             //int id = IDT_Augusta.SharedController.emv_retrieveTerminalID();
 
             RETURN_CODE rt = IDT_Augusta.SharedController.emv_retrieveTerminalData(ref tlv);
@@ -2432,7 +2434,7 @@ namespace IPA.DAL.RBADAL
         }
     }
 
-    private string GetTerminalMajorConfiguration()
+    private string GetTerminalType()
     {
         string command = USDK_CONFIGURATION_COMMANDS.GET_MAJOR_TERMINAL_CFG;
         string response = DeviceCommand(command, false);
@@ -2447,15 +2449,29 @@ namespace IPA.DAL.RBADAL
             {
                 case TerminalMajorConfiguration.TERMCFG_2:
                 {
-                    SetTerminalData(TerminalMajorConfiguration.CONFIG_2C);
+                    response = TerminalMajorConfiguration.CONFIG_2C;
                     break;
                 }
                 case TerminalMajorConfiguration.TERMCFG_5:
                 {
-                    SetTerminalData(TerminalMajorConfiguration.CONFIG_5C);
+                    response = TerminalMajorConfiguration.CONFIG_5C;
                     break;
                 }
             }
+        }
+
+        return response;
+    }
+
+    private string GetTerminalMajorConfiguration()
+    {
+        string response = GetTerminalType();
+        Debug.WriteLine("Terminal Major Configuration: ----------- =[{0}]", (object) response);
+
+        if(response.Equals(TerminalMajorConfiguration.CONFIG_2C) || response.Equals(TerminalMajorConfiguration.CONFIG_5C))
+        {
+            // WIP: TESTING
+            //SetTerminalData(response);
         }
 
         return response;
@@ -2521,7 +2537,7 @@ namespace IPA.DAL.RBADAL
             RETURN_CODE rt = IDT_Augusta.SharedController.emv_setTerminalData(tags);
             if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS) 
             {
-                Debug.WriteLine("device: SetTerminalData() Successful:" + " nrnn");
+                Debug.WriteLine("device: SetTerminalData() Successful for configuration: ", (object) configuration);
             }
             else 
             {

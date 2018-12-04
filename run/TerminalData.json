@@ -1,21 +1,4 @@
 {
-  "config_meta": {
-    "Type": "device",
-    "Production": false,
-    "Customer": {
-      "Company": "TrustCommerce",
-      "Contact": "WIP",
-      "Id": 125
-    },
-    "Id": 0,
-    "Notes": "WIP",
-    "Version": "1.0.0.0",
-    "Terminal_type": "Augusta (USB HID)"
-  },
-  "hardware": {
-    "Serial_num": "816T647582",
-    "Contactless_available": "WIP"
-  },
   "general_configuration": {
     "Contact": {
       "capk": [
@@ -589,20 +572,5 @@
       "icc_encryption_enabled": true
     }
   },
-  "user_configuration": {
-    "expiration_masking": true,
-    "pan_clear_digits": 4,
-    "swipe_force_mask": {
-      "track1": false,
-      "track2": true,
-      "track3": false,
-      "track3card0": true
-    },
-    "swipe_mask": {
-      "track1": true,
-      "track2": false,
-      "track3": true
-    },
-    "last_update_timestamp": "2018-12-04T00:07:17.6138416Z"
-  }
+  "last_update_timestamp": "2018-12-04T00:52:42.4148454Z"
 }

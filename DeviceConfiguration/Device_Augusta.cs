@@ -2471,7 +2471,7 @@ namespace IPA.DAL.RBADAL
         if(response.Equals(TerminalMajorConfiguration.CONFIG_2C) || response.Equals(TerminalMajorConfiguration.CONFIG_5C))
         {
             // WIP: TESTING
-            //SetTerminalData(response);
+            SetTerminalData(response);
         }
 
         return response;
@@ -2531,6 +2531,9 @@ namespace IPA.DAL.RBADAL
 
         if(data != null)
         {
+            // Save this to a backup file prior to any other operation
+            serializer.WriteTerminalDataConfig();
+
             byte [] tags = data.Skip(3).Take(data.Length - 3).ToArray();
 
             // Set Terminal Data) command : "72 46 02 03"

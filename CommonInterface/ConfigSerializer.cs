@@ -16,6 +16,8 @@ namespace IPA.CommonInterface
     public class ConfigSerializer
     {
         private const string JSON_CONFIG = "configuration.json";
+        private const string TERMINAL_CONFIG = "TerminalData.json";
+
         private ConfigSerializer cfgMetaObject;
         private string fileName;
         
@@ -128,6 +130,39 @@ namespace IPA.CommonInterface
             }
         }
 
+        public void WriteTerminalDataConfig()
+        {
+            try
+            {
+                TerminalDataConfigSerializer cfgTerminalDataMetaObject =  JsonConvert.DeserializeObject<TerminalDataConfigSerializer>("{\"general_configuration\": {\"Contact\": {\"terminal_ics_type\": \"\",\"terminal_data\": \"\"}}}");
+
+                if(cfgTerminalDataMetaObject != null)
+                {
+                    // Update timestamp
+                    DateTime timenow = DateTime.UtcNow;
+                    cfgTerminalDataMetaObject.last_update_timestamp = JsonConvert.SerializeObject(timenow).Trim('"');
+                    Debug.WriteLine(cfgTerminalDataMetaObject.last_update_timestamp);
+
+                    cfgTerminalDataMetaObject.general_configuration = general_configuration;
+
+                    JsonSerializer serializer = new JsonSerializer();
+                    string path = System.IO.Directory.GetCurrentDirectory(); 
+                    fileName = path + "\\" + TERMINAL_CONFIG;
+
+                    using (StreamWriter sw = new StreamWriter(fileName))
+                    using (JsonWriter writer = new JsonTextWriter(sw))
+                    {
+                       serializer.Formatting = Formatting.Indented;
+                       serializer.Serialize(writer, cfgTerminalDataMetaObject);
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Debug.WriteLine("JsonSerializer: exception: {0}", ex);
+            }
+        }
+
         public string GetFileName()
         {
             return fileName;
@@ -224,5 +259,14 @@ namespace IPA.CommonInterface
         public bool track1 { get; set; }
         public bool track2 { get; set; }
         public bool track3 { get; set; }
+    }
+
+     [Serializable]
+    public class TerminalDataConfigSerializer
+    {
+        [JsonProperty(PropertyName = "general_configuration", Order = 1)]
+        public general_configuration general_configuration;
+        [JsonProperty(PropertyName = "last_update_timestamp", Order = 2)]
+        public string last_update_timestamp  { get; set; }
     }
 }

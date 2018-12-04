@@ -27,3 +27,5 @@ CommonInterface/bin/
 CommonInterface/obj/
 DeviceConfiguration/bin/
 DeviceConfiguration/obj/
+
+run/TerminalData.*

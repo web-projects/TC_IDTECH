@@ -34,6 +34,9 @@ namespace IPA.MainApp
   {
     [DllImport("user32.dll")]
     static extern bool HideCaret(IntPtr hWnd);
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
 
     /********************************************************************************************************/
     // ATTRIBUTES SECTION
@@ -49,8 +52,8 @@ namespace IPA.MainApp
     AppDomain appDomainDevice;
     IDevicePlugIn devicePlugin;
     const string MODULE_NAME = "DeviceConfiguration";
-    const string PLUGIN_NAME = "IPA.DAL.RBADAL.Device_Augusta";
-    string ASSEMBLY_NAME = typeof(IPA.DAL.RBADAL.Device_Augusta).Assembly.FullName;
+    const string PLUGIN_NAME = "IPA.DAL.RBADAL.DeviceCfg";
+    string ASSEMBLY_NAME = typeof(IPA.DAL.RBADAL.DeviceCfg).Assembly.FullName;
 
     // Application Configuration
     bool tc_show_settings_tab;
@@ -66,6 +69,12 @@ namespace IPA.MainApp
     Stopwatch stopWatch;
     internal static System.Timers.Timer TransactionTimer { get; set; }
     Color TEXTBOX_FORE_COLOR;
+
+    // Always on TOP
+    private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+    private const UInt32 SWP_NOSIZE = 0x0001;
+    private const UInt32 SWP_NOMOVE = 0x0002;
+    private const UInt32 TOPMOST_FLAGS = SWP_NOMOVE | SWP_NOSIZE;
     #endregion
 
     public Application()
@@ -132,6 +141,11 @@ namespace IPA.MainApp
     // FORM ELEMENTS
     /********************************************************************************************************/
     #region -- form elements --
+    
+    private void OnFormLoad(object sender, EventArgs e)
+    {
+        SetWindowPos(this.Handle, HWND_TOPMOST, 0, 0, 0, 0, TOPMOST_FLAGS);
+    }
 
     private void Form1_FormClosing(object sender, FormClosingEventArgs e)
     {
@@ -1217,5 +1231,5 @@ namespace IPA.MainApp
     }
 
     #endregion
-    }
+  }
 }

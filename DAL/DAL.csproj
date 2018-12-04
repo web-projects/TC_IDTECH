@@ -125,6 +125,7 @@
     <Compile Include="Models\TimerEventArgs.cs" />
     <Compile Include="Models\UpdateEventArgs.cs" />
     <Compile Include="Services\IDTech\DeviceData.cs" />
+    <Compile Include="Services\IDTech\Device_Augusta.cs" />
     <Compile Include="Services\IDTech\Device_IDTech.cs" />
     <Compile Include="Services\IDTech\IDTech_Models.cs" />
     <Compile Include="Interfaces\IDevice.cs" />

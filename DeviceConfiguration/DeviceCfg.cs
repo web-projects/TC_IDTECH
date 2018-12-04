@@ -21,7 +21,7 @@ using IPA.DAL.RBADAL.Services;
 namespace IPA.DAL.RBADAL
 {
   [Serializable]
-  public class Device_Augusta : MarshalByRefObject, IDevicePlugIn
+  public class DeviceCfg : MarshalByRefObject, IDevicePlugIn
   {
     /********************************************************************************************************/
     // ATTRIBUTES
@@ -65,7 +65,7 @@ namespace IPA.DAL.RBADAL
     /********************************************************************************************************/
     #region -- construction and initialization --
 
-    public Device_Augusta()
+    public DeviceCfg()
     {
       deviceType = IDT_DEVICE_Types.IDT_DEVICE_NONE;
 ///      cardReader = new CardReader();
@@ -1600,7 +1600,7 @@ namespace IPA.DAL.RBADAL
             serializer.config_meta.Type = "device";
             serializer.hardware.Serial_num = deviceInformation.SerialNumber;
             serializer.config_meta.Terminal_type = deviceInformation.ModelName;
-            Version version = typeof(Device_Augusta).Assembly.GetName().Version;
+            Version version = typeof(DeviceCfg).Assembly.GetName().Version;
             serializer.config_meta.Version = version.ToString();
 
             string response = null;
@@ -2376,7 +2376,7 @@ namespace IPA.DAL.RBADAL
             string swipeMask = SetSwipeMaskOption(paramset4);
 
             // Setup Response
-            object [] message = { "" };
+            object [] message = new object[4];
             message[0] = expMask;
             message[1] = panDigits;
             message[2] = swipeForceEncrypt;
@@ -2471,7 +2471,7 @@ namespace IPA.DAL.RBADAL
         if(response.Equals(TerminalMajorConfiguration.CONFIG_2C) || response.Equals(TerminalMajorConfiguration.CONFIG_5C))
         {
             // WIP: TESTING
-            SetTerminalData(response);
+            ///SetTerminalData(response);
         }
 
         return response;

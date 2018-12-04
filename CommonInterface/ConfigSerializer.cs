@@ -16,7 +16,7 @@ namespace IPA.CommonInterface
     public class ConfigSerializer
     {
         private const string JSON_CONFIG = "configuration.json";
-        private const string TERMINAL_CONFIG = "TerminalData.json";
+        private const string TERMINAL_CONFIG = "TerminalData";
 
         private ConfigSerializer cfgMetaObject;
         private string fileName;
@@ -147,7 +147,8 @@ namespace IPA.CommonInterface
 
                     JsonSerializer serializer = new JsonSerializer();
                     string path = System.IO.Directory.GetCurrentDirectory(); 
-                    fileName = path + "\\" + TERMINAL_CONFIG;
+                    string extension = timenow.ToString("yyyyMMddhhmm").Trim('"');
+                    fileName = path + "\\" + TERMINAL_CONFIG + "." + extension + ".json";
 
                     using (StreamWriter sw = new StreamWriter(fileName))
                     using (JsonWriter writer = new JsonTextWriter(sw))

@@ -433,10 +433,17 @@ namespace IPA.MainApp
                 this.Invoke(new MethodInvoker(() =>
                 {
                     string data = txtCardData.Text;
-                    string message = devicePlugin.GetErrorMessage(data);
-                    txtCardData.Text = message;
-                    this.txtCardData.ForeColor = TEXTBOX_FORE_COLOR;
-                    Debug.WriteLine("main: card data=[{0}]", (object) data);
+                    if(data.Length > 0)
+                    {
+                        string message = devicePlugin.GetErrorMessage(data);
+                        txtCardData.Text = message;
+                        this.txtCardData.ForeColor = TEXTBOX_FORE_COLOR;
+                        Debug.WriteLine("main: card data=[{0}]", (object) data);
+                    }
+                    else
+                    {
+                        SetTransactionTimer();
+                    }
                 }));
             }
         }

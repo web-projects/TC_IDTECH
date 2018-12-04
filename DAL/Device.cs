@@ -26,7 +26,7 @@ namespace IPA.DAL.RBADAL.Services
 
         #region -- public methods --
 
-        public void Init(string[] available, ref bool useUniversalSDK, ref IDTECH_DEVICE_PID mode)
+        public void Init(string[] available, ref IDTECH_DEVICE_PID mode)
         {
             BaudRate = int.Parse(ConfigurationManager.AppSettings["IPA.DAL.Device.COMBaudRate"]);
             DataBits = int.Parse(ConfigurationManager.AppSettings["IPA.DAL.Device.COMDataBits"]);
@@ -63,14 +63,12 @@ namespace IPA.DAL.RBADAL.Services
                           {
                             case (int) IDTECH_DEVICE_PID.AUGUSTA_KYB:
                             {
-                              useUniversalSDK = true;
                               mode = IDTECH_DEVICE_PID.AUGUSTA_KYB;
                               break;
                             }
 
                             case (int) IDTECH_DEVICE_PID.AUGUSTA_HID:
                             {
-                              useUniversalSDK = true;
                               mode = IDTECH_DEVICE_PID.AUGUSTA_HID;
                               break;
                             }
@@ -82,8 +80,16 @@ namespace IPA.DAL.RBADAL.Services
                             }
                           }
                         }
+
                         deviceMode = mode;
-                        deviceInterface = new Device_IDTech(deviceMode);
+                        if(mode ==  IDTECH_DEVICE_PID.AUGUSTA_HID || mode == IDTECH_DEVICE_PID.AUGUSTA_KYB)
+                        {
+                            deviceInterface = new Device_Augusta(deviceMode);
+                        }
+                        else
+                        {
+                            deviceInterface = new Device_IDTech(deviceMode);
+                        }
                         deviceInterface.OnNotification += DeviceOnNotification;
                         break;
                     }

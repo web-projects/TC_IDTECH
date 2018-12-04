@@ -98,11 +98,6 @@ namespace IPA.DAL.RBADAL.Services
             deviceMode = mode;
         }
 
-        public Device_IDTech()
-        {
-
-        }
-
         void IDevice.Init(string[] accepted, string[] available, int baudRate, int dataBits)
         {
             acceptedPorts = accepted;
@@ -834,7 +829,6 @@ namespace IPA.DAL.RBADAL.Services
         {
             // declare variables
             string model = null;
-
 
             switch (modelType.Trim())
             {

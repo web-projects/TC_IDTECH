@@ -111,7 +111,7 @@ namespace IPA.DAL.RBADAL
             device.Removed += DeviceRemovedHandler;
             Device.OnNotification += OnNotification;
 
-            Device.Init(SerialPortService.GetAvailablePorts(), ref useUniversalSDK, ref deviceInformation.deviceMode);
+            Device.Init(SerialPortService.GetAvailablePorts(), ref deviceInformation.deviceMode);
 
             // Notify Main Form
             SetDeviceMode(deviceInformation.deviceMode);

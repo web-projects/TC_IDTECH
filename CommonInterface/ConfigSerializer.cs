@@ -18,7 +18,7 @@ namespace IPA.CommonInterface
         private const string JSON_CONFIG = "configuration.json";
         private const string TERMINAL_CONFIG = "TerminalData";
 
-        public TerminalConfiguration terminalCfg = new TerminalConfiguration();
+        public TerminalConfiguration terminalCfg;
 
         private string fileName;
 

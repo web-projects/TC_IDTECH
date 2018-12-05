@@ -49,12 +49,13 @@ namespace IPA.DAL.RBADAL.Services
                     {
                         var deviceID = devices[0].DeviceID;
                         string [] worker = deviceID.Split('&');
- 
+                        string pid = "";
+
                         // should contain PID_XXXX...
                         if(System.Text.RegularExpressions.Regex.IsMatch(worker[1], "PID_"))
                         {
                           string [] worker2 = System.Text.RegularExpressions.Regex.Split(worker[1], @"PID_");
-                          string pid = worker2[1].Substring(0, 4);
+                          pid = worker2[1].Substring(0, 4);
 
                           // See if device matches
                           int pidId = Int32.Parse(pid);
@@ -86,9 +87,15 @@ namespace IPA.DAL.RBADAL.Services
                         {
                             deviceInterface = new Device_Augusta(deviceMode);
                         }
-                        else
+                        else if (mode == IDTECH_DEVICE_PID.SECUREKEY_HID)
                         {
                             deviceInterface = new Device_IDTech(deviceMode);
+                        }
+                        else
+                        {
+                            Unknown_Device ukd = new Unknown_Device(mode);
+                            ukd.SetConfig("PID", pid);
+                            deviceInterface = ukd;
                         }
                         deviceInterface.OnNotification += DeviceOnNotification;
                         break;

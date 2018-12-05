@@ -130,6 +130,7 @@
     <Compile Include="Services\IDTech\IDTech_Models.cs" />
     <Compile Include="Interfaces\IDevice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\IDTech\UnknownDevice.cs" />
     <Compile Include="Services\IPA.SerialReader.cs" />
   </ItemGroup>
   <ItemGroup>

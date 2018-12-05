@@ -10,10 +10,10 @@
     "Id": 0,
     "Notes": "WIP",
     "Version": "1.0.0.0",
-    "Terminal_type": "Augusta (USB HID)"
+    "Terminal_type": null
   },
   "hardware": {
-    "Serial_num": "816T647582",
+    "Serial_num": null,
     "Contactless_available": "WIP"
   },
   "general_configuration": {
@@ -144,7 +144,7 @@
           "value": "5F360102DF170400000000DF25039F3704DF280F9F020695055F2A029A039C019F3704DF190199DF180199DF1305FC6024A800DF14050010000000DF1505FC60ACF8009F090202009F1B0400000000DFEE150101"
         }
       ],
-      "terminal_ics_type": "5C",
+      "terminal_ics_type": "COMMAND EXECUTE FAILED - CODE=0x00000003",
       "terminal_data": "5F3601029F1A0208409F3501219F33036028C89F4005F000F0A0019F1E085465726D696E616C9F150212349F160F3030303030303030303030303030309F1C0838373635343332319F4E2231303732312057616C6B65722053742E20437970726573732C204341202C5553412EDF260101DF1008656E667265737A68DF110100DF270100DFEE150101DFEE160100DFEE170105DFEE180180DFEE1E08D09C20D0C41E1400DFEE1F0180DFEE1B083030303130353030DFEE20013CDFEE21010ADFEE2203323C3C",
       "5F36": "02",
       "9F1A": "0840",
@@ -432,7 +432,7 @@
       "firmware_ver": "ID TECH Augusta USB-HID V1.02",
       "contact_emv_kernel_ver": "EMV Common L2 V1.10.037",
       "contact_emv_kernel_checksum": "8d9395c588f2dec9ae9dc8bb7b9841a3525711c6",
-      "contact_emv_kernel_configuration_checksum": "dad6aed81e9375043a1dbef84c193fe863b2ed7f"
+      "contact_emv_kernel_configuration_checksum": "494420544543482041756775737461205553422d4849442056312e3032"
     },
     "Encryption": {
       "data_encryption_type": "TDES",
@@ -454,6 +454,6 @@
       "track2": false,
       "track3": true
     },
-    "last_update_timestamp": "2018-12-05T16:28:36.7182021Z"
+    "last_update_timestamp": "2018-12-05T21:55:01.4402387Z"
   }
 }

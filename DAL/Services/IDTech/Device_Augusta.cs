@@ -47,11 +47,11 @@ namespace IPA.DAL.RBADAL.Services
             if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
             {
                 deviceInfo.SerialNumber = serialNumber;
-                Debug.WriteLine("device INFO[Serial Number]   : {0}", (object) deviceInfo.SerialNumber);
+                Debug.WriteLine("device INFO[Serial Number]     : {0}", (object) deviceInfo.SerialNumber);
             }
             else
             {
-            Debug.WriteLine("DeviceCfg::SetDeviceConfig: failed to get serialNumber e={0}", rt);
+                Debug.WriteLine("DeviceCfg::PopulateDeviceInfo(): failed to get serialNumber reason={0}", rt);
             }
 
             string firmwareVersion = "";
@@ -60,20 +60,28 @@ namespace IPA.DAL.RBADAL.Services
             if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
             {
                 deviceInfo.FirmwareVersion = ParseFirmwareVersion(firmwareVersion);
-                Debug.WriteLine("device INFO[Firmware Version]: {0}", (object) deviceInfo.FirmwareVersion);
+                Debug.WriteLine("device INFO[Firmware Version]  : {0}", (object) deviceInfo.FirmwareVersion);
 
                 deviceInfo.Port = firmwareVersion.Substring(firmwareVersion.IndexOf("USB", StringComparison.Ordinal), 7);
-                Debug.WriteLine("device INFO[Port]            : {0}", (object) deviceInfo.Port);
+                Debug.WriteLine("device INFO[Port]              : {0}", (object) deviceInfo.Port);
+            }
+            else
+            {
+                Debug.WriteLine("DeviceCfg::PopulateDeviceInfo(): failed to get Firmware version reason={0}", rt);
             }
 
             deviceInfo.ModelName = IDTechSDK.Profile.IDT_DEVICE_String(deviceType, deviceConnect);
-            Debug.WriteLine("device INFO[Model Name]      : {0}", (object) deviceInfo.ModelName);
+            Debug.WriteLine("device INFO[Model Name]        : {0}", (object) deviceInfo.ModelName);
 
             rt = IDT_Augusta.SharedController.config_getModelNumber(ref deviceInfo.ModelNumber);
 
             if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
             {
-                Debug.WriteLine("device INFO[Model Number]    : {0}", (object) deviceInfo.ModelNumber);
+                Debug.WriteLine("device INFO[Model Number]      : {0}", (object) deviceInfo.ModelNumber);
+            }
+            else
+            {
+                Debug.WriteLine("DeviceCfg::PopulateDeviceInfo(): failed to get Model number reason={0}", rt);
             }
 
             return true;

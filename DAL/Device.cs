@@ -74,6 +74,12 @@ namespace IPA.DAL.RBADAL.Services
                               break;
                             }
 
+                            case (int) IDTECH_DEVICE_PID.AUGUSTAS_HID:
+                            {
+                              mode = IDTECH_DEVICE_PID.AUGUSTA_HID;
+                              break;
+                            }
+
                             default:
                             {
                                  mode = IDTECH_DEVICE_PID.UNKNOWN;
@@ -83,7 +89,7 @@ namespace IPA.DAL.RBADAL.Services
                         }
 
                         deviceMode = mode;
-                        if(mode ==  IDTECH_DEVICE_PID.AUGUSTA_HID || mode == IDTECH_DEVICE_PID.AUGUSTA_KYB)
+                        if(mode ==  IDTECH_DEVICE_PID.AUGUSTA_HID || mode == IDTECH_DEVICE_PID.AUGUSTA_KYB || mode == IDTECH_DEVICE_PID.AUGUSTAS_HID)
                         {
                             deviceInterface = new Device_Augusta(deviceMode);
                         }

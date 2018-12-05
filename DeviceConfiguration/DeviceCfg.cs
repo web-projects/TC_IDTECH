@@ -477,7 +477,12 @@ namespace IPA.DAL.RBADAL
           Debug.WriteLine("device connected: {0}", (object) IDTechSDK.Profile.IDT_DEVICE_String(type, deviceConnect));
 
           // Populate Device Configuration
-          SetDeviceConfig();
+          new Thread(() =>
+          {
+             Thread.CurrentThread.IsBackground = false;
+             Thread.Sleep(1000);
+             SetDeviceConfig();
+          }).Start();
 
           break;
         }

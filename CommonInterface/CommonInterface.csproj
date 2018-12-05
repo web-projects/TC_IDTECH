@@ -47,16 +47,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\TerminalConfiguration.cs" />
     <Compile Include="DeviceNotificationEventArgs.cs" />
     <Compile Include="IConfigurationWrapper.cs" />
-    <Compile Include="Msr.cs" />
-    <Compile Include="Aid.cs" />
-    <Compile Include="TerminalData.cs" />
-    <Compile Include="TerminalInfo.cs" />
-    <Compile Include="Capk.cs" />
+    <Compile Include="Configuration\Msr.cs" />
+    <Compile Include="Configuration\Aid.cs" />
+    <Compile Include="Configuration\TerminalData.cs" />
+    <Compile Include="Configuration\TerminalInfo.cs" />
+    <Compile Include="Configuration\Capk.cs" />
     <Compile Include="IDevicePlugIn.cs" />
     <Compile Include="ConfigSerializer.cs" />
-    <Compile Include="MsrConfigItem.cs" />
+    <Compile Include="Configuration\MsrConfigItem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils.cs" />
   </ItemGroup>

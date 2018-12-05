@@ -59,6 +59,7 @@ namespace IPA.MainApp
     bool tc_show_settings_tab;
     bool tc_show_configuration_tab;
     bool tc_show_raw_mode_tab;
+    bool tc_show_terminal_data_tab;
     bool tc_show_json_tab;
     int  tc_transaction_timeout;
     int  tc_transaction_collection_timeout;
@@ -107,12 +108,20 @@ namespace IPA.MainApp
             tabControl1.TabPages.Remove(tabPage4);
         }
 
+        // Terminal Data Tab
+        string show_terminal_data_tab = System.Configuration.ConfigurationManager.AppSettings["tc_show_terminal_data_tab"] ?? "false";
+        bool.TryParse(show_terminal_data_tab, out tc_show_terminal_data_tab);
+        if(!tc_show_terminal_data_tab)
+        {
+            tabControl1.TabPages.Remove(tabPage5);
+        }
+
         // Json Tab
         string show_json_tab = System.Configuration.ConfigurationManager.AppSettings["tc_show_json_tab"] ?? "false";
         bool.TryParse(show_json_tab, out tc_show_json_tab);
         if(!tc_show_json_tab)
         {
-            tabControl1.TabPages.Remove(tabPage5);
+            tabControl1.TabPages.Remove(tabPage6);
         }
 
         // Transaction Timer
@@ -228,6 +237,11 @@ namespace IPA.MainApp
         ShowJsonConfig(e.Message);
     }
 
+    private void ShowTerminalDataUI(object sender, DeviceNotificationEventArgs e)
+    {
+        ShowTerminalData(e.Message);
+    }
+
     protected void OnDeviceNotificationUI(object sender, DeviceNotificationEventArgs args)
     {
         Debug.WriteLine("device: notification type={0}", args.NotificationType);
@@ -281,6 +295,12 @@ namespace IPA.MainApp
                 break;
             }
 
+            case NOTIFICATION_TYPE.NT_SHOW_TERMINAL_DATA:
+            {
+                ShowTerminalDataUI(sender, args);
+                break;
+            }
+
             case NOTIFICATION_TYPE.NT_SHOW_JSON_CONFIG:
             {
                 ShowJsonConfigUI(sender, args);
@@ -318,6 +338,7 @@ namespace IPA.MainApp
             this.tabPage3.Enabled = false;
             this.tabPage4.Enabled = false;
             this.tabPage5.Enabled = false;
+            this.tabPage6.Enabled = false;
         }
     }
 
@@ -371,6 +392,7 @@ namespace IPA.MainApp
         this.tabPage2.Enabled = tc_show_settings_tab;
         this.tabPage3.Enabled = tc_show_configuration_tab;
         this.tabPage4.Enabled = tc_show_raw_mode_tab;
+        this.tabPage5.Enabled = tc_show_terminal_data_tab;
         this.picBoxConfigWait.Visible  = false;
         this.picBoxJsonWait.Visible = false;
 
@@ -483,6 +505,7 @@ namespace IPA.MainApp
             this.tabPage2.Enabled = false;
             this.tabPage3.Enabled = false;
             this.tabPage4.Enabled = false;
+            this.tabPage5.Enabled = false;
 
             new Thread(() =>
             {
@@ -497,7 +520,7 @@ namespace IPA.MainApp
                     this.Invoke(new MethodInvoker(() =>
                     {
                         this.picBoxJsonWait.Visible = true;
-                        tabControl1.SelectedTab = this.tabPage5;
+                        tabControl1.SelectedTab = this.tabPage6;
                     }));
                 }
 
@@ -542,6 +565,10 @@ namespace IPA.MainApp
                 if(tabControl1.Contains(tabPage5))
                 {
                     tabControl1.TabPages.Remove(tabPage5);
+                }
+                if(tabControl1.Contains(tabPage6))
+                {
+                    tabControl1.TabPages.Remove(tabPage6);
                 }
             }));
         }
@@ -599,9 +626,10 @@ namespace IPA.MainApp
 
                 // Enable Tab(s)
                 this.tabPage1.Enabled = true;
-                this.tabPage2.Enabled = true;
-                this.tabPage3.Enabled = true;
-                this.tabPage4.Enabled = true;
+                this.tabPage2.Enabled = tc_show_settings_tab;
+                this.tabPage3.Enabled = tc_show_configuration_tab;
+                this.tabPage4.Enabled = tc_show_raw_mode_tab;
+                this.tabPage5.Enabled = tc_show_terminal_data_tab;
             }
             catch (Exception exp)
             {
@@ -630,9 +658,10 @@ namespace IPA.MainApp
 
             // Enable Tab(s)
             this.tabPage1.Enabled = true;
-            this.tabPage2.Enabled = true;
-            this.tabPage3.Enabled = true;
-            this.tabPage4.Enabled = true;
+            this.tabPage2.Enabled = tc_show_settings_tab;
+            this.tabPage3.Enabled = tc_show_configuration_tab;
+            this.tabPage4.Enabled = tc_show_raw_mode_tab;
+            this.tabPage5.Enabled = tc_show_terminal_data_tab;
         };
 
         if (InvokeRequired)
@@ -653,6 +682,7 @@ namespace IPA.MainApp
         this.tabPage3.Enabled = false;
         this.tabPage4.Enabled = false;
         this.tabPage5.Enabled = false;
+        this.tabPage6.Enabled = false;
 
         this.btnCardRead.Enabled = false;
 
@@ -692,6 +722,7 @@ namespace IPA.MainApp
             this.tabPage2.Enabled = tc_show_settings_tab;
             this.tabPage3.Enabled = tc_show_configuration_tab;
             this.tabPage4.Enabled = tc_show_raw_mode_tab;
+            this.tabPage5.Enabled = tc_show_terminal_data_tab;
             this.picBoxConfigWait.Visible = false;
             this.picBoxJsonWait.Visible = false;
         }
@@ -797,9 +828,10 @@ namespace IPA.MainApp
 
                 // Enable Tabs
                 this.tabPage1.Enabled = true;
-                this.tabPage2.Enabled = true;
-                this.tabPage3.Enabled = true;
-                this.tabPage4.Enabled = true;
+                this.tabPage2.Enabled = tc_show_settings_tab;
+                this.tabPage3.Enabled = tc_show_configuration_tab;
+                this.tabPage4.Enabled = tc_show_raw_mode_tab;
+                this.tabPage5.Enabled = tc_show_terminal_data_tab;
                 this.picBoxConfigWait.Visible  = false;
                 this.picBoxJsonWait.Visible  = false;
             }
@@ -866,6 +898,10 @@ namespace IPA.MainApp
                     {
                         tabControl1.TabPages.Remove(tabPage5);
                     }
+                    if(tabControl1.Contains(tabPage6))
+                    {
+                        tabControl1.TabPages.Remove(tabPage6);
+                    }
                     tabControl1.SelectedTab = this.tabPage1;
                 }
                 else
@@ -886,11 +922,15 @@ namespace IPA.MainApp
                     {
                         tabControl1.TabPages.Add(tabPage4);
                     }
-                    if(!tabControl1.Contains(tabPage5) && tc_show_json_tab)
+                    if(!tabControl1.Contains(tabPage5) && tc_show_terminal_data_tab)
                     {
                         tabControl1.TabPages.Add(tabPage5);
-                        tabControl1.SelectedTab = this.tabPage5;
-                        this.tabPage5.Enabled = true;
+                    }
+                    if(!tabControl1.Contains(tabPage6) && tc_show_json_tab)
+                    {
+                        tabControl1.TabPages.Add(tabPage6);
+                        tabControl1.SelectedTab = this.tabPage6;
+                        this.tabPage6.Enabled = true;
                         this.picBoxJsonWait.Visible = true;
                     }
                 }
@@ -938,6 +978,38 @@ namespace IPA.MainApp
         }
     }
 
+    private void ShowTerminalData(object payload)
+    {
+        if(dev_usb_mode == DEV_USB_MODE.USB_HID_MODE)
+        {
+            // Invoker with Parameter(s)
+            MethodInvoker mi = () =>
+            {
+                try
+                {
+                    if(tc_show_terminal_data_tab)
+                    {
+                        string [] data = ((IEnumerable) payload).Cast<object>().Select(x => x == null ? "" : x.ToString()).ToArray();
+                        this.txtTerminalData.Text = data[0];
+                    }
+                }
+                catch (Exception exp)
+                {
+                    Debug.WriteLine("main: ShowJsonConfig() - exception={0}", (object) exp.Message);
+                }
+            };
+
+            if (InvokeRequired)
+            {
+                BeginInvoke(mi);
+            }
+            else
+            {
+                Invoke(mi);
+            }
+        }
+    }
+
     private void ShowJsonConfig(object payload)
     {
         if(dev_usb_mode == DEV_USB_MODE.USB_HID_MODE)
@@ -951,7 +1023,7 @@ namespace IPA.MainApp
                     {
                         string [] filename = ((IEnumerable) payload).Cast<object>().Select(x => x == null ? "" : x.ToString()).ToArray();
                         this.txtJson.Text = File.ReadAllText(filename[0]);
-                        tabControl1.SelectedTab = this.tabPage5;
+                        tabControl1.SelectedTab = this.tabPage6;
                         this.picBoxJsonWait.Visible = false;
                     }
                 }
@@ -1034,8 +1106,9 @@ namespace IPA.MainApp
         // Disable Tabs
         this.tabPage1.Enabled = false;
         this.tabPage2.Enabled = false;
-        //this.tabPage3.Enabled = false;
+        this.tabPage3.Enabled = false;
         this.tabPage4.Enabled = false;
+        this.tabPage5.Enabled = false;
 
         this.Invoke(new MethodInvoker(() =>
         {
@@ -1107,21 +1180,21 @@ namespace IPA.MainApp
         if(serializer != null)
         {
             // EXPIRATION MASK
-            this.cBxExpirationMask.Checked = serializer?.user_configuration?.expiration_masking?? false;
+            this.cBxExpirationMask.Checked = serializer?.terminalCfg.user_configuration?.expiration_masking?? false;
 
             // PAN DIGITS
-            this.txtPAN.Text = serializer?.user_configuration?.pan_clear_digits.ToString();
+            this.txtPAN.Text = serializer?.terminalCfg.user_configuration?.pan_clear_digits.ToString();
 
             // SWIPE FORCE
-            this.cBxTrack1.Checked = serializer?.user_configuration?.swipe_force_mask.track1?? false;
-            this.cBxTrack2.Checked = serializer?.user_configuration?.swipe_force_mask.track2?? false;
-            this.cBxTrack3.Checked = serializer?.user_configuration?.swipe_force_mask.track3?? false;
-            this.cBxTrack3Card0.Checked = serializer?.user_configuration?.swipe_force_mask.track3card0?? false;
+            this.cBxTrack1.Checked = serializer?.terminalCfg.user_configuration?.swipe_force_mask.track1?? false;
+            this.cBxTrack2.Checked = serializer?.terminalCfg.user_configuration?.swipe_force_mask.track2?? false;
+            this.cBxTrack3.Checked = serializer?.terminalCfg.user_configuration?.swipe_force_mask.track3?? false;
+            this.cBxTrack3Card0.Checked = serializer?.terminalCfg.user_configuration?.swipe_force_mask.track3card0?? false;
 
             // SWIPE MASK
-            this.cBxSwipeMaskTrack1.Checked = serializer?.user_configuration?.swipe_mask.track1?? false;
-            this.cBxSwipeMaskTrack2.Checked = serializer?.user_configuration?.swipe_mask.track2?? false;
-            this.cBxSwipeMaskTrack3.Checked = serializer?.user_configuration?.swipe_mask.track3?? false;
+            this.cBxSwipeMaskTrack1.Checked = serializer?.terminalCfg.user_configuration?.swipe_mask.track1?? false;
+            this.cBxSwipeMaskTrack2.Checked = serializer?.terminalCfg.user_configuration?.swipe_mask.track2?? false;
+            this.cBxSwipeMaskTrack3.Checked = serializer?.terminalCfg.user_configuration?.swipe_mask.track3?? false;
 
             // Invoker without Parameter(s)
             this.Invoke((MethodInvoker)delegate()
@@ -1141,18 +1214,18 @@ namespace IPA.MainApp
             if(serializer != null)
             {
                 // Update Data: EXPIRATION MASKING
-                serializer.user_configuration.expiration_masking = this.cBxExpirationMask.Checked;
+                serializer.terminalCfg.user_configuration.expiration_masking = this.cBxExpirationMask.Checked;
                 // PAN Clear Digits
-                serializer.user_configuration.pan_clear_digits = Convert.ToInt32(this.txtPAN.Text);
+                serializer.terminalCfg.user_configuration.pan_clear_digits = Convert.ToInt32(this.txtPAN.Text);
                 // Swipe Force Mask
-                serializer.user_configuration.swipe_force_mask.track1 = this.cBxTrack1.Checked;
-                serializer.user_configuration.swipe_force_mask.track2 = this.cBxTrack2.Checked;
-                serializer.user_configuration.swipe_force_mask.track3 = this.cBxTrack3.Checked;
-                serializer.user_configuration.swipe_force_mask.track3card0 = this.cBxTrack3Card0.Checked;
+                serializer.terminalCfg.user_configuration.swipe_force_mask.track1 = this.cBxTrack1.Checked;
+                serializer.terminalCfg.user_configuration.swipe_force_mask.track2 = this.cBxTrack2.Checked;
+                serializer.terminalCfg.user_configuration.swipe_force_mask.track3 = this.cBxTrack3.Checked;
+                serializer.terminalCfg.user_configuration.swipe_force_mask.track3card0 = this.cBxTrack3Card0.Checked;
                 // Swipe Mask
-                serializer.user_configuration.swipe_mask.track1 = this.cBxSwipeMaskTrack1.Checked;
-                serializer.user_configuration.swipe_mask.track2 = this.cBxSwipeMaskTrack2.Checked;
-                serializer.user_configuration.swipe_mask.track3 = this.cBxSwipeMaskTrack3.Checked;
+                serializer.terminalCfg.user_configuration.swipe_mask.track1 = this.cBxSwipeMaskTrack1.Checked;
+                serializer.terminalCfg.user_configuration.swipe_mask.track2 = this.cBxSwipeMaskTrack2.Checked;
+                serializer.terminalCfg.user_configuration.swipe_mask.track3 = this.cBxSwipeMaskTrack3.Checked;
 
                 // WRITE to Config
                 serializer.WriteConfig();
@@ -1209,9 +1282,9 @@ namespace IPA.MainApp
 
     private void btnCloseJson_Click(object sender, EventArgs e)
     {
-        if(tc_show_json_tab && tabControl1.Contains(tabPage5))
+        if(tc_show_json_tab && tabControl1.Contains(tabPage6))
         {
-            tabControl1.TabPages.Remove(tabPage5);
+            tabControl1.TabPages.Remove(tabPage6);
         }
     }
 

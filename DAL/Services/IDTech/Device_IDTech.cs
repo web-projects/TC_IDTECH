@@ -49,8 +49,7 @@ namespace IPA.DAL.RBADAL.Services
         public const int IDTechVendorID = 0x0ACD;
 
         //Not sure how this is used, set in Connect
-///        private static DeviceInfo deviceInfo;
-        public DeviceInfo deviceInfo;
+        private static DeviceInfo deviceInfo;
 
 //        private static string attachedPort;
         private static string[] acceptedPorts;
@@ -112,6 +111,10 @@ namespace IPA.DAL.RBADAL.Services
             //ingenicoDevice.DeviceConnectionChanged += (sender4, deviceConnectionArgs) => UpdateDeviceIngenico(deviceConnectionArgs.ConnectionStatus);
         }
 
+        public virtual void Configure(object[] settings)
+        {
+        }
+
         DeviceStatus IDevice.Connect()
         {
             //initialize attached device because application detected USB device change
@@ -159,7 +162,6 @@ namespace IPA.DAL.RBADAL.Services
 ///            Transaction.PaymentXO.Request.CreditCard.AbortType = DeviceAbortType.BadRead;
             NotificationRaise(new NotificationEventArgs { NotificationType = NotificationType.DeviceEvent, DeviceEvent = DeviceEvent.CardReadComplete });
         }
-
 
         void IDevice.Abort(DeviceAbortType abortType)
         {
@@ -288,7 +290,7 @@ namespace IPA.DAL.RBADAL.Services
             
             return configStatus;
         }
-        public string GetSerialNumber()
+        public virtual string GetSerialNumber()
         {
             string serial = string.Empty;
             //declare variables
@@ -743,7 +745,7 @@ namespace IPA.DAL.RBADAL.Services
             return success;
         }
 
-        public string ParseFirmwareVersion(string firmwareInfo)
+        public virtual string ParseFirmwareVersion(string firmwareInfo)
         {
             bool AUGUSTA_DEVICE = (deviceMode == IDTECH_DEVICE_PID.AUGUSTA_HID || deviceMode == IDTECH_DEVICE_PID.AUGUSTA_KYB);
             // Validate the format firmwareInfo see if the version # exists
@@ -798,7 +800,7 @@ namespace IPA.DAL.RBADAL.Services
             return serialNumber;
         }
 
-        public DeviceInfo GetDeviceInfo()
+        public virtual DeviceInfo GetDeviceInfo()
         {
             return deviceInfo;
         }
@@ -1715,11 +1717,10 @@ if(empty)
             NotificationRaise(new NotificationEventArgs { NotificationType = NotificationType.DeviceEvent, DeviceEvent = DeviceEvent.DeviceDisconnected });
         }
 
-
         #endregion
     }
 
-///    internal class DeviceInfo
+    ///internal class DeviceInfo
     public class DeviceInfo
     {
         public string SerialNumber;

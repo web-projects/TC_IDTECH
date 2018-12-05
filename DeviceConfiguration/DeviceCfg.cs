@@ -407,49 +407,26 @@ namespace IPA.DAL.RBADAL
     {
       if(IDT_DEVICE_Types.IDT_DEVICE_NONE != deviceType)
       {
+           object [] settings = { deviceType, deviceConnect };
+
+           Device.Configure(settings);
+
            // Create Device info object
            if(deviceInformation == null)
            {
               deviceInformation = new DeviceInformation();
            }
 
-           string serialNumber = "";
-           RETURN_CODE rt = IDT_Augusta.SharedController.config_getSerialNumber(ref serialNumber);
+           DeviceInfo devInfo = Device.GetDeviceInfo();
 
-          if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
-          {
-              deviceInformation.SerialNumber = serialNumber;
-              Debug.WriteLine("device INFO[Serial Number]   : {0}", (object) deviceInformation.SerialNumber);
-          }
-          else
-          {
-            Debug.WriteLine("DeviceCfg::SetDeviceConfig: failed to get serialNumber e={0}", rt);
-          }
-
-          if(deviceInformation.deviceMode == IDTECH_DEVICE_PID.AUGUSTA_HID)
-          {
-              string firmwareVersion = "";
-              rt = IDT_Augusta.SharedController.device_getFirmwareVersion(ref firmwareVersion);
-
-              if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
-              {
-                  deviceInformation.FirmwareVersion = ParseFirmwareVersion(firmwareVersion);
-                  Debug.WriteLine("device INFO[Firmware Version]: {0}", (object) deviceInformation.FirmwareVersion);
-
-                  deviceInformation.Port = firmwareVersion.Substring(firmwareVersion.IndexOf("USB", StringComparison.Ordinal), 7);
-                  Debug.WriteLine("device INFO[Port]            : {0}", (object) deviceInformation.Port);
-              }
-
-              deviceInformation.ModelName = IDTechSDK.Profile.IDT_DEVICE_String(deviceType, deviceConnect);
-              Debug.WriteLine("device INFO[Model Name]      : {0}", (object) deviceInformation.ModelName);
-
-              rt = IDT_Augusta.SharedController.config_getModelNumber(ref deviceInformation.ModelNumber);
-
-              if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
-              {
-                  Debug.WriteLine("device INFO[Model Number]    : {0}", (object) deviceInformation.ModelNumber);
-              }
-          }
+           if(devInfo != null)
+           {
+              deviceInformation.SerialNumber    = devInfo.SerialNumber;
+              deviceInformation.FirmwareVersion = devInfo.FirmwareVersion;
+              deviceInformation.ModelName       = devInfo.ModelName;
+              deviceInformation.ModelNumber     = devInfo.ModelNumber;
+              deviceInformation.Port            = devInfo.Port;
+           }
       }
     }
 
@@ -1585,7 +1562,7 @@ namespace IPA.DAL.RBADAL
     {
         try
         {
-            serializer.config_meta.Customer.Company = "TrustCommerce";
+            serializer.terminalCfg.config_meta.Customer.Company = "TrustCommerce";
         }
         catch(Exception exp)
         {
@@ -1597,36 +1574,36 @@ namespace IPA.DAL.RBADAL
     {
         try
         {
-            serializer.config_meta.Type = "device";
-            serializer.hardware.Serial_num = deviceInformation.SerialNumber;
-            serializer.config_meta.Terminal_type = deviceInformation.ModelName;
+            serializer.terminalCfg.config_meta.Type = "device";
+            serializer.terminalCfg.hardware.Serial_num = deviceInformation.SerialNumber;
+            serializer.terminalCfg.config_meta.Terminal_type = deviceInformation.ModelName;
             Version version = typeof(DeviceCfg).Assembly.GetName().Version;
-            serializer.config_meta.Version = version.ToString();
+            serializer.terminalCfg.config_meta.Version = version.ToString();
 
             string response = null;
             RETURN_CODE rt = IDT_Augusta.SharedController.device_getFirmwareVersion(ref response);
 
             if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt && !string.IsNullOrWhiteSpace(response))
             {
-                serializer.general_configuration.Terminal_info.firmware_ver = response;
+                serializer.terminalCfg.general_configuration.Terminal_info.firmware_ver = response;
             }
             response = "";
             rt = IDT_Augusta.SharedController.emv_getEMVKernelVersion(ref response);
             if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt && !string.IsNullOrWhiteSpace(response))
             {
-                serializer.general_configuration.Terminal_info.contact_emv_kernel_ver = response;
+                serializer.terminalCfg.general_configuration.Terminal_info.contact_emv_kernel_ver = response;
             }
             response = "";
             rt = IDT_Augusta.SharedController.emv_getEMVKernelCheckValue(ref response);
             if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt && !string.IsNullOrWhiteSpace(response))
             {
-                serializer.general_configuration.Terminal_info.contact_emv_kernel_checksum = response;
+                serializer.terminalCfg.general_configuration.Terminal_info.contact_emv_kernel_checksum = response;
             }
             response = "";
             rt = IDT_Augusta.SharedController.emv_getEMVConfigurationCheckValue(ref response);
             if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt && !string.IsNullOrWhiteSpace(response))
             {
-                serializer.general_configuration.Terminal_info.contact_emv_kernel_configuration_checksum = response;
+                serializer.terminalCfg.general_configuration.Terminal_info.contact_emv_kernel_configuration_checksum = response;
             }
         }
         catch(Exception exp)
@@ -1641,7 +1618,7 @@ namespace IPA.DAL.RBADAL
 
         try
         {
-            serializer.general_configuration.Contact.terminal_ics_type = GetTerminalType();
+            serializer.terminalCfg.general_configuration.Contact.terminal_ics_type = GetTerminalType();
 
             //int id = IDT_Augusta.SharedController.emv_retrieveTerminalID();
 
@@ -1651,8 +1628,8 @@ namespace IPA.DAL.RBADAL
             {
                 TerminalData td = new TerminalData(tlv);
                 string text = td.ConvertTLVToValuePairs();
-                serializer.general_configuration.Contact.terminal_data = td.ConvertTLVToString();
-                serializer.general_configuration.Contact.tags = td.GetTags();
+                serializer.terminalCfg.general_configuration.Contact.terminal_data = td.ConvertTLVToString();
+                serializer.terminalCfg.general_configuration.Contact.tags = td.GetTags();
                 // Information From Terminal Data
                 string language = td.GetTagValue("DF10");
                 language = (language.Length > 1) ? language.Substring(0, 2) : "";
@@ -1664,6 +1641,10 @@ namespace IPA.DAL.RBADAL
 ///                terminalID = CardReader.ConvertHexStringToAscii(terminalID);
                 string exp = td.GetTagValue("5F36");
                 exponent = Int32.Parse(td.GetTagValue("5F36"));
+
+                // Display Terminal Data to User
+                object [] message = { text };
+                NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_SHOW_TERMINAL_DATA, Message = message });
             }
         }
         catch(Exception exp)
@@ -1684,8 +1665,8 @@ namespace IPA.DAL.RBADAL
             
             if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
             {
-                serializer.general_configuration.Encryption.msr_encryption_enabled = msr;
-                serializer.general_configuration.Encryption.icc_encryption_enabled = icc;
+                serializer.terminalCfg.general_configuration.Encryption.msr_encryption_enabled = msr;
+                serializer.terminalCfg.general_configuration.Encryption.icc_encryption_enabled = icc;
                 byte format = 0;
                 rt = IDT_Augusta.SharedController.icc_getKeyFormatForICCDUKPT(ref format);
                 if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
@@ -1704,7 +1685,7 @@ namespace IPA.DAL.RBADAL
                             break;
                         }
                     }
-                    serializer.general_configuration.Encryption.data_encryption_type = key_format;
+                    serializer.terminalCfg.general_configuration.Encryption.data_encryption_type = key_format;
                 }
             }
         }
@@ -1745,7 +1726,7 @@ namespace IPA.DAL.RBADAL
                         // Write to Configuration File
                         if(CAPKList.Count > 0)
                         {
-                            serializer.general_configuration.Contact.capk = CAPKList;
+                            serializer.terminalCfg.general_configuration.Contact.capk = CAPKList;
                         }
                     }
                 }
@@ -1789,7 +1770,7 @@ namespace IPA.DAL.RBADAL
                         // Write to Configuration File
                         if(AidList.Count > 0)
                         {
-                            serializer.general_configuration.Contact.aid = AidList;
+                            serializer.terminalCfg.general_configuration.Contact.aid = AidList;
                         }
                     }
                 }
@@ -1821,7 +1802,7 @@ namespace IPA.DAL.RBADAL
                 }
             }
 
-            serializer.general_configuration.msr_settings = msr_settings;
+            serializer.terminalCfg.general_configuration.msr_settings = msr_settings;
         }
         catch(Exception exp)
         {

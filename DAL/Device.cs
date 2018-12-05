@@ -117,6 +117,10 @@ namespace IPA.DAL.RBADAL.Services
             
         }
         
+        public void Configure(object[] settings)
+        {
+            deviceInterface.Configure(settings);
+        }
 
         //TODO: map response codes to something meaningful
 ///        public async Task CardRead(string paymentAmount, string promptText, string availableReaders, List<TCCustAttributeItem> attributes, EntryModeType entryModeType, int attemptedReads, CreditCard cc)
@@ -252,7 +256,6 @@ if (deviceID.ToLower().Contains("usb\\") && ((deviceID.Contains($"VID_{IDTECH}")
         {
             OnNotification?.Invoke(null, e);
         }
-            
 
         #endregion
 

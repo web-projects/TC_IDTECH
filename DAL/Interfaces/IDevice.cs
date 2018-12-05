@@ -27,6 +27,7 @@ namespace IPA.DAL.RBADAL.Interfaces
         
         //Public methods
         void Init(string[] accepted, string[] available, int baudRate, int dataBits);
+        void Configure(object[] settings);
         DeviceStatus Connect();
         void Disconnect();
         void Abort(DeviceAbortType abortType);

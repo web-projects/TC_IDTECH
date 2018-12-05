@@ -82,6 +82,8 @@
             this.txtCommand = new System.Windows.Forms.TextBox();
             this.label15 = new System.Windows.Forms.Label();
             this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.txtTerminalData = new System.Windows.Forms.TextBox();
+            this.tabPage6 = new System.Windows.Forms.TabPage();
             this.picBoxJsonWait = new System.Windows.Forms.PictureBox();
             this.btnCloseJson = new System.Windows.Forms.Button();
             this.txtJson = new System.Windows.Forms.TextBox();
@@ -97,6 +99,7 @@
             this.tabPage4.SuspendLayout();
             this.panel4.SuspendLayout();
             this.tabPage5.SuspendLayout();
+            this.tabPage6.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picBoxJsonWait)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -229,6 +232,7 @@
             this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Controls.Add(this.tabPage5);
+            this.tabControl1.Controls.Add(this.tabPage6);
             this.tabControl1.Location = new System.Drawing.Point(12, 53);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -643,15 +647,35 @@
             // 
             // tabPage5
             // 
-            this.tabPage5.Controls.Add(this.picBoxJsonWait);
-            this.tabPage5.Controls.Add(this.btnCloseJson);
-            this.tabPage5.Controls.Add(this.txtJson);
+            this.tabPage5.Controls.Add(this.txtTerminalData);
             this.tabPage5.Location = new System.Drawing.Point(4, 22);
             this.tabPage5.Name = "tabPage5";
             this.tabPage5.Size = new System.Drawing.Size(692, 518);
             this.tabPage5.TabIndex = 4;
-            this.tabPage5.Text = "Json";
+            this.tabPage5.Text = "Terminal Data";
             this.tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // txtTerminalData
+            // 
+            this.txtTerminalData.Location = new System.Drawing.Point(5, 17);
+            this.txtTerminalData.Multiline = true;
+            this.txtTerminalData.Name = "txtTerminalData";
+            this.txtTerminalData.ReadOnly = true;
+            this.txtTerminalData.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtTerminalData.Size = new System.Drawing.Size(682, 443);
+            this.txtTerminalData.TabIndex = 4;
+            // 
+            // tabPage6
+            // 
+            this.tabPage6.Controls.Add(this.picBoxJsonWait);
+            this.tabPage6.Controls.Add(this.btnCloseJson);
+            this.tabPage6.Controls.Add(this.txtJson);
+            this.tabPage6.Location = new System.Drawing.Point(4, 22);
+            this.tabPage6.Name = "tabPage6";
+            this.tabPage6.Size = new System.Drawing.Size(692, 518);
+            this.tabPage6.TabIndex = 5;
+            this.tabPage6.Text = "Json";
+            this.tabPage6.UseVisualStyleBackColor = true;
             // 
             // picBoxJsonWait
             // 
@@ -660,9 +684,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.picBoxJsonWait.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.picBoxJsonWait.Image = ((System.Drawing.Image)(resources.GetObject("picBoxJsonWait.Image")));
-            this.picBoxJsonWait.Location = new System.Drawing.Point(0, 17);
+            this.picBoxJsonWait.Location = new System.Drawing.Point(0, 0);
             this.picBoxJsonWait.Name = "picBoxJsonWait";
-            this.picBoxJsonWait.Size = new System.Drawing.Size(689, 487);
+            this.picBoxJsonWait.Size = new System.Drawing.Size(693, 522);
             this.picBoxJsonWait.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.picBoxJsonWait.TabIndex = 2;
             this.picBoxJsonWait.TabStop = false;
@@ -727,6 +751,8 @@
             this.panel4.PerformLayout();
             this.tabPage5.ResumeLayout(false);
             this.tabPage5.PerformLayout();
+            this.tabPage6.ResumeLayout(false);
+            this.tabPage6.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picBoxJsonWait)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
@@ -788,9 +814,11 @@
         private System.Windows.Forms.TextBox txtCommandResult;
         private System.Windows.Forms.PictureBox picBoxConfigWait;
         private System.Windows.Forms.TabPage tabPage5;
+        private System.Windows.Forms.TextBox txtTerminalData;
         private System.Windows.Forms.PictureBox picBoxJsonWait;
         private System.Windows.Forms.Button btnCloseJson;
         private System.Windows.Forms.TextBox txtJson;
+        private System.Windows.Forms.TabPage tabPage6;
     }
 }
 

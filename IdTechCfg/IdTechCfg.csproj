@@ -36,46 +36,82 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Augusta_config">
-      <HintPath>..\sdk\Augusta_config.dll</HintPath>
+      <HintPath>..\sdk\Augusta\Augusta_config.dll</HintPath>
     </Reference>
     <Reference Include="Augusta_device">
-      <HintPath>..\sdk\Augusta_device.dll</HintPath>
+      <HintPath>..\sdk\Augusta\Augusta_device.dll</HintPath>
     </Reference>
     <Reference Include="Augusta_emv">
-      <HintPath>..\sdk\Augusta_emv.dll</HintPath>
+      <HintPath>..\sdk\Augusta\Augusta_emv.dll</HintPath>
     </Reference>
     <Reference Include="Augusta_icc">
-      <HintPath>..\sdk\Augusta_icc.dll</HintPath>
+      <HintPath>..\sdk\Augusta\Augusta_icc.dll</HintPath>
     </Reference>
     <Reference Include="Augusta_KB_config">
-      <HintPath>..\sdk\Augusta_KB_config.dll</HintPath>
+      <HintPath>..\sdk\Augusta\Augusta_KB_config.dll</HintPath>
     </Reference>
     <Reference Include="Augusta_KB_device">
-      <HintPath>..\sdk\Augusta_KB_device.dll</HintPath>
+      <HintPath>..\sdk\Augusta\Augusta_KB_device.dll</HintPath>
     </Reference>
     <Reference Include="Augusta_KB_msr">
-      <HintPath>..\sdk\Augusta_KB_msr.dll</HintPath>
+      <HintPath>..\sdk\Augusta\Augusta_KB_msr.dll</HintPath>
     </Reference>
     <Reference Include="Augusta_KB_parse_">
-      <HintPath>..\sdk\Augusta_KB_parse_.dll</HintPath>
+      <HintPath>..\sdk\Augusta\Augusta_KB_parse_.dll</HintPath>
     </Reference>
     <Reference Include="Augusta_msr">
-      <HintPath>..\sdk\Augusta_msr.dll</HintPath>
+      <HintPath>..\sdk\Augusta\Augusta_msr.dll</HintPath>
     </Reference>
     <Reference Include="Augusta_parse">
-      <HintPath>..\sdk\Augusta_parse.dll</HintPath>
-    </Reference>
-    <Reference Include="CommonInterface">
-      <HintPath>..\sdk\CommonInterface.dll</HintPath>
-    </Reference>
-    <Reference Include="DeviceConfiguration">
-      <HintPath>..\sdk\DeviceConfiguration.dll</HintPath>
+      <HintPath>..\sdk\Augusta\Augusta_parse.dll</HintPath>
     </Reference>
     <Reference Include="HidLibrary, Version=3.2.46.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\hidlibrary.3.2.46.0\lib\HidLibrary.dll</HintPath>
     </Reference>
     <Reference Include="IDTechSDK">
       <HintPath>..\sdk\IDTechSDK.dll</HintPath>
+    </Reference>
+    <Reference Include="L100_config">
+      <HintPath>..\sdk\NEOII\L100_config.dll</HintPath>
+    </Reference>
+    <Reference Include="L100_device">
+      <HintPath>..\sdk\NEOII\L100_device.dll</HintPath>
+    </Reference>
+    <Reference Include="L100_lcd">
+      <HintPath>..\sdk\NEOII\L100_lcd.dll</HintPath>
+    </Reference>
+    <Reference Include="L100_pin">
+      <HintPath>..\sdk\NEOII\L100_pin.dll</HintPath>
+    </Reference>
+    <Reference Include="LoggerManager">
+      <HintPath>..\LoggerManager\bin\Debug\LoggerManager.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_config">
+      <HintPath>..\sdk\NEOII\NEO2_config.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_ctls">
+      <HintPath>..\sdk\NEOII\NEO2_ctls.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_device">
+      <HintPath>..\sdk\NEOII\NEO2_device.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_emv">
+      <HintPath>..\sdk\NEOII\NEO2_emv.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_icc">
+      <HintPath>..\sdk\NEOII\NEO2_icc.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_lcd">
+      <HintPath>..\sdk\NEOII\NEO2_lcd.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_msr">
+      <HintPath>..\sdk\NEOII\NEO2_msr.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_parse">
+      <HintPath>..\sdk\NEOII\NEO2_parse.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_pin">
+      <HintPath>..\sdk\NEOII\NEO2_pin.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
@@ -108,6 +144,27 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="VP3300_config">
+      <HintPath>..\sdk\VP3300\VP3300_config.dll</HintPath>
+    </Reference>
+    <Reference Include="VP3300_ctls">
+      <HintPath>..\sdk\VP3300\VP3300_ctls.dll</HintPath>
+    </Reference>
+    <Reference Include="VP3300_device">
+      <HintPath>..\sdk\VP3300\VP3300_device.dll</HintPath>
+    </Reference>
+    <Reference Include="VP3300_emv">
+      <HintPath>..\sdk\VP3300\VP3300_emv.dll</HintPath>
+    </Reference>
+    <Reference Include="VP3300_icc">
+      <HintPath>..\sdk\VP3300\VP3300_icc.dll</HintPath>
+    </Reference>
+    <Reference Include="VP3300_msr">
+      <HintPath>..\sdk\VP3300\VP3300_msr.dll</HintPath>
+    </Reference>
+    <Reference Include="VP3300_parse">
+      <HintPath>..\sdk\VP3300\VP3300_parse.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppDomainCfg.cs" />
@@ -132,6 +189,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="configuration.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -144,22 +204,35 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\logo-bottom.png" />
     <Content Include="Assets\TC-IPA-Shield.ico" />
     <Content Include="Assets\TC-logo.png" />
     <Content Include="Assets\TC-WAIT.gif" />
+    <Content Include="NEO2_Devices.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="TC-IPA-Shield.ico" />
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CommonInterface\CommonInterface.csproj">
+      <Project>{88da37a0-8e42-45c4-81d5-e89cd6c83816}</Project>
+      <Name>CommonInterface</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DAL\DAL.csproj">
-      <Project>{165D403C-205D-4302-978D-234981F456C8}</Project>
+      <Project>{165d403c-205d-4302-978d-234981f456c8}</Project>
       <Name>DAL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DeviceConfiguration\DeviceConfiguration.csproj">
+      <Project>{d03b9c37-6bff-4e70-bb0e-c4dea43621c8}</Project>
+      <Name>DeviceConfiguration</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

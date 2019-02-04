@@ -68,6 +68,29 @@ namespace IPA.CommonInterface
             return text;
         }
 
+        public string [] ConvertTLVToValuePairsArray()
+        {
+            List<string> collection = new List<string>();
+            try
+            {
+                var values = Common.processTLVUnencrypted(tlv);
+                values = values.ToDictionary(kv => kv.Key, kv => (string)((string)kv.Value).ToUpper());
+                Debug.WriteLine("====================== TERMINAL DATA : TLV DUMP ======================");
+                foreach (KeyValuePair<string, string> kvp in values)
+                {
+                    collection.Add(string.Format("{0}:{1}", kvp.Key, kvp.Value).ToUpper());
+                    Debug.WriteLine("{0} : {1}", kvp.Key , kvp.Value);
+                }
+                Debug.WriteLine("======================================================================");
+            }
+            catch(Exception exp)
+            {
+                Debug.WriteLine("TerminalDatga::ConvertTLVToValuePairs(): - exception={0}", (object)exp.Message);
+            }
+            string [] text = collection.ToArray();
+            return text;
+        }
+
         public string GetTagValue(string key)
         {
             object value = "";

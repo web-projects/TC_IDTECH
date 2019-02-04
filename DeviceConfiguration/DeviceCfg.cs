@@ -12,11 +12,13 @@ using HidLibrary;
 using IDTechSDK;
 
 using IPA.CommonInterface;
+using IPA.CommonInterface.Helpers;
 using IPA.DAL;
 using IPA.DAL.RBADAL.Services.Devices.IDTech;
 using IPA.Core.Shared.Helpers.StatusCode;
 using IPA.Core.Shared.Enums;
 using IPA.DAL.RBADAL.Services;
+using IPA.DAL.RBADAL.Services.Devices.IDTech.Models;
 
 namespace IPA.DAL.RBADAL
 {
@@ -41,6 +43,7 @@ namespace IPA.DAL.RBADAL
 
     private bool useUniversalSDK;
     private bool attached;
+    private bool connected;
     private bool formClosing;
 
     private readonly object discoveryLock = new object();
@@ -80,6 +83,7 @@ namespace IPA.DAL.RBADAL
 
       // Device Discovery
       //useUniversalSDK = DeviceDiscovery();
+      connected = false;
 
       try
       {
@@ -119,7 +123,10 @@ namespace IPA.DAL.RBADAL
             // connect to device
             Device.Connect();
 
-            if(deviceInformation.deviceMode != IDTECH_DEVICE_PID.AUGUSTA_HID)
+            // Set as Attached
+            attached = true;
+
+            if(!useUniversalSDK)
             {
                 Debug.WriteLine("device information ----------------------------------------------------------------");
                 DeviceInfo di = Device.GetDeviceInfo();
@@ -133,27 +140,39 @@ namespace IPA.DAL.RBADAL
                 Debug.WriteLine("device INFO[Model Name]      : {0}", (object) deviceInformation.ModelName);
                 deviceInformation.Port = di.Port;
                 Debug.WriteLine("device INFO[Port]            : {0}", (object) deviceInformation.Port);
+
+                // Update Device Configuration
+                string [] message = { "COMPLETED" };
+                NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_DEVICE_UPDATE_CONFIG, Message = message });
             }
 
-            if(deviceInformation.deviceMode == IDTECH_DEVICE_PID.AUGUSTA_HID)
+            // DEVICES with USDK Support
+            if(useUniversalSDK)
             {
                 // Initialize Universal SDK
                 IDT_Device.setCallback(MessageCallBack);
                 IDT_Device.startUSBMonitoring();
-                GetDeviceInformation();
-            }
 
-            // Set as Attached
-            attached = true;
+                string [] message = { "COMPLETED" };
+                NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_INITIALIZE_DEVICE, Message = message });
+            }
+            else if(deviceInformation.deviceMode == IDTECH_DEVICE_PID.VP3000_KYB)
+            {
+                deviceType = IDT_DEVICE_Types.IDT_DEVICE_VP3300;
+                SetDeviceConfig();
+                string [] message = { "COMPLETED" };
+                NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_INITIALIZE_DEVICE, Message = message });
+            }
+          }
+          else
+          {
+            throw new Exception("NoDevice");
           }
       }
       catch (Exception xcp)
       {
           throw xcp;
       }
-
-      string [] message = { "COMPLETED" };
-      NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_INITIALIZE_DEVICE, Message = message });
     }
 
     public ConfigSerializer GetConfigSerializer()
@@ -205,6 +224,19 @@ namespace IPA.DAL.RBADAL
                     case DeviceEvent.DeviceDisconnected:
                     {
                         DeviceRemovedHandler();
+                        break;
+                    }
+                    case DeviceEvent.CardReadComplete:
+                    {
+                        Core.Data.Entity.Other.CreditCard cc = Transaction.PaymentXO.Request.CreditCard;
+                        string last4 = cc.EncryptedTracks;
+                        NotificationRaise(
+                            new DeviceNotificationEventArgs()
+                            {
+                                NotificationType = NOTIFICATION_TYPE.NT_PROCESS_CARDDATA,
+                                Message = new object[] { "Card Read " + last4 },
+                            }
+                        );
                         break;
                     }
                 }
@@ -321,19 +353,45 @@ namespace IPA.DAL.RBADAL
 
         switch(mode)
         {
-            case IDTECH_DEVICE_PID.AUGUSTA_KYB:
+            case IDTECH_DEVICE_PID.VP3000_HID:
+            case IDTECH_DEVICE_PID.VP5300_HID:
+            case IDTECH_DEVICE_PID.AUGUSTA_HID:
+            case IDTECH_DEVICE_PID.AUGUSTAS_HID:
             {
                 useUniversalSDK = true;
-                deviceInformation.deviceMode = IDTECH_DEVICE_PID.AUGUSTA_KYB;
-                message[0] = USK_DEVICE_MODE.USB_HID;
+                deviceInformation.deviceMode = mode;
+                message[0] = USK_DEVICE_MODE.USB_KYB;
                 break;
             }
 
-            case IDTECH_DEVICE_PID.AUGUSTA_HID:
+            case IDTECH_DEVICE_PID.MAGSTRIPE_HID:
+            case IDTECH_DEVICE_PID.SECUREKEY_HID:
+            case IDTECH_DEVICE_PID.SECUREMAG_HID:
+            {
+                useUniversalSDK = false;
+                deviceInformation.deviceMode = mode;
+                message[0] = "OLDIDTECH:" + USK_DEVICE_MODE.USB_KYB;
+                break;
+            }
+
+            case IDTECH_DEVICE_PID.MAGSTRIPE_KYB:
+            case IDTECH_DEVICE_PID.SECUREKEY_KYB:
+            case IDTECH_DEVICE_PID.SECUREMAG_KYB:
+            {
+                useUniversalSDK = false;
+                deviceInformation.deviceMode = mode;
+                message[0] = "OLDIDTECH:" + USK_DEVICE_MODE.USB_HID;
+                break;
+            }
+
+            case IDTECH_DEVICE_PID.VP3000_KYB:
+            case IDTECH_DEVICE_PID.VP5300_KYB:
+            case IDTECH_DEVICE_PID.AUGUSTA_KYB:
+            case IDTECH_DEVICE_PID.AUGUSTAS_KYB:
             {
                 useUniversalSDK = true;
-                deviceInformation.deviceMode = IDTECH_DEVICE_PID.AUGUSTA_HID;
-                message[0] = USK_DEVICE_MODE.USB_KYB;
+                deviceInformation.deviceMode = mode;
+                message[0] = USK_DEVICE_MODE.USB_HID;
                 break;
             }
 
@@ -359,10 +417,12 @@ namespace IPA.DAL.RBADAL
     {
       Debug.WriteLine("\ndevice: removed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
 
+      connected = false;
+
       if(attached)
       {
           attached = false;
-
+          
           // Last device was USDK Type
           if(useUniversalSDK)
           {
@@ -385,23 +445,6 @@ namespace IPA.DAL.RBADAL
     // UNIVERSAL SDK INTERFACE
     /********************************************************************************************************/
     #region -- universal sdk interface --
-
-    public string ParseFirmwareVersion(string firmwareInfo)
-    {
-        // Augusta format has no space after V: V1.00
-        // Validate the format firmwareInfo see if the version # exists
-        var version = firmwareInfo.Substring(firmwareInfo.IndexOf('V') + 1,
-                                             firmwareInfo.Length - firmwareInfo.IndexOf('V') - 1).Trim();
-        var mReg = Regex.Match(version, @"[0-9]+\.[0-9]+");
-
-        // If the parse succeeded 
-        if (mReg.Success)
-        {
-            version = mReg.Value;
-        }
-
-        return version;
-    }
 
     private void SetDeviceConfig()
     {
@@ -427,6 +470,10 @@ namespace IPA.DAL.RBADAL
               deviceInformation.ModelNumber     = devInfo.ModelNumber;
               deviceInformation.Port            = devInfo.Port;
            }
+
+           // Update Device Configuration
+           object [] message = { "COMPLETED" };
+           NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_DEVICE_UPDATE_CONFIG, Message = message });
       }
     }
 
@@ -473,15 +520,29 @@ namespace IPA.DAL.RBADAL
         case DeviceState.Connected:
         {
           deviceType = type;
-          attached = true;
-          Debug.WriteLine("device connected: {0}", (object) IDTechSDK.Profile.IDT_DEVICE_String(type, deviceConnect));
+          string deviceName = IDTechSDK.Profile.IDT_DEVICE_String(type, deviceConnect);
+          Debug.WriteLine("device connected: {0}", (object) deviceName);
 
           // Populate Device Configuration
           new Thread(() =>
           {
              Thread.CurrentThread.IsBackground = false;
-             Thread.Sleep(1000);
+
+             // Disable EMV QC
+             if(deviceName.Contains("HID"))
+             {
+                SetEmvQCMode(false);
+             }
+
+             // Get Device Configuration
              SetDeviceConfig();
+
+             Thread.Sleep(100);
+             connected = true;
+
+             // Get Device Information
+             GetDeviceInformation();
+
           }).Start();
 
           break;
@@ -510,6 +571,18 @@ namespace IPA.DAL.RBADAL
             break;
         }
 
+        case DeviceState.EMVCallback:
+        {
+            if (emvCallback == null) 
+            {
+                break;
+            }
+
+            ProcessEMVCallback(emvCallback);
+
+            break;
+        }
+
         case DeviceState.TransactionData:
         {
           if (cardData == null) 
@@ -525,12 +598,11 @@ namespace IPA.DAL.RBADAL
               {
                   if (cardData.msr_rawData.Length == 1 && cardData.msr_rawData[0] == 0x18)
                   {
-                      Debug.WriteLine("Get MSR Complete! \n");
-                      Debug.WriteLine("Get MSR Complete! \n");
+                      Debug.WriteLine("Get MSR Complete!");
                   }
               }
 
-              //clearCallbackData(ref data, ref cardData);
+              ClearCallbackData(ref data, ref cardData);
 
               return;
           }
@@ -551,7 +623,7 @@ namespace IPA.DAL.RBADAL
             }
 
             //output parsed card data
-            Debug.WriteLine("Return Code: " + transactionResultCode.ToString() + "\r\n");
+            Debug.WriteLine("device: TRANSACTION EMV DATA return code={0}", (object) transactionResultCode.ToString());
 
             // Data Received Processing
             ProcessCardData(cardData);
@@ -562,13 +634,13 @@ namespace IPA.DAL.RBADAL
 
         case DeviceState.DataReceived: 
         {
-          //SetOutputTextLog(GetTimestamp() +  " IN: " + Common.getHexStringFromBytes(data));
+          Debug.WriteLine("{0} IN : {1}", Utils.GetTimeStamp(), Common.getHexStringFromBytes(data));
           break;
         }
 
         case DeviceState.DataSent:
         {
-          //SetOutputTextLog(GetTimestamp() + " OUT: " + Common.getHexStringFromBytes(data));
+          Debug.WriteLine("{0} OUT: {1}", Utils.GetTimeStamp(), Common.getHexStringFromBytes(data));
           break;
         }
 
@@ -583,44 +655,44 @@ namespace IPA.DAL.RBADAL
           if (data != null & data.Length > 0)
           {
               CARD_ACTION action = (CARD_ACTION)data[0];
-              StringBuilder sb = new StringBuilder("Card Action Request: ");
+              StringBuilder sb = new StringBuilder("device: Card Action Request=");
 
               if ((action & CARD_ACTION.CARD_ACTION_INSERT) == CARD_ACTION.CARD_ACTION_INSERT)
               {
-                sb.Append("INSERT ");
+                 sb.Append("INSERT");
               }
 
               if ((action & CARD_ACTION.CARD_ACTION_REINSERT) == CARD_ACTION.CARD_ACTION_REINSERT)
               {
-                sb.Append("REINSERT ");
+                 sb.Append("REINSERT");
               }
 
               if ((action & CARD_ACTION.CARD_ACTION_REMOVE) == CARD_ACTION.CARD_ACTION_REMOVE)
               {  
-                sb.Append("REMOVE ");
+                 sb.Append("REMOVE");
               }
 
               if ((action & CARD_ACTION.CARD_ACTION_SWIPE) == CARD_ACTION.CARD_ACTION_SWIPE)
               {  
-                sb.Append("SWIPE ");
+                sb.Append("SWIPE");
               }
 
               if ((action & CARD_ACTION.CARD_ACTION_SWIPE_AGAIN) == CARD_ACTION.CARD_ACTION_SWIPE_AGAIN)
               {  
-                sb.Append("SWIPE_AGAIN ");
+                sb.Append("SWIPE_AGAIN");
               }
 
               if ((action & CARD_ACTION.CARD_ACTION_TAP) == CARD_ACTION.CARD_ACTION_TAP)
               {  
-                sb.Append("TAP ");
+                sb.Append("TAP");
               }
 
               if ((action & CARD_ACTION.CARD_ACTION_TAP_AGAIN) == CARD_ACTION.CARD_ACTION_TAP_AGAIN)
               {  
-                sb.Append("TAP_AGAIN ");
+                sb.Append("TAP_AGAIN");
               }
 
-              Debug.WriteLine(sb.ToString() + "\n");
+              Debug.WriteLine(sb.ToString());
           }
 
           break;
@@ -823,19 +895,46 @@ namespace IPA.DAL.RBADAL
       }
     }
 
-    private void ProcessCardData(IDTTransactionData cardData)
+    private void ProcessEMVCallback(EMV_Callback emvCallback)
     {
-        // Stop Timer
-        MSRTimer?.Stop();
-
-        string text = "";
-
-        if (cardData.Event == EVENT_TRANSACTION_DATA_Types.EVENT_TRANSACTION_PIN_DATA)
+        if (emvCallback != null) 
         {
-            Debug.WriteLine("PIN Data received:\r\nKSN: " + cardData.pin_KSN + "\r\nPINBLOCK: " + cardData.pin_pinblock + "\r\nKey Entry: " + cardData.pin_KeyEntry + "\r\n");
-            return;
+            Debug.WriteLine("ProcessEMVCallback: LCD Display ={0}", (object)Common.getHexStringFromBytes(emvCallback.lcd_messages));
         }
+        if (emvCallback.lcd_displayMode != EMV_LCD_DISPLAY_MODE.EMV_LCD_DISPLAY_MODE_CANCEL)
+        {
+            //IDTechSoftwareDevice.UpdateEMVResponse(emvCallback);
+        }
+        if (emvCallback.callbackType == EMV_CALLBACK_TYPE.EMV_CALLBACK_TYPE_LCD) //LCD Callback Type
+        {
+            if (emvCallback.lcd_displayMode == EMV_LCD_DISPLAY_MODE.EMV_LCD_DISPLAY_MODE_CLEAR_SCREEN)
+            {
+                return;
+            }
+            else if (emvCallback.lcd_displayMode == EMV_LCD_DISPLAY_MODE.EMV_LCD_DISPLAY_MODE_MESSAGE)
+            {
+            }
+            else
+            {
+                //Display message with menu/language or prompt, and return result to emv_callbackResponseLCD
+                //Kernel will not proceed until this step is complete
+            }
 
+        }
+        if (emvCallback.callbackType == EMV_CALLBACK_TYPE.EMV_CALLBACK_TYPE_PINPAD) //PIN Callback Type
+        {
+            //Provide PIN information to emv_callbackResponsePIN
+            //Kernel will not proceed until this step is complete
+        }
+        if (emvCallback.callbackType == EMV_CALLBACK_TYPE.EMV_CALLBACK_MSR) //MSR Callback Type
+        {
+            //Provide MSR Swipe information to emv_callbackResponseMSR
+            //Kernel will not proceed until this step is complete
+        }
+    }
+
+    private void ProcessMSRData(IDTTransactionData cardData, ref string text)
+    {
         if (cardData.Event == EVENT_TRANSACTION_DATA_Types.EVENT_TRANSACTION_DATA_CARD_DATA)
         {
             if (cardData.msr_rawData != null)
@@ -899,7 +998,10 @@ namespace IPA.DAL.RBADAL
         {
             text += "KSN: " + Common.getHexStringFromBytes(cardData.msr_KSN).ToUpper()  + "\r\n";
         }
-
+    }
+    
+    private void ProcessEMVData(IDTTransactionData cardData, ref string text, ref string emvData)
+    {
         if (cardData.emv_clearingRecord != null)
         {
             if (cardData.emv_clearingRecord.Length > 0)
@@ -911,39 +1013,37 @@ namespace IPA.DAL.RBADAL
                 text += "\r\n\r\n";
             }
         }
+
         if (cardData.emv_unencryptedTags != null)
         {
             if (cardData.emv_unencryptedTags.Length > 0)
             {
-                text += "\r\n======================== \r\n";
-
-                text += "\r\nUnencrypted Tags: \r\n";
+                text += "Unencrypted Tags: \r\n";
                 text += Common.getHexStringFromBytes(cardData.emv_unencryptedTags) + "\r\n\r\n";
                 text += TLV_To_Values(cardData.emv_unencryptedTags);
-                text += "\r\n======================== \r\n";
+                emvData = Common.getHexStringFromBytes(cardData.emv_unencryptedTags);
             }
         }
+
         if (cardData.emv_encryptedTags != null)
         {
             if (cardData.emv_encryptedTags.Length > 0)
             {
-                text += "\r\n======================== \r\n";
                 text += "\r\nEncrypted Tags: \r\n";
                 text += Common.getHexStringFromBytes(cardData.emv_encryptedTags) + "\r\n\r\n";
                 text += TLV_To_Values(cardData.emv_encryptedTags);
-                text += "\r\n======================== \r\n";
             }
 
         }
+
         if (cardData.emv_maskedTags != null)
         {
             if (cardData.emv_maskedTags.Length > 0)
             {
-                text += "\r\n======================== \r\n";
                 text += "\r\nMasked Tags: \r\n";
                 text += Common.getHexStringFromBytes(cardData.emv_maskedTags) + "\r\n\r\n";
                 text += TLV_To_Values(cardData.emv_maskedTags);
-                text += "\r\n======================== \r\n";
+                emvData += Common.getHexStringFromBytes(cardData.emv_maskedTags);
             }
         }
 
@@ -1062,7 +1162,6 @@ namespace IPA.DAL.RBADAL
 
               case EMV_RESULT_CODE.EMV_RESULT_CODE_CALL_YOUR_BANK:
               {
-                //SetOutputTextLCD("CALL YOUR BANK");
                 text += ("RESULT: " + "EMV_RESULT_CODE_CALL_YOUR_BANK" + "\r\n");
                 break;
               }
@@ -1201,7 +1300,48 @@ namespace IPA.DAL.RBADAL
         {
           text += ("App Error State: " + errorCode.getEMVAppErrorState(cardData.emv_appErrorState) + "\r\n");
         }
+    }
 
+    private string RetrieveAdditionalTags(string tags)
+    {
+        String text = "";
+        IDTTransactionData cardData = null;
+        RETURN_CODE rt = IDT_Augusta.SharedController.emv_retrieveTransactionResult(Common.getByteArray(tags), ref cardData);
+        if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS && cardData != null)
+        {
+            if (cardData.emv_unencryptedTags != null)
+            {
+                if (cardData.emv_unencryptedTags.Length > 0)
+                {
+                    text = Common.getHexStringFromBytes(cardData.emv_unencryptedTags);
+                }
+
+            }
+            if (cardData.emv_encryptedTags != null)
+            {
+                if (cardData.emv_encryptedTags.Length > 0)
+                {
+                    text += Common.getHexStringFromBytes(cardData.emv_encryptedTags);
+                }
+            }
+            if (cardData.emv_maskedTags != null)
+            {
+                if (cardData.emv_maskedTags.Length > 0)
+                {
+                    text += Common.getHexStringFromBytes(cardData.emv_maskedTags);
+                }
+            }
+        }
+        else
+        {
+            Debug.WriteLine("device: retrieve Results failed Error Code: {0:X}", (ushort) rt);
+        }
+
+        return text;
+    }
+
+    private void ProcessCTLSData(IDTTransactionData cardData, ref string text)
+    {
         if (cardData.ctlsApplication > 0)
         {
             text += "Contactless Application: ";
@@ -1311,21 +1451,73 @@ namespace IPA.DAL.RBADAL
               }
             }
         }
+    }
 
-        Debug.WriteLine(text);
+    private void ProcessCardData(IDTTransactionData cardData)
+    {
+        // Stop Timer
+        MSRTimer?.Stop();
+
+        if (cardData.Event == EVENT_TRANSACTION_DATA_Types.EVENT_TRANSACTION_PIN_DATA)
+        {
+            Debug.WriteLine("PIN Data received:\r\nKSN: " + cardData.pin_KSN + "\r\nPINBLOCK: " + cardData.pin_pinblock + "\r\nKey Entry: " + cardData.pin_KeyEntry + "\r\n");
+            return;
+        }
+
+        string text = "";
+        string emvData = "";
+
+        // MSR Payload
+        ProcessMSRData(cardData, ref text);
+
+        // EMV Payload
+        ProcessEMVData(cardData, ref text, ref emvData);
+
+        // CTLS Payload
+        ProcessCTLSData(cardData, ref text);
 
         // Process Card Data
-        string [] message = { text };
+        Debug.WriteLine("device: PROCESS CARD DATA -> CODE={0} - card data=[{1}]", cardData.emv_resultCode, emvData);
+
+        bool updateView = (cardData.emv_resultCode == EMV_RESULT_CODE.EMV_RESULT_CODE_AUTHENTICATE_TRANSACTION) ? true : false;
+        bool isHIDMode = (IDT_Device.getProtocolType() != DEVICE_PROTOCOL_Types.DEVICE_PROTOCOL_KB);
+        object [] message = { "*** TRANSACTION DATA CAPTURED : EMV ***", emvData, (short) cardData.emv_resultCode, isHIDMode, updateView };
         NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_PROCESS_CARDDATA, Message = message });
 
         byte[] temp = new byte[0];
         ClearCallbackData(ref temp, ref cardData);
+    }
 
-        //if (cardData.emv_resultCode == EMV_RESULT_CODE.EMV_RESULT_CODE_GO_ONLINE && cbAutoComplete.Checked)
-        //{
-        //    tbOutput.AppendText("Auto Complete Executing ");
-        //    btnEMVComplete_Click(null, null);
-        //}
+    private RETURN_CODE EMVAuthenticateTransaction(byte [] additionalTags)
+    {
+        RETURN_CODE rt = IDT_Augusta.SharedController.emv_authenticateTransaction(additionalTags);
+        if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
+        {
+            Debug.WriteLine("device: Authenticate EMV Successful");
+        }
+        else
+        {
+            Debug.WriteLine("device: Authenticate EMV failed Error Code: {0:X}", (ushort) rt);
+        }
+
+        return rt;
+    }
+
+    private RETURN_CODE EMVCompleteTransaction(byte [] additionalTags)
+    {
+        byte[] iad = null;
+        byte[] responseCode = new byte[] { 0x30, 0x30 };
+        RETURN_CODE rt = IDT_Augusta.SharedController.emv_completeTransaction(false, responseCode, iad, null, additionalTags);
+        if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
+        {
+            Debug.WriteLine("device: Complete EMV Command Accepted");
+        }
+        else
+        {
+            Debug.WriteLine("device: Complete EMV failed Error Code: {0:X}", (ushort) rt);
+        }
+
+        return rt;
     }
 
     /********************************************************************************************************/
@@ -1341,7 +1533,7 @@ namespace IPA.DAL.RBADAL
       if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
       {
           result = ((response == 0x30) ? "Masked" : "Unmasked");
-          Debug.WriteLine("Expiration Masking: " + ((response == 0x30) ? "Masked" : "Unmasked"));
+          Debug.WriteLine("Expiration Masking: {0}", (object) ((response == 0x30) ? "Masked" : "Unmasked"));
       }
       else
       {
@@ -1507,7 +1699,13 @@ namespace IPA.DAL.RBADAL
         bool.TryParse(enable_read_terminal_info, out read_terminal_info);
         if(read_terminal_info)
         {
-            GetTerminalInfo();
+            serializer.terminalCfg.config_meta.Type = "device";
+            serializer.terminalCfg.hardware.Serial_num = deviceInformation.SerialNumber;
+            serializer.terminalCfg.config_meta.Terminal_type = deviceInformation.ModelName;
+            Version version = typeof(DeviceCfg).Assembly.GetName().Version;
+            serializer.terminalCfg.config_meta.Version = version.ToString();
+
+            Device.GetTerminalInfo(ref serializer);
         }
  
         // Terminal Information
@@ -1516,7 +1714,11 @@ namespace IPA.DAL.RBADAL
         bool.TryParse(enable_read_terminal_data, out read_terminal_data);
         if(read_terminal_data)
         {
-            GetTerminalData();
+            serializer.terminalCfg.general_configuration.Contact.terminal_ics_type = GetTerminalType() ?? null;
+            object [] message1 = Device.GetTerminalData(ref serializer, ref exponent);
+
+            // Display Terminal Data to User
+            NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_SHOW_TERMINAL_DATA, Message = message1 });
         }
 
         // Encryption Control
@@ -1525,7 +1727,7 @@ namespace IPA.DAL.RBADAL
         bool.TryParse(enable_read_encryption, out read_encryption);
         if(read_encryption)
         {
-            GetEncryptionControl();
+            Device.GetEncryptionControl(ref serializer);
         }
 
         // Device Configuration: contact:capk
@@ -1534,7 +1736,7 @@ namespace IPA.DAL.RBADAL
         bool.TryParse(enable_read_capk_settings, out read_capk_settings);
         if(read_capk_settings)
         {
-            GetCapkList();
+            Device.GetCapKList(ref serializer);
         }
 
         // Device Configuration: contact:aid
@@ -1543,7 +1745,7 @@ namespace IPA.DAL.RBADAL
         bool.TryParse(enable_read_aid_settings, out read_aid_settings);
         if(read_aid_settings)
         {
-            GetAidList();
+            Device.GetAidList(ref serializer);
         }
 
         // MSR Settings
@@ -1552,7 +1754,7 @@ namespace IPA.DAL.RBADAL
         bool.TryParse(enable_read_msr_settings, out read_msr_settings);
         if(read_msr_settings)
         {
-            GetMSRSettings();
+            Device.GetMSRSettings(ref serializer);
         }
 
         // Update configuration file
@@ -1572,246 +1774,6 @@ namespace IPA.DAL.RBADAL
         catch(Exception exp)
         {
             Debug.WriteLine("DeviceCfg::GetCompany(): - exception={0}", (object)exp.Message);
-        }
-    }
-
-    private void GetTerminalInfo()
-    {
-        try
-        {
-            serializer.terminalCfg.config_meta.Type = "device";
-            serializer.terminalCfg.hardware.Serial_num = deviceInformation.SerialNumber;
-            serializer.terminalCfg.config_meta.Terminal_type = deviceInformation.ModelName;
-            Version version = typeof(DeviceCfg).Assembly.GetName().Version;
-            serializer.terminalCfg.config_meta.Version = version.ToString();
-
-            string response = null;
-            RETURN_CODE rt = IDT_Augusta.SharedController.device_getFirmwareVersion(ref response);
-
-            if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt && !string.IsNullOrWhiteSpace(response))
-            {
-                serializer.terminalCfg.general_configuration.Terminal_info.firmware_ver = response;
-            }
-            response = "";
-            rt = IDT_Augusta.SharedController.emv_getEMVKernelVersion(ref response);
-            if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt && !string.IsNullOrWhiteSpace(response))
-            {
-                serializer.terminalCfg.general_configuration.Terminal_info.contact_emv_kernel_ver = response;
-            }
-            response = "";
-            rt = IDT_Augusta.SharedController.emv_getEMVKernelCheckValue(ref response);
-            if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt && !string.IsNullOrWhiteSpace(response))
-            {
-                serializer.terminalCfg.general_configuration.Terminal_info.contact_emv_kernel_checksum = response;
-            }
-            response = "";
-            rt = IDT_Augusta.SharedController.emv_getEMVConfigurationCheckValue(ref response);
-            if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt && !string.IsNullOrWhiteSpace(response))
-            {
-                serializer.terminalCfg.general_configuration.Terminal_info.contact_emv_kernel_configuration_checksum = response;
-            }
-        }
-        catch(Exception exp)
-        {
-            Debug.WriteLine("DeviceCfg::GetTerminalInfo(): - exception={0}", (object)exp.Message);
-        }
-    }
-
-    private byte [] GetTerminalData()
-    {
-        byte [] tlv = null;
-
-        try
-        {
-            serializer.terminalCfg.general_configuration.Contact.terminal_ics_type = GetTerminalType();
-
-            //int id = IDT_Augusta.SharedController.emv_retrieveTerminalID();
-
-            RETURN_CODE rt = IDT_Augusta.SharedController.emv_retrieveTerminalData(ref tlv);
-            
-            if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt && tlv != null)
-            {
-                TerminalData td = new TerminalData(tlv);
-                string text = td.ConvertTLVToValuePairs();
-                serializer.terminalCfg.general_configuration.Contact.terminal_data = td.ConvertTLVToString();
-                serializer.terminalCfg.general_configuration.Contact.tags = td.GetTags();
-                // Information From Terminal Data
-                string language = td.GetTagValue("DF10");
-                language = (language.Length > 1) ? language.Substring(0, 2) : "";
-                string merchantName = td.GetTagValue("9F4E");
-///                merchantName = CardReader.ConvertHexStringToAscii(merchantName);
-                string merchantID = td.GetTagValue("9F16");
-///                merchantID = CardReader.ConvertHexStringToAscii(merchantID);
-                string terminalID = td.GetTagValue("9F1C");
-///                terminalID = CardReader.ConvertHexStringToAscii(terminalID);
-                string exp = td.GetTagValue("5F36");
-                exponent = Int32.Parse(td.GetTagValue("5F36"));
-
-                // Display Terminal Data to User
-                object [] message = { text };
-                NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_SHOW_TERMINAL_DATA, Message = message });
-            }
-        }
-        catch(Exception exp)
-        {
-            Debug.WriteLine("DeviceCfg::GetTerminalData(): - exception={0}", (object)exp.Message);
-        }
-
-        return tlv;
-    }
-
-    private void GetEncryptionControl()
-    {
-        try
-        {
-            bool msr = false;
-            bool icc = false;
-            RETURN_CODE rt = IDT_Augusta.SharedController.config_getEncryptionControl(ref msr, ref icc);
-            
-            if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
-            {
-                serializer.terminalCfg.general_configuration.Encryption.msr_encryption_enabled = msr;
-                serializer.terminalCfg.general_configuration.Encryption.icc_encryption_enabled = icc;
-                byte format = 0;
-                rt = IDT_Augusta.SharedController.icc_getKeyFormatForICCDUKPT(ref format);
-                if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
-                {
-                    string key_format = "None";
-                    switch(format)
-                    {
-                        case 0x00:
-                        {
-                            key_format = "TDES";
-                            break;
-                        }
-                        case 0x01:
-                        {
-                            key_format = "AES";
-                            break;
-                        }
-                    }
-                    serializer.terminalCfg.general_configuration.Encryption.data_encryption_type = key_format;
-                }
-            }
-        }
-        catch(Exception exp)
-        {
-            Debug.WriteLine("DeviceCfg::GetEncryptionControl(): - exception={0}", (object)exp.Message);
-        }
-    }
-
-    private void GetCapkList()
-    {
-        if(deviceInformation.deviceMode == IDTECH_DEVICE_PID.AUGUSTA_HID)
-        {
-            try
-            {
-                if(serializer != null)
-                {
-                    byte [] keys = null;
-                    RETURN_CODE rt = IDT_Augusta.SharedController.emv_retrieveCAPKList(ref keys);
-                
-                    if(rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
-                    {
-                        List<Capk> CAPKList = new List<Capk>();
-
-                        foreach(byte[] capk in keys.Split(6))
-                        {
-                            byte[] key = null;
-
-                            rt = IDT_Augusta.SharedController.emv_retrieveCAPK(capk, ref key);
-
-                            if(rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
-                            {
-                                Capk apk = new Capk(key);
-                                CAPKList.Add(apk);
-                            }
-                        }
-
-                        // Write to Configuration File
-                        if(CAPKList.Count > 0)
-                        {
-                            serializer.terminalCfg.general_configuration.Contact.capk = CAPKList;
-                        }
-                    }
-                }
-            }
-            catch(Exception exp)
-            {
-                Debug.WriteLine("DeviceCfg::GetCapkList(): - exception={0}", (object)exp.Message);
-            }
-        }
-    }
-
-    private void GetAidList()
-    {
-        if(deviceInformation.deviceMode == IDTECH_DEVICE_PID.AUGUSTA_HID)
-        {
-            try
-            {
-                if(serializer != null)
-                {
-                    byte [][] keys = null;
-                    RETURN_CODE rt = IDT_Augusta.SharedController.emv_retrieveAIDList(ref keys);
-                
-                    if(rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
-                    {
-                        List<Aid> AidList = new List<Aid>();
-
-                        foreach(byte[] aidName in keys)
-                        {
-                            byte[] value = null;
-
-                            rt = IDT_Augusta.SharedController.emv_retrieveApplicationData(aidName, ref value);
-
-                            if(rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
-                            {
-                                Aid aid = new Aid(aidName, value);
-                                aid.ConvertTLVToValuePairs();
-                                AidList.Add(aid);
-                            }
-                        }
-
-                        // Write to Configuration File
-                        if(AidList.Count > 0)
-                        {
-                            serializer.terminalCfg.general_configuration.Contact.aid = AidList;
-                        }
-                    }
-                }
-            }
-            catch(Exception exp)
-            {
-                Debug.WriteLine("DeviceCfg::GetAidList(): - exception={0}", (object)exp.Message);
-            }
-        }
-    }
-
-    private void GetMSRSettings()
-    {
-        try
-        {
-            Msr msr = new Msr();
-            List<MSRSettings> msr_settings =  new List<MSRSettings>();; 
-
-            foreach(var setting in msr.msr_settings)
-            {
-                byte value   = 0;
-                //RETURN_CODE rt = IDT_Augusta.SharedController.msr_getSetting((byte)setting.function_value, ref value);
-                RETURN_CODE rt = IDT_Augusta.SharedController.msr_getSetting(Convert.ToByte(setting.function_id, 16), ref value);
-
-                if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
-                {
-                    setting.value = value.ToString("x");
-                    msr_settings.Add(setting);
-                }
-            }
-
-            serializer.terminalCfg.general_configuration.msr_settings = msr_settings;
-        }
-        catch(Exception exp)
-        {
-            Debug.WriteLine("DeviceCfg::GetMSRSettings(): - exception={0}", (object)exp.Message);
         }
     }
 
@@ -1993,201 +1955,6 @@ namespace IPA.DAL.RBADAL
     #endregion
 
     /********************************************************************************************************/
-    // HIDLIBRARY INTERFACE
-    /********************************************************************************************************/
-    #region -- hidlibrary interface --
-  
-    private static byte GetCheckSumValue(byte[] dataBytes)
-    {
-        return dataBytes.Aggregate<byte, byte>(0x0, (current, t) => (byte)(current ^ t));
-    }
-
-    private static byte GetCheckSum(byte[] dataBytes)
-    {
-        byte result = dataBytes.Aggregate<byte, byte>(0x0, (current, t) => (byte)(current + t));
-        return (byte)(result & 0xFF);
-    }
-
-    private EntryModeStatus SetupCommand(byte[] command, out byte[] response)
-    {
-        var status = EntryModeStatus.Success;
-        const int bufferLength = 1000;
-        var deviceDataBuffer = new byte[bufferLength];
-        response = null;
-
-        try
-        {
-          // Initialize return data buffer
-          for (int i = 0; i < bufferLength; i++)
-          {
-            deviceDataBuffer[i] = 0;
-          }
-
-          //TODO: Cannot have init call init, circular calls, recheck logic
-          //if (device == null || !device.IsConnected)
-          //status = Init();
-
-          if (status == EntryModeStatus.Success)
-          {
-              int featureReportLen = device.Capabilities.FeatureReportByteLength;
-              
-              //WriteFeatureData works better if we send the entire feature length array, not just the length of command plus checksum
-              var reportBuffer = new byte[featureReportLen];
-              
-              //Assume featureCommand is not 0 prepended, and contains a checksum.
-              var zeroReportIdCommand = new byte[Math.Max(command.Length + 2, featureReportLen)];
-
-              // Prepend 0x00 to command[...] since HidLibrary expects Features to start with reportID, and we use 0.
-              zeroReportIdCommand[0] = 0x00;
-              Array.Copy(command, 0, zeroReportIdCommand, 1, command.Length);
-
-              // Send COMMAND
-              var result = device.WriteFeatureData(zeroReportIdCommand);
-
-              if (result)
-              {
-                  // Empirical data shows this is a good time to wait.
-                  Thread.Sleep(1200); 
-                  result = ReadFeatureDataLong(out deviceDataBuffer);
-              }
-
-              //as long as we have data in result, we are ok with failed reading later.
-              if (result || deviceDataBuffer.Length > 0)
-              {
-                int dataIndex = 0;
-
-                for (dataIndex = bufferLength - 1; dataIndex > 1; dataIndex--)
-                {
-                    if (deviceDataBuffer[dataIndex] != 0)
-                    {
-                        break;
-                    }
-                }
-
-                response = new byte[dataIndex + 1];
-
-                for (var ind = 0; ind <= dataIndex; ind++)
-                {
-                    response[ind] += deviceDataBuffer[ind];
-                }
-
-                if(dataIndex > 1)
-                {
-                  Debug.WriteLine("reponse: {0}", Encoding.UTF8.GetString(response, 0, response.Length), null);
-                }
-
-                status = EntryModeStatus.Success;
-              }
-              else
-              {
-                status = EntryModeStatus.CardNotRead;
-              }
-          }
-      }
-      catch (Exception ex)
-      {
-          status = EntryModeStatus.Error;
-      }
-
-      return status;
-    }
-
-    public bool ReadFeatureDataLong(out byte[] resBuffer, byte reportId = 0x00)
-    {
-        bool success = false;
-        resBuffer = new byte[1000];
-        
-        if (device != null && device.IsConnected)
-        {
-            bool isFirstNonZeroBlock = false;
-            int responseLength = 0;
-            int reportLength = device.Capabilities.FeatureReportByteLength;
-            byte[] reportBuffer = new byte[reportLength];
-
-            try
-            {
-                // Get response data from HID Device
-                success = true;
-
-                for (int k = 0; k < 100 && success; k++)  // 1 second in total
-                {
-                    for (int indx = 0; indx < reportBuffer.Length; indx++)
-                    {
-                        reportBuffer[indx] = 0;
-                    }
-
-                    success = device.ReadFeatureData(out reportBuffer, reportId);
- 
-                    if (success)
-                    {
-                        for (int i = 0; i < reportLength; i++)
-                        {
-                            if (reportBuffer[i] != 0)
-                            {
-                                isFirstNonZeroBlock = true;
-                                break;
-                            }
-                        }
-                    }
-
-                    // Pack the data after first non zero data block 
-                    if (isFirstNonZeroBlock)
-                    {
-                        Array.Copy(reportBuffer, 1, resBuffer, responseLength, reportLength - 1);
-                        responseLength += reportLength - 1;
-                    }
-
-                    if (responseLength + reportLength > resBuffer.Length)
-                    {
-                        success = false;
-                    }
-
-                    Thread.Sleep(10);
-                }
-            }
-            catch (Exception xcp)
-            {
-                throw xcp;
-            }
-        }
-
-        return success;
-    }
-
-    private EntryModeStatus SetDeviceHidMode()
-    {
-      byte[] result;
-
-      // Create the command to get config values
-      var readConfig = new byte[CommandTokens.SetUSBHIDMode.Length + 1];
-      Array.Copy(CommandTokens.SetUSBHIDMode, readConfig, CommandTokens.SetUSBHIDMode.Length);
-      readConfig[CommandTokens.SetUSBHIDMode.Length] = 0x00;
-      readConfig[readConfig.Length - 1] = GetCheckSumValue(readConfig);
-
-      //execute the command, get the result
-      var status = SetupCommand(readConfig, out result);
-
-      return status;
-    }
-
-    private EntryModeStatus DeviceSoftReset()
-    {
-      byte[] result;
-
-      // Create the command to get config values
-      var readConfig = new byte[CommandTokens.DeviceReset.Length + 1];
-      Array.Copy(CommandTokens.DeviceReset, readConfig, CommandTokens.DeviceReset.Length);
-      readConfig[CommandTokens.DeviceReset.Length] = 0x00;
-      readConfig[readConfig.Length - 1] = GetCheckSumValue(readConfig);
-
-      //execute the command, get the result
-      var status = SetupCommand(readConfig, out result);
-
-      return status;
-    }
-    #endregion
-
-    /********************************************************************************************************/
     // READER ACTIONS
     /********************************************************************************************************/
     #region -- reader actions --
@@ -2212,21 +1979,30 @@ namespace IPA.DAL.RBADAL
       MSRTimer.Elapsed += (sender, e) => RaiseTimerExpired(new Core.Client.Dal.Models.TimerEventArgs { Timer = TimerType.MSR });
       MSRTimer.Start();
 
-      amount = "1.00";
+      // CORE's AMOUNT REQUESTED
+      amount = "10.00";
       
-      //if(useUniversalSDK)
-      if(deviceInformation.deviceMode == IDTECH_DEVICE_PID.AUGUSTA_HID)
+      if(useUniversalSDK)
       {
-          //RETURN_CODE rt = IDT_Augusta.SharedController.msr_startMSRSwipe(60);
+          IDT_Device.emv_allowFallback(false);
+          IDT_Device.emv_autoAuthenticate(false);
+
+          // The DFEE1A tag is a proprietary ID TECH tag that wrappers other tags: the BYTE after the tag is the length (in bytes of additional tags).
+          //additionalTags = Common.getByteArray("DFEE104DFEF5ADFEF5BDFEF5CDFEF5D");
           additionalTags = null;
-          RETURN_CODE rt = IDT_Augusta.SharedController.emv_startTransaction(Convert.ToDouble(amount), 0, exponent, 0,30, additionalTags, false);
+          RETURN_CODE rt = IDT_Augusta.SharedController.emv_startTransaction(Convert.ToDouble(amount), 0, exponent, 0, 30, additionalTags, false);
+
           if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
           {
               Debug.WriteLine("DeviceCfg::GetCardData(): MSR Turned On successfully; Ready to swipe");
           }
           else
           {
-              Debug.WriteLine("DeviceCfg::GetCardData(): start EMV failed Error Code: " + "0x" + String.Format("{0:X}", (ushort)rt));
+              Debug.WriteLine("DeviceCfg::GetCardData(): start EMV failed Error Code: 0x{0:X}", (ushort)rt);
+              rt = IDT_Augusta.SharedController.emv_cancelTransaction();
+
+              // Disable EMV QC Mode
+              SetEmvQCMode(false);
           }
       }
       else
@@ -2262,6 +2038,67 @@ namespace IPA.DAL.RBADAL
       // Allow for GUI Recovery
       string [] message = { "***** TRANSACTION FAILED: TIMEOUT *****" };
       NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_PROCESS_CARDDATA_ERROR, Message = message });
+    }
+
+    public string [] ParseCardData(string data)
+    {
+        byte [] tlv = DALUtils.HexStringToByteArray(data);
+        TerminalData td = new TerminalData(tlv);
+        string [] text = td.ConvertTLVToValuePairsArray();
+
+        // Retrieve CC-PAN
+        //TrackData trackData = Utils.GetTrackData(tlv);
+
+        //if (trackData != null)
+        //{
+        //}
+
+        return text;
+    }
+
+    public void CardReadNextState(object state)
+    {
+        EMV_RESULT_CODE nextstep = (EMV_RESULT_CODE) Convert.ToInt16(state);
+        Debug.WriteLine("DeviceCfg::CardReadNextState(): - TRANSACTION NEXT STEP={0}", nextstep);
+
+        switch (nextstep)
+        {
+            case EMV_RESULT_CODE.EMV_RESULT_CODE_APPROVED:
+            {
+                Debug.WriteLine("DeviceCfg::CardReadNextState(): - TRANSACTION APPROVED");
+                break;
+            }
+
+            case EMV_RESULT_CODE.EMV_RESULT_CODE_GO_ONLINE:
+            {
+                byte[] additionalTags = null;
+                EMVCompleteTransaction(additionalTags);
+                break;
+            }
+
+            case EMV_RESULT_CODE.EMV_RESULT_CODE_AUTHENTICATE_TRANSACTION:
+            {
+                byte[] additionalTags = null;
+                if(EMVAuthenticateTransaction(additionalTags) != RETURN_CODE.RETURN_CODE_DO_SUCCESS)
+                {
+                    RETURN_CODE rt = IDT_Augusta.SharedController.emv_cancelTransaction();
+                    Debug.WriteLine("DeviceCfg::CardReadNextState(): - status={0}", IDTechSDK.errorCode.getErrorString(rt));
+                }
+                break;
+            }
+
+            case EMV_RESULT_CODE.EMV_RESULT_CODE_TRANSACTION_CANCELED:
+            {
+                Debug.WriteLine("DeviceCfg::CardReadNextState(): - TRANSACTION CANCELLED");
+                break;
+            }
+
+            case EMV_RESULT_CODE.EMV_RESULT_CODE_SMARTCARD_FAIL:
+            {
+                Debug.WriteLine("DeviceCfg::CardReadNextState(): - SMARTCARD FAILED");
+                break;
+            }
+        }
     }
 
     #endregion
@@ -2386,31 +2223,110 @@ namespace IPA.DAL.RBADAL
         {
             if(mode.Equals(USK_DEVICE_MODE.USB_HID))
             {
-               if(deviceInformation.deviceMode == IDTECH_DEVICE_PID.AUGUSTA_KYB)
+               if(deviceInformation.deviceMode == IDTECH_DEVICE_PID.AUGUSTA_KYB   ||
+                  deviceInformation.deviceMode == IDTECH_DEVICE_PID.AUGUSTAS_KYB  ||
+                  deviceInformation.deviceMode == IDTECH_DEVICE_PID.MAGSTRIPE_KYB ||
+                  deviceInformation.deviceMode == IDTECH_DEVICE_PID.SECUREKEY_KYB ||
+                  deviceInformation.deviceMode == IDTECH_DEVICE_PID.SECUREMAG_KYB)
                {
-                    EntryModeStatus status = SetDeviceHidMode();
-                    if(status == EntryModeStatus.Success)
+                    // Get QC Mode State
+                    byte [] response = null;
+                    string command = USDK_CONFIGURATION_COMMANDS.GET_QUICK_CHIP_MODE_STATE;
+                    RETURN_CODE rt = IDT_Augusta.SharedController.device_sendDataCommand(command, true, ref response);
+
+                    bool disableQC = true;
+                    byte result = response[0];
+                    if(result == 0x06 && response.Count() > 16)
                     {
-                        DeviceSoftReset();
+                        if(response[17] == 0x01)
+                        {
+                            // QC-On
+                            disableQC = true;
+                        }
+                        else if(response[17] == 0x00)
+                        {
+                            // QC-Off
+                            disableQC = false;
+                        }
+                    }
+                    // Disable EMV QC
+                    if(disableQC)
+                    {
+                        command  = USDK_CONFIGURATION_COMMANDS.SET_KYB_QC_MODE_DISABLED;
+                        //command = USDK_CONFIGURATION_COMMANDS.SET_QUICK_CHIP_MODE_DISABLED;
+                        rt = IDT_Augusta.SharedController.device_sendDataCommand_ext(command, false, ref response, 60, false);
+                        result = response[0];
+                        if(result == 0x06)
+                        {
+                            Thread.Sleep(1000);
+                        }
+                        if(attached)
+                        { 
+                            IDT_Augusta.SharedController.device_sendDataCommand_ext(command, false, ref response, 60 , false);
+                            result = response[0];
+                            if(result == 0x06)
+                            {
+                                Thread.Sleep(1000);
+                            }
+                            // Well, we tried !
+                            if(attached)
+                            { 
+                                // Set Device to HID MODE
+                                if(!Device.SetUSBHIDMode())
+                                {
+                                    DeviceRemovedHandler();
+                                }
+                                //string [] message = { "Enable" };
+                                //NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_ENABLE_MODE_BUTTON, Message = message } );
+                            }
+                        }
+
+                        // Disable QuickCHIP - device should reboot
+                        //Device.SetQuickChipMode(false);
+                        //Device.Reset();
                     }
                }
+                else if(deviceInformation.deviceMode == IDTECH_DEVICE_PID.VP3000_KYB)
+                {
+                    //Device.VP3000PingReport();
+                    Device.SetVP3000DeviceHidMode();
+                }
             }
             else if(mode.Equals(USK_DEVICE_MODE.USB_KYB))
             {
-               if(deviceInformation.deviceMode == IDTECH_DEVICE_PID.AUGUSTA_HID)
+               if(deviceInformation.deviceMode == IDTECH_DEVICE_PID.AUGUSTA_HID  ||
+                  deviceInformation.deviceMode == IDTECH_DEVICE_PID.AUGUSTAS_HID)
                {
                     // TURN ON QUICK CHIP MODE
-                    string command = USDK_CONFIGURATION_COMMANDS.ENABLE_QUICK_CHIP_MODE;
-                    DeviceCommand(command, true);
-                    // Set Device to KB MODE
-                    RETURN_CODE rt = IDT_Augusta.SharedController.msr_switchUSBInterfaceMode(true);
-                    Debug.WriteLine("DeviceCfg::SetDeviceMode(): - status={0}", rt);
+                    byte [] response = null;
+                    string command = USDK_CONFIGURATION_COMMANDS.SET_QUICK_CHIP_MODE_ENABLED;
+                    RETURN_CODE rt = IDT_Augusta.SharedController.device_sendDataCommand(command, true, ref response);
+                    Thread.Sleep(1000);
+                    if(attached)
+                    { 
+                        // Set Device to HID MODE
+                        rt = IDT_Augusta.SharedController.msr_switchUSBInterfaceMode(true);
+                        Debug.WriteLine("DeviceCfg::SetDeviceMode(): - status={0}", IDTechSDK.errorCode.getErrorString(rt));
 
-                    // code won't be reached: above function reboot device
-                    //if(rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
-                    //{
-                    //    IDT_Augusta.SharedController.device_rebootDevice();
-                    //}
+                        // Restart device discovery
+                        DeviceRemovedHandler();
+                    }
+               }
+               else if(deviceInformation.deviceMode == IDTECH_DEVICE_PID.VP3000_HID)
+               {
+                  RETURN_CODE rt = IDT_VP3300.SharedController.device_setPollMode(3);
+                  if(rt != RETURN_CODE.RETURN_CODE_DO_SUCCESS)
+                  {
+                    Debug.WriteLine("DeviceCfg::SetDeviceMode(): VP3000 - error={0}", IDTechSDK.errorCode.getErrorString(rt));
+                  }
+               }
+               else
+               {
+                    // Set Device to Keyboard MODE
+                    if(!Device.SetUSBKeyboardMode())
+                    {
+                        DeviceRemovedHandler();
+                    }
                }
             }
         }
@@ -2418,6 +2334,101 @@ namespace IPA.DAL.RBADAL
         {
            Debug.WriteLine("DeviceCfg::SetDeviceMode(): - exception={0}", (object)exp.Message);
         }
+    }
+
+    private bool GetEMVQCMode()
+    {
+        bool isEMVQCEnabled = false;
+        byte [] response = null;
+        string command = USDK_CONFIGURATION_COMMANDS.GET_QUICK_CHIP_MODE_STATE;
+        RETURN_CODE rt = IDT_Augusta.SharedController.device_sendDataCommand(command, true, ref response);
+        byte result = (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS) ? response[0] : (byte) 0x00;
+
+        if(result == 0x06)
+        {
+            if(response.Count() == 6)
+            {
+                if(response[5] == 0x31)
+                {
+                    isEMVQCEnabled = true;
+                }
+                else if(response[5] == 0x30)
+                {
+                    isEMVQCEnabled = false;
+                }
+            }
+        }
+
+        return isEMVQCEnabled;
+    }
+
+    public bool SetEmvQCMode(bool mode)
+    {
+        if(deviceProtocol == DEVICE_PROTOCOL_Types.DEVICE_PROTOCOL_KB)
+        {
+            return false;
+        }
+
+        bool result = false;
+
+        try
+        {
+            bool isEMVQCEnabled = GetEMVQCMode();
+            byte [] response = null;
+            if(mode)
+            {
+                // Enable QC Mode
+                if(!isEMVQCEnabled)
+                {
+                    string command = USDK_CONFIGURATION_COMMANDS.SET_QUICK_CHIP_MODE_ENABLED;
+                    RETURN_CODE rt = IDT_Augusta.SharedController.device_sendDataCommand(command, true, ref response);
+                    result = (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS) ? true : false;
+                }
+                else
+                {
+                    Debug.WriteLine("DeviceCfg::SetEmvQCMode(): - ALREADY ENABLED.");
+                }
+            }
+            else
+            {
+                // Disable QC Mode
+                if(isEMVQCEnabled)
+                {
+                    string command = USDK_CONFIGURATION_COMMANDS.SET_QUICK_CHIP_MODE_DISABLED;
+                    RETURN_CODE rt = IDT_Augusta.SharedController.device_sendDataCommand(command, true, ref response);
+                    result = (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS) ? true : false;
+                    // Disable ICC
+                    //RETURN_CODE rt = IDT_Augusta.SharedController.icc_disable();
+                    // Remove EMV settings
+                    //rt = IDT_Augusta.SharedController.emv_removeTerminalData();
+                    // Remove All AID
+                    //rt = IDT_Augusta.SharedController.emv_removeAllApplicationData();
+                    // Remove All CAPK
+                    //rt = IDT_Augusta.SharedController.emv_removeAllCAPK();
+                    // Set Device to HID MODE
+                    //rt = IDT_Augusta.SharedController.msr_switchUSBInterfaceMode(true);
+                    //Debug.WriteLine("DeviceCfg::SetEmvQCMode() - status={0}", rt);
+
+                    //string [] message = { "Enable" };
+                    //NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_SET_EMV_MODE_BUTTON, Message = message });
+
+                    // Restart device discovery
+                    //DeviceRemovedHandler();
+
+                    result = true;
+                }
+                else
+                {
+                    Debug.WriteLine("DeviceCfg::SetEmvQCMode(): - ALREADY DISABLED.");
+                }
+            }
+        }
+        catch(Exception exp)
+        {
+           Debug.WriteLine("DeviceCfg::SetEmvQCMode(): - exception={0}", (object)exp.Message);
+        }
+
+        return result;
     }
 
     private string GetTerminalType()
@@ -2444,6 +2455,10 @@ namespace IPA.DAL.RBADAL
                     break;
                 }
             }
+        }
+        else
+        {
+            response = "UNDEFINED";
         }
 
         return response;
@@ -2486,8 +2501,18 @@ namespace IPA.DAL.RBADAL
 
         if(command.Length > 0)
         {
-            response = DeviceCommand(command, false);
-            Debug.WriteLine("device::SetTerminalMajorConfiguration() reply=[{0}]", (object) response);
+            //response = DeviceCommand(command, false);
+            //Debug.WriteLine("device::SetTerminalMajorConfiguration() reply=[{0}]", (object) response);
+            int configuration = Convert.ToInt32(command.Substring(0, 1));
+            RETURN_CODE rt = IDT_Augusta.SharedController.emv_setTerminalMajorConfiguration(configuration);
+            if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
+            {
+                Debug.WriteLine("DeviceCfg::SetTerminalMajorConfiguration(): success.");
+            }
+            else
+            {
+                Debug.WriteLine("DeviceCfg::SetTerminalMajorConfiguration(): failed Error Code: 0x{0:X}", (ushort)rt);
+            }
         }
 
         return response;
@@ -2530,7 +2555,7 @@ namespace IPA.DAL.RBADAL
             }
             else 
             {
-                Debug.WriteLine("device: SetTerminalData() failed error=0x{0}: {1}", String.Format("{0:X}", (ushort)rt), IDTechSDK.errorCode.getErrorString(rt) + "nrnn");
+                Debug.WriteLine("device: SetTerminalData() failed error=0x{0:X}: {1}", (ushort)rt, IDTechSDK.errorCode.getErrorString(rt));
             }
         }
     }
@@ -2571,7 +2596,7 @@ namespace IPA.DAL.RBADAL
          }
         else
         {
-
+            //TODO
         }
 
         return message[0];
@@ -2598,7 +2623,7 @@ namespace IPA.DAL.RBADAL
         }
         else if(data.StartsWith("9F39"))
         {
-            message = "*** TRANSACTION DATA PROCESSED : MSR ***";
+            message = "*** TRANSACTION DATA CAPTURED : MSR ***";
         }
 
         return message;
@@ -2621,7 +2646,9 @@ namespace IPA.DAL.RBADAL
     public const string USB_HID = "USB-HID";
     public const string USB_KYB = "USB-KB";
     public const string UNKNOWN = "UNKNOWN";
- }
+    public const string OLDIDTECHHID = "OLDIDTECHHID";
+    public const string OLDIDTECHKYB = "OLDIDTECHKB";
+    }
 
  internal static class TerminalMajorConfiguration
  {
@@ -2633,11 +2660,14 @@ namespace IPA.DAL.RBADAL
 
  internal static class USDK_CONFIGURATION_COMMANDS
  {
-    internal const string GET_MAJOR_TERMINAL_CFG = "72 52 01 28";
-    internal const string SET_TERMINAL_MAJOR_2C  = "72 53 01 28 01 32";
-    internal const string SET_TERMINAL_MAJOR_5C  = "72 53 01 28 01 35";
-    internal const string GET_EMV_TERMINAL_DATA  = "72 46 02 01";
-    internal const string ENABLE_QUICK_CHIP_MODE = "72 53 01 29 01 31";
+    internal const string GET_MAJOR_TERMINAL_CFG       = "72 52 01 28";
+    internal const string SET_TERMINAL_MAJOR_2C        = "72 53 01 28 01 32";
+    internal const string SET_TERMINAL_MAJOR_5C        = "72 53 01 28 01 35";
+    internal const string GET_EMV_TERMINAL_DATA        = "72 46 02 01";
+    internal const string GET_QUICK_CHIP_MODE_STATE    = "72 52 01 29";
+    internal const string SET_QUICK_CHIP_MODE_DISABLED = "72 53 01 29 01 30";
+    internal const string SET_KYB_QC_MODE_DISABLED     = "02 06 00 72 53 01 29 01 30 38 20 03";
+    internal const string SET_QUICK_CHIP_MODE_ENABLED  = "72 53 01 29 01 31";
  }
 
  #endregion

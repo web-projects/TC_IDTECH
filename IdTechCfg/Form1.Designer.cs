@@ -44,6 +44,10 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.listView1 = new System.Windows.Forms.ListView();
+            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.btnShowTags = new System.Windows.Forms.Button();
             this.btnMode = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.panel2 = new System.Windows.Forms.Panel();
@@ -145,14 +149,14 @@
             this.label5.AutoSize = true;
             this.label5.Location = new System.Drawing.Point(26, 191);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(29, 13);
+            this.label5.Size = new System.Drawing.Size(61, 13);
             this.label5.TabIndex = 5;
-            this.label5.Text = "Port:";
+            this.label5.Text = "Port/Mode:";
             // 
             // lblSerialNumber
             // 
             this.lblSerialNumber.AutoSize = true;
-            this.lblSerialNumber.Location = new System.Drawing.Point(163, 35);
+            this.lblSerialNumber.Location = new System.Drawing.Point(163, 32);
             this.lblSerialNumber.Name = "lblSerialNumber";
             this.lblSerialNumber.Size = new System.Drawing.Size(13, 13);
             this.lblSerialNumber.TabIndex = 6;
@@ -161,7 +165,7 @@
             // lblFirmwareVersion
             // 
             this.lblFirmwareVersion.AutoSize = true;
-            this.lblFirmwareVersion.Location = new System.Drawing.Point(163, 74);
+            this.lblFirmwareVersion.Location = new System.Drawing.Point(163, 69);
             this.lblFirmwareVersion.Name = "lblFirmwareVersion";
             this.lblFirmwareVersion.Size = new System.Drawing.Size(13, 13);
             this.lblFirmwareVersion.TabIndex = 7;
@@ -170,7 +174,7 @@
             // lblModelName
             // 
             this.lblModelName.AutoSize = true;
-            this.lblModelName.Location = new System.Drawing.Point(163, 113);
+            this.lblModelName.Location = new System.Drawing.Point(163, 109);
             this.lblModelName.Name = "lblModelName";
             this.lblModelName.Size = new System.Drawing.Size(13, 13);
             this.lblModelName.TabIndex = 8;
@@ -188,7 +192,7 @@
             // lblPort
             // 
             this.lblPort.AutoSize = true;
-            this.lblPort.Location = new System.Drawing.Point(163, 191);
+            this.lblPort.Location = new System.Drawing.Point(163, 190);
             this.lblPort.Name = "lblPort";
             this.lblPort.Size = new System.Drawing.Size(13, 13);
             this.lblPort.TabIndex = 10;
@@ -200,9 +204,9 @@
             this.btnCardRead.Name = "btnCardRead";
             this.btnCardRead.Size = new System.Drawing.Size(75, 23);
             this.btnCardRead.TabIndex = 11;
-            this.btnCardRead.Text = "MSR";
+            this.btnCardRead.Text = "READ";
             this.btnCardRead.UseVisualStyleBackColor = true;
-            this.btnCardRead.Click += new System.EventHandler(this.CardRead_Click);
+            this.btnCardRead.Click += new System.EventHandler(this.OnCardReadClick);
             // 
             // txtCardData
             // 
@@ -238,9 +242,12 @@
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(700, 544);
             this.tabControl1.TabIndex = 14;
+            this.tabControl1.SelectedIndexChanged += new System.EventHandler(this.OnSelectedIndexChanged);
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.listView1);
+            this.tabPage1.Controls.Add(this.btnShowTags);
             this.tabPage1.Controls.Add(this.btnMode);
             this.tabPage1.Controls.Add(this.lblPort);
             this.tabPage1.Controls.Add(this.btnCardRead);
@@ -262,6 +269,39 @@
             this.tabPage1.Text = "Application";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // listView1
+            // 
+            this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1,
+            this.columnHeader2});
+            this.listView1.GridLines = true;
+            this.listView1.Location = new System.Drawing.Point(8, 234);
+            this.listView1.Name = "listView1";
+            this.listView1.Size = new System.Drawing.Size(674, 231);
+            this.listView1.TabIndex = 16;
+            this.listView1.UseCompatibleStateImageBehavior = false;
+            this.listView1.View = System.Windows.Forms.View.Details;
+            this.listView1.Visible = false;
+            // 
+            // columnHeader1
+            // 
+            this.columnHeader1.Text = "TAG";
+            // 
+            // columnHeader2
+            // 
+            this.columnHeader2.Text = "VALUE";
+            // 
+            // btnShowTags
+            // 
+            this.btnShowTags.Location = new System.Drawing.Point(14, 483);
+            this.btnShowTags.Name = "btnShowTags";
+            this.btnShowTags.Size = new System.Drawing.Size(75, 23);
+            this.btnShowTags.TabIndex = 15;
+            this.btnShowTags.Text = "TAGS";
+            this.btnShowTags.UseVisualStyleBackColor = true;
+            this.btnShowTags.Visible = false;
+            this.btnShowTags.Click += new System.EventHandler(this.OnShowTagsClick);
+            // 
             // btnMode
             // 
             this.btnMode.Location = new System.Drawing.Point(607, 483);
@@ -270,7 +310,7 @@
             this.btnMode.TabIndex = 14;
             this.btnMode.Text = "MODE";
             this.btnMode.UseVisualStyleBackColor = true;
-            this.btnMode.Click += new System.EventHandler(this.btnMode_Click);
+            this.btnMode.Click += new System.EventHandler(this.OnModeClick);
             // 
             // tabPage2
             // 
@@ -400,7 +440,7 @@
             this.btnReadConfig.TabIndex = 9;
             this.btnReadConfig.Text = "READ";
             this.btnReadConfig.UseVisualStyleBackColor = true;
-            this.btnReadConfig.Click += new System.EventHandler(this.btnReadConfig_Click);
+            this.btnReadConfig.Click += new System.EventHandler(this.OnReadConfigClick);
             // 
             // tabPage3
             // 
@@ -439,7 +479,7 @@
             this.btnConfigure.TabIndex = 1;
             this.btnConfigure.Text = "Configure";
             this.btnConfigure.UseVisualStyleBackColor = true;
-            this.btnConfigure.Click += new System.EventHandler(this.btnConfigure_Click);
+            this.btnConfigure.Click += new System.EventHandler(this.OnConfigureClick);
             // 
             // panel3
             // 
@@ -603,11 +643,11 @@
             this.btnExecute.Location = new System.Drawing.Point(309, 411);
             this.btnExecute.Name = "btnExecute";
             this.btnExecute.Size = new System.Drawing.Size(75, 23);
-            this.btnExecute.TabIndex = 1;
+            this.btnExecute.TabIndex = 2;
             this.btnExecute.Text = "Execute";
             this.btnExecute.UseVisualStyleBackColor = true;
             this.btnExecute.Visible = false;
-            this.btnExecute.Click += new System.EventHandler(this.ExecuteCommand_Click);
+            this.btnExecute.Click += new System.EventHandler(this.OnExecuteCommandClick);
             // 
             // panel4
             // 
@@ -626,7 +666,7 @@
             this.txtCommandResult.Name = "txtCommandResult";
             this.txtCommandResult.ReadOnly = true;
             this.txtCommandResult.Size = new System.Drawing.Size(507, 180);
-            this.txtCommandResult.TabIndex = 2;
+            this.txtCommandResult.TabIndex = 3;
             // 
             // txtCommand
             // 
@@ -701,7 +741,7 @@
             this.btnCloseJson.TabIndex = 0;
             this.btnCloseJson.Text = "CLOSE";
             this.btnCloseJson.UseVisualStyleBackColor = true;
-            this.btnCloseJson.Click += new System.EventHandler(this.btnCloseJson_Click);
+            this.btnCloseJson.Click += new System.EventHandler(this.OnCloseJsonClick);
             // 
             // txtJson
             // 
@@ -730,6 +770,7 @@
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.tabControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Application";
             this.Text = "Application";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
@@ -819,6 +860,10 @@
         private System.Windows.Forms.Button btnCloseJson;
         private System.Windows.Forms.TextBox txtJson;
         private System.Windows.Forms.TabPage tabPage6;
+        private System.Windows.Forms.Button btnShowTags;
+        private System.Windows.Forms.ListView listView1;
+        private System.Windows.Forms.ColumnHeader columnHeader1;
+        private System.Windows.Forms.ColumnHeader columnHeader2;
     }
 }
 

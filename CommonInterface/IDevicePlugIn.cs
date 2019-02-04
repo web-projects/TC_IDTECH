@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using IPA.CommonInterface.Helpers;
 
 namespace IPA.CommonInterface
 {
@@ -19,8 +20,11 @@ namespace IPA.CommonInterface
     string [] GetConfig();
     // NOTIFICATION
     void SetFormClosing(bool state);
-    // MSR READER
+    // DATA READER
     void GetCardData();
+    void CardReadNextState(object state);
+    // Parse Card Data
+    string [] ParseCardData(string data);
     // Settings
     void GetDeviceConfiguration();
     // Configuration

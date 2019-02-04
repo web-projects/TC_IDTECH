@@ -25,6 +25,12 @@ This an application to test IDTech Augusta Devices.
 
 ### HISTORY ###
 
-* 20181130 - initial repository.
-* 20181203 - modeled after current IPA.
-* 20181204 - added topmost modallity to main form.
+* 20181130 - Initial repository.
+* 20181203 - Modeled after current IPA.
+* 20181204 - Added topmost modallity to main form.
+* 20181231 - Added VP3000 basic support.
+* 20180108 - Added card information on transaction screen.
+* 20180110 - Completed EMV transaction flow for HID and Keyboard modes.
+* 20180111 - Added Quick Chip On/Off capability.
+             Cleaned up extra tag processing and rendering.
+* 20190122 - Added file logging interface.

@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using IPA.Core.Shared.Helpers;
 using IPA.Core.Shared.Helpers.StatusCode;
+using IPA.CommonInterface;
 
 namespace IPA.DAL.RBADAL.Services
 {
@@ -28,6 +29,8 @@ namespace IPA.DAL.RBADAL.Services
         public EventWaitHandle waitForReply = new EventWaitHandle(false, EventResetMode.AutoReset);
 
         public event EventHandler<NotificationEventArgs> OnNotification;
+
+        private static DeviceInfo deviceInfo;
 
         #endregion
 
@@ -65,6 +68,8 @@ namespace IPA.DAL.RBADAL.Services
 
         void IDevice.Init(string[] accepted, string[] available, int baudRate, int dataBits)
         {
+            //Create Device info object
+            deviceInfo = new DeviceInfo();
         }
 
         public virtual void Configure(object[] settings)
@@ -73,7 +78,8 @@ namespace IPA.DAL.RBADAL.Services
 
         DeviceStatus IDevice.Connect()
         {
-            return DeviceStatus.Unsupported;
+            //return DeviceStatus.Unsupported;
+            return DeviceStatus.Connected;
         }
 
         bool IDevice.Reset()
@@ -109,12 +115,7 @@ namespace IPA.DAL.RBADAL.Services
         void IDevice.Process(DeviceProcess process)
         {
         }
-        /*
-                Signature IDevice.Signature()
-                {
-                    throw new NotImplementedException();
-                }
-        */
+
         bool IDevice.UpdateDevice(DeviceUpdateType updateType)
         {
             return false;
@@ -145,7 +146,6 @@ namespace IPA.DAL.RBADAL.Services
         #endregion
 
         #region -- device helper methods --
-
  
         public virtual string ParseFirmwareVersion(string firmwareInfo)
         {
@@ -178,9 +178,7 @@ namespace IPA.DAL.RBADAL.Services
         {
             return unknown;
         }
-
- 
-    
+     
         public IDTSetStatus SetConfig(string configCommands, string resetConfigCommands)
         {
             if (configCommands == "PID")
@@ -224,6 +222,67 @@ namespace IPA.DAL.RBADAL.Services
         }
 
         #endregion
+
+        #region -- keyboard mode overrides --
+        public bool SetQuickChipMode(bool mode)
+        {
+            return false;
+        }
+        public bool SetUSBHIDMode()
+        {
+            return false;
+        }
+        public bool SetUSBKeyboardMode()
+        {
+            return false;
+        }
+        public void SetVP3000DeviceHidMode()
+        {
+        }
+        public void VP3000PingReport()
+        {
+        }
+        #endregion
+
+        /********************************************************************************************************/
+        // DEVICE CONFIGURATION
+        /********************************************************************************************************/
+        #region -- device configuration --
+
+        public virtual void GetTerminalInfo(ref ConfigSerializer serializer)
+        {
+        }
+
+        public virtual string [] GetTerminalData(ref ConfigSerializer serializer, ref int exponent)
+        {
+            return null;
+        }
+        public virtual void ValidateTerminalData(ref ConfigSerializer serializer)
+        {
+        }
+        public virtual void GetAidList(ref ConfigSerializer serializer)
+        {
+        }
+        public virtual void ValidateAidList(ref ConfigSerializer serializer)
+        {
+        }
+        public virtual void GetCapKList(ref ConfigSerializer serializer)
+        {
+        }
+        public virtual void ValidateCapKList(ref ConfigSerializer serializer)
+        {
+        }
+        public void GetMSRSettings(ref ConfigSerializer serializer)
+        {
+        }
+        public void GetEncryptionControl(ref ConfigSerializer serializer)
+        {
+        }
+        public virtual void FactoryReset()
+        {
+        }
+        #endregion
+
     }
 }
 

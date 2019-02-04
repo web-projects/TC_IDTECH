@@ -47,14 +47,16 @@ namespace IPA.DAL.RBADAL.Services.Devices.IDTech.Models
 
     }
 
-    internal class Track1
+    //internal class Track1
+    public  class Track1
     {
         public string PAN { get; set; }
         public string Name { get; set; }
         public string ExpDate { get; set; }
     }
 
-    internal class Track3
+    //internal class Track3
+    public class Track3
     {
         string Address { get; set; }
         string ZIP { get; set; }

@@ -7,6 +7,7 @@ using System.Management;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Threading.Tasks;
+using IPA.CommonInterface;
 ///using Configuration = IPA.Core.Client.DataAccess.Helper.Config;
 
 namespace IPA.DAL.RBADAL.Services
@@ -49,58 +50,70 @@ namespace IPA.DAL.RBADAL.Services
                     {
                         var deviceID = devices[0].DeviceID;
                         string [] worker = deviceID.Split('&');
-                        string pid = "";
 
+                            int pidId = 0;
                         // should contain PID_XXXX...
                         if(System.Text.RegularExpressions.Regex.IsMatch(worker[1], "PID_"))
                         {
                           string [] worker2 = System.Text.RegularExpressions.Regex.Split(worker[1], @"PID_");
-                          pid = worker2[1].Substring(0, 4);
+                          string pid = worker2[1].Substring(0, 4);
 
                           // See if device matches
-                          int pidId = Int32.Parse(pid);
+                          pidId = Int32.Parse(pid);
 
                           switch(pidId)
                           {
+                            case (int) IDTECH_DEVICE_PID.MAGSTRIPE_HID:
+                            case (int) IDTECH_DEVICE_PID.MAGSTRIPE_KYB:
+                            case (int) IDTECH_DEVICE_PID.SECUREKEY_HID:
+                            case (int) IDTECH_DEVICE_PID.SECUREKEY_KYB:
+                            case (int) IDTECH_DEVICE_PID.VP3000_HID:
+                            case (int) IDTECH_DEVICE_PID.VP3000_KYB:
                             case (int) IDTECH_DEVICE_PID.AUGUSTA_KYB:
-                            {
-                              mode = IDTECH_DEVICE_PID.AUGUSTA_KYB;
-                              break;
-                            }
-
+                            case (int) IDTECH_DEVICE_PID.AUGUSTAS_KYB:
                             case (int) IDTECH_DEVICE_PID.AUGUSTA_HID:
-                            {
-                              mode = IDTECH_DEVICE_PID.AUGUSTA_HID;
-                              break;
-                            }
-
                             case (int) IDTECH_DEVICE_PID.AUGUSTAS_HID:
+                            case (int) IDTECH_DEVICE_PID.VP5300_HID:
+                            case (int) IDTECH_DEVICE_PID.VP5300_KYB:
                             {
-                              mode = IDTECH_DEVICE_PID.AUGUSTA_HID;
+                              mode = (IDTECH_DEVICE_PID)pidId;
                               break;
                             }
 
                             default:
                             {
-                                 mode = IDTECH_DEVICE_PID.UNKNOWN;
-                                break;
+                              mode = IDTECH_DEVICE_PID.UNKNOWN;
+                              break;
                             }
                           }
                         }
 
                         deviceMode = mode;
-                        if(mode ==  IDTECH_DEVICE_PID.AUGUSTA_HID || mode == IDTECH_DEVICE_PID.AUGUSTA_KYB || mode == IDTECH_DEVICE_PID.AUGUSTAS_HID)
+
+                        if (mode == IDTECH_DEVICE_PID.AUGUSTA_HID  || mode == IDTECH_DEVICE_PID.AUGUSTA_KYB  ||
+                            mode == IDTECH_DEVICE_PID.AUGUSTAS_HID || mode == IDTECH_DEVICE_PID.AUGUSTAS_KYB)
                         {
                             deviceInterface = new Device_Augusta(deviceMode);
                         }
-                        else if (mode == IDTECH_DEVICE_PID.SECUREKEY_HID)
+                        else if (mode == IDTECH_DEVICE_PID.VP3000_HID || mode == IDTECH_DEVICE_PID.VP3000_KYB)
+                        {
+                            deviceInterface = new Device_VP3000(deviceMode);
+                        }
+                        else if (mode == IDTECH_DEVICE_PID.VP5300_HID || mode == IDTECH_DEVICE_PID.VP5300_KYB)
+                        {
+                            deviceInterface = new Device_VP5300(deviceMode);
+                        }
+                        else if (mode == IDTECH_DEVICE_PID.SECUREKEY_HID ||
+                                 mode == IDTECH_DEVICE_PID.SECUREKEY_KYB ||
+                                 mode == IDTECH_DEVICE_PID.MAGSTRIPE_KYB ||
+                                 mode == IDTECH_DEVICE_PID.MAGSTRIPE_HID)
                         {
                             deviceInterface = new Device_IDTech(deviceMode);
                         }
                         else
                         {
                             Unknown_Device ukd = new Unknown_Device(mode);
-                            ukd.SetConfig("PID", pid);
+                            ukd.SetConfig("PID", pidId.ToString());
                             deviceInterface = ukd;
                         }
                         deviceInterface.OnNotification += DeviceOnNotification;
@@ -127,7 +140,6 @@ namespace IPA.DAL.RBADAL.Services
                 throw new Exception(DeviceStatus.NoDevice.ToString());
             }
             deviceInterface?.Init(Device.AcceptedPorts, available, Device.BaudRate, Device.DataBits);            
-            
         }
         
         public void Configure(object[] settings)
@@ -200,6 +212,21 @@ namespace IPA.DAL.RBADAL.Services
             return deviceInterface.Reset();
         }
 
+        public bool SetQuickChipMode(bool mode)
+        {
+            return deviceInterface.SetQuickChipMode(mode);
+        }
+
+        public bool SetUSBHIDMode()
+        {
+            return deviceInterface.SetUSBHIDMode();
+        }
+
+        public bool SetUSBKeyboardMode()
+        {
+            return deviceInterface.SetUSBKeyboardMode();
+        }
+
         public bool UpdateDevice(DeviceUpdateType updateType)
         {
             return deviceInterface.UpdateDevice(updateType);
@@ -247,6 +274,65 @@ if (deviceID.ToLower().Contains("usb\\") && ((deviceID.Contains($"VID_{IDTECH}")
         {
             return deviceInterface.GetDeviceInfo();
         }
+
+         #region -- keyboard mode overrides --
+        public void SetVP3000DeviceHidMode()
+        {
+            deviceInterface.SetVP3000DeviceHidMode();
+        }
+        public void VP3000PingReport()
+        {
+            deviceInterface.VP3000PingReport();
+        }
+        #endregion
+
+        /********************************************************************************************************/
+        // DEVICE CONFIGURATION
+        /********************************************************************************************************/
+        #region -- device configuration --
+
+        public void GetTerminalInfo(ref ConfigSerializer serializer)
+        {
+        }
+
+        public string [] GetTerminalData(ref ConfigSerializer serializer, ref int exponent)
+        {
+            return deviceInterface.GetTerminalData(ref serializer, ref exponent);
+        }
+        public void ValidateTerminalData(ref ConfigSerializer serializer)
+        {
+            deviceInterface.ValidateTerminalData(ref serializer);
+        }
+        public void GetAidList(ref ConfigSerializer serializer)
+        {
+            deviceInterface.GetAidList(ref serializer);
+        }
+        public void ValidateAidList(ref ConfigSerializer serializer)
+        {
+            deviceInterface.ValidateAidList(ref serializer);
+        }
+        public void GetCapKList(ref ConfigSerializer serializer)
+        {
+            deviceInterface.GetCapKList(ref serializer);
+        }
+        public void ValidateCapKList(ref ConfigSerializer serializer)
+        {
+            deviceInterface.ValidateCapKList(ref serializer);
+        }
+        public void GetMSRSettings(ref ConfigSerializer serializer)
+        {
+            deviceInterface.GetMSRSettings(ref serializer);
+        }
+        public void GetEncryptionControl(ref ConfigSerializer serializer)
+        {
+            deviceInterface.GetEncryptionControl(ref serializer);
+        }
+        public void FactoryReset()
+        {
+            deviceInterface.FactoryReset();
+        }
+        #endregion
+
         public class USBDeviceInfo
         {
             public USBDeviceInfo(string deviceID, string pnpDeviceID, string description, DeviceManufacturer vendor)

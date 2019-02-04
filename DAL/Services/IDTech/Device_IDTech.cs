@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using IPA.Core.Shared.Helpers;
 using IPA.Core.Shared.Helpers.StatusCode;
+using IPA.CommonInterface;
 
 namespace IPA.DAL.RBADAL.Services
 {
@@ -111,10 +112,6 @@ namespace IPA.DAL.RBADAL.Services
             //ingenicoDevice.DeviceConnectionChanged += (sender4, deviceConnectionArgs) => UpdateDeviceIngenico(deviceConnectionArgs.ConnectionStatus);
         }
 
-        public virtual void Configure(object[] settings)
-        {
-        }
-
         DeviceStatus IDevice.Connect()
         {
             //initialize attached device because application detected USB device change
@@ -139,11 +136,6 @@ namespace IPA.DAL.RBADAL.Services
                 else
                     return DeviceStatus.NoDevice;
             }
-        }
-
-        bool IDevice.Reset()
-        {            
-            return true;
         }
 
         bool IDevice.ShowMessage(IDeviceMessage deviceMessage, string message)
@@ -371,7 +363,7 @@ namespace IPA.DAL.RBADAL.Services
                         //TODO Handle Exception
                         throw xcp;
                     }
-                    if (isHid != true)
+                    if (isHid != null && isHid != true)
                     {
                         PopulateDeviceInfo();
                         //DeviceReset requires the device be Populated first...
@@ -523,6 +515,11 @@ namespace IPA.DAL.RBADAL.Services
                     deviceInfo.FirmwareVersion = ParseFirmwareVersion(firmwareModelInfo);
                     deviceInfo.ModelName = firmwareModelInfo.Substring(2, firmwareModelInfo.IndexOf("USB", StringComparison.Ordinal) - 3);
                     deviceInfo.Port = firmwareModelInfo.Substring(firmwareModelInfo.IndexOf("USB", StringComparison.Ordinal), 7);
+                    // MAGSTRIP DEVICE EMBBEDS THE TYPE AS: "USB HID KB Reader"
+                    if(firmwareModelInfo.Contains("USB HID KB Reader"))
+                    {
+                        deviceInfo.Port = "USB KB";
+                    }
 
                     //Get the device model #
                     deviceInfo.ModelNumber = GetModelNumber(deviceInfo.ModelName, deviceInfo.ConfigValues, double.Parse(deviceInfo.FirmwareVersion));
@@ -538,8 +535,10 @@ namespace IPA.DAL.RBADAL.Services
         private IDTSetStatus DeviceReset()
         {
             var configStatus = new IDTSetStatus { Success = true };
-            bool AUGUSTA_DEVICE = (deviceMode == IDTECH_DEVICE_PID.AUGUSTA_HID || deviceMode == IDTECH_DEVICE_PID.AUGUSTA_KYB);
-            if(AUGUSTA_DEVICE)
+            if(deviceMode == IDTECH_DEVICE_PID.AUGUSTA_KYB   ||
+               deviceMode == IDTECH_DEVICE_PID.MAGSTRIPE_KYB ||
+               deviceMode == IDTECH_DEVICE_PID.SECUREKEY_KYB ||
+               deviceMode == IDTECH_DEVICE_PID.SECUREMAG_KYB)
             {
                 // WIP: no resets for these device types
                 return configStatus;
@@ -609,12 +608,10 @@ namespace IPA.DAL.RBADAL.Services
 
             try
             {
-                for (int i = 0; i < bufferLength; i++)  // Initialize return data buffer
+                for (int i = 0; i < bufferLength; i++)
+                {
                     deviceDataBuffer[i] = 0;
-
-                //TODO: Cannot have init call init, circular calls, recheck logic
-                //if (device == null || !device.IsConnected)
-                //status = Init();
+                }
 
                 if (status == EntryModeStatus.Success)
                 {
@@ -1666,8 +1663,22 @@ if(empty)
 
                 if (trackData != null)
                 {
-///                    Transaction.PaymentXO.Request.CreditCard = new Core.Data.Entity.Other.CreditCard
+                    if (Transaction.PaymentXO == null)
+                        Transaction.Init();
+                    Transaction.PaymentXO.Request.CreditCard = new Core.Data.Entity.Other.CreditCard();
                     {
+                        Transaction.PaymentXO.Request.CreditCard.AbortType = DeviceAbortType.NoAbort;
+                        Transaction.PaymentXO.Request.CreditCard.CardHolderName = trackData.Name;
+                        Transaction.PaymentXO.Request.CreditCard.CreditCardNumber = trackData.PAN;
+                        Transaction.PaymentXO.Request.CreditCard.EncryptedTracks = trackData.EncryptedTracks;
+                        Transaction.PaymentXO.Request.CreditCard.CardExpirationMonth = trackData.ExpDate.Substring(2, 2);
+                        Transaction.PaymentXO.Request.CreditCard.CardExpirationYear = trackData.ExpDate.Substring(0, 2);
+                        Transaction.PaymentXO.Request.CreditCard.Track1 = trackData.Track1;
+                        Transaction.PaymentXO.Request.CreditCard.Track2 = trackData.Track2;
+                        Transaction.PaymentXO.Request.CreditCard.Track3 = trackData.Track3;
+                        Transaction.PaymentXO.Request.CreditCard.EMVCardEntryMode =
+                            trackData.IsSwipe ? Core.Shared.Enums.EntryModeType.Swiped.ToString() : Core.Shared.Enums.EntryModeType.Keyed.ToString();
+                    };
 ///                        AbortType = DeviceAbortType.NoAbort,
 ///                        CardHolderName = trackData.Name,
 ///                        CreditCardNumber = trackData.PAN,
@@ -1682,7 +1693,7 @@ if(empty)
 
                         //TODO: where does the PIN come from on DebitCards?
                         //EncryptedPIN = IsDebit ? trackData. : null,
-                    };
+
 ///                    Transaction.IsManual = !trackData.IsSwipe;
 ///                    Transaction.PaymentXO.Request.PaymentTender.EntryModeTypeID = trackData.IsSwipe? (int)Core.Shared.Enums.EntryModeType.Swiped : (int)Core.Shared.Enums.EntryModeType.Keyed;                  
                     NotificationRaise(new NotificationEventArgs { NotificationType = NotificationType.DeviceEvent, DeviceEvent = DeviceEvent.CardReadComplete });
@@ -1718,6 +1729,117 @@ if(empty)
         }
 
         #endregion
+
+        public bool Reset()
+        {
+           byte[] result;
+
+           // Create the command to get config values
+           var readConfig = new byte[CommandTokens.DeviceReset.Length + 1];
+           Array.Copy(CommandTokens.DeviceReset, readConfig, CommandTokens.DeviceReset.Length);
+           readConfig[CommandTokens.DeviceReset.Length] = 0x00;
+           readConfig[readConfig.Length - 1] = GetCheckSumValue(readConfig);
+
+           // execute the command, get the result
+           var status = SetupCommand(readConfig, out result);
+           return (status == EntryModeStatus.Success) ? true : false;
+        }
+
+        public bool SetQuickChipMode(bool mode)
+        {
+           byte[] result;
+
+           // Create the command to get config values
+           var readConfig = new byte[CommandTokens.QuickChipModeOn.Length + 1];
+           if(mode)
+           {
+              Array.Copy(CommandTokens.QuickChipModeOn, readConfig, CommandTokens.QuickChipModeOn.Length);
+           }
+           else
+           {
+              Array.Copy(CommandTokens.QuickChipModeOff, readConfig, CommandTokens.QuickChipModeOff.Length);
+           }
+           readConfig[CommandTokens.QuickChipModeOn.Length] = 0x00;
+           readConfig[readConfig.Length - 1] = GetCheckSumValue(readConfig);
+
+           // execute the command, get the result
+           var status = SetupCommand(readConfig, out result);
+           return (status == EntryModeStatus.Success) ? true : false;
+        }
+
+        public bool SetUSBHIDMode()
+        {
+           byte[] result;
+
+           // Create the command to get config values
+           var readConfig = new byte[CommandTokens.SetUSBHIDMode.Length + 1];
+           Array.Copy(CommandTokens.SetUSBHIDMode, readConfig, CommandTokens.SetUSBHIDMode.Length);
+           readConfig[CommandTokens.SetUSBHIDMode.Length] = 0x00;
+           readConfig[readConfig.Length - 1] = GetCheckSumValue(readConfig);
+
+           // execute the command, get the result
+           var status = SetupCommand(readConfig, out result);
+           return (status == EntryModeStatus.Success) ? true : false;
+        }
+
+        public bool SetUSBKeyboardMode()
+        {
+            var rtn = SetUSBKBMode();
+            return rtn.Success;
+        }
+
+        public virtual void Configure(object[] settings)
+        {
+        }
+
+        #region -- keyboard mode overrides --
+        public virtual void SetVP3000DeviceHidMode()
+        {
+        }
+
+        public virtual void VP3000PingReport()
+        {
+        }
+        #endregion
+
+        /********************************************************************************************************/
+        // DEVICE CONFIGURATION
+        /********************************************************************************************************/
+        #region -- device configuration --
+
+        public virtual void GetTerminalInfo(ref ConfigSerializer serializer)
+        {
+        }
+
+        public virtual string [] GetTerminalData(ref ConfigSerializer serializer, ref int exponent)
+        {
+            return null;
+        }
+        public virtual void ValidateTerminalData(ref ConfigSerializer serializer)
+        {
+        }
+        public virtual void GetAidList(ref ConfigSerializer serializer)
+        {
+        }
+        public virtual void ValidateAidList(ref ConfigSerializer serializer)
+        {
+        }
+        public virtual void GetCapKList(ref ConfigSerializer serializer)
+        {
+        }
+        public virtual void ValidateCapKList(ref ConfigSerializer serializer)
+        {
+        }
+        public virtual void GetMSRSettings(ref ConfigSerializer serializer)
+        {
+        }
+        public virtual void GetEncryptionControl(ref ConfigSerializer serializer)
+        {
+        }
+        public virtual void FactoryReset()
+        {
+        }
+        #endregion
     }
 
     ///internal class DeviceInfo
@@ -1725,6 +1847,7 @@ if(empty)
     {
         public string SerialNumber;
         public string FirmwareVersion;
+        public string EMVKernelVersion;
         public string ModelName;
         public string ModelNumber;
         public string Port;

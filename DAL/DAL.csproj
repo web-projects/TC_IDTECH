@@ -30,45 +30,35 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Augusta_config, Version=1.2.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_config.dll</HintPath>
+    <Reference Include="Augusta_config">
+      <HintPath>..\sdk\Augusta\Augusta_config.dll</HintPath>
     </Reference>
-    <Reference Include="Augusta_device, Version=1.2.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_device.dll</HintPath>
+    <Reference Include="Augusta_device">
+      <HintPath>..\sdk\Augusta\Augusta_device.dll</HintPath>
     </Reference>
-    <Reference Include="Augusta_emv, Version=1.2.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_emv.dll</HintPath>
+    <Reference Include="Augusta_emv">
+      <HintPath>..\sdk\Augusta\Augusta_emv.dll</HintPath>
     </Reference>
-    <Reference Include="Augusta_icc, Version=1.2.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_icc.dll</HintPath>
+    <Reference Include="Augusta_icc">
+      <HintPath>..\sdk\Augusta\Augusta_icc.dll</HintPath>
     </Reference>
-    <Reference Include="Augusta_KB_config, Version=1.2.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_KB_config.dll</HintPath>
+    <Reference Include="Augusta_KB_config">
+      <HintPath>..\sdk\Augusta\Augusta_KB_config.dll</HintPath>
     </Reference>
-    <Reference Include="Augusta_KB_device, Version=1.2.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_KB_device.dll</HintPath>
+    <Reference Include="Augusta_KB_device">
+      <HintPath>..\sdk\Augusta\Augusta_KB_device.dll</HintPath>
     </Reference>
-    <Reference Include="Augusta_KB_msr, Version=1.2.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_KB_msr.dll</HintPath>
+    <Reference Include="Augusta_KB_msr">
+      <HintPath>..\sdk\Augusta\Augusta_KB_msr.dll</HintPath>
     </Reference>
-    <Reference Include="Augusta_KB_parse_, Version=1.2.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_KB_parse_.dll</HintPath>
+    <Reference Include="Augusta_KB_parse_">
+      <HintPath>..\sdk\Augusta\Augusta_KB_parse_.dll</HintPath>
     </Reference>
-    <Reference Include="Augusta_msr, Version=1.2.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_msr.dll</HintPath>
+    <Reference Include="Augusta_msr">
+      <HintPath>..\sdk\Augusta\Augusta_msr.dll</HintPath>
     </Reference>
-    <Reference Include="Augusta_parse, Version=1.2.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_parse.dll</HintPath>
+    <Reference Include="Augusta_parse">
+      <HintPath>..\sdk\Augusta\Augusta_parse.dll</HintPath>
     </Reference>
     <Reference Include="CommonInterface">
       <HintPath>..\CommonInterface\bin\Debug\CommonInterface.dll</HintPath>
@@ -79,6 +69,75 @@
     <Reference Include="IDTechSDK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=dbf9f7fd0c4c4b4a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\sdk\IDTechSDK.dll</HintPath>
+    </Reference>
+    <Reference Include="L100_config">
+      <HintPath>..\sdk\NEOII\L100_config.dll</HintPath>
+    </Reference>
+    <Reference Include="L100_device">
+      <HintPath>..\sdk\NEOII\L100_device.dll</HintPath>
+    </Reference>
+    <Reference Include="L100_lcd">
+      <HintPath>..\sdk\NEOII\L100_lcd.dll</HintPath>
+    </Reference>
+    <Reference Include="L100_pin">
+      <HintPath>..\sdk\NEOII\L100_pin.dll</HintPath>
+    </Reference>
+    <Reference Include="LoggerManager">
+      <HintPath>..\LoggerManager\bin\Debug\LoggerManager.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_config">
+      <HintPath>..\sdk\NEOII\NEO2_config.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_ctls">
+      <HintPath>..\sdk\NEOII\NEO2_ctls.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_device">
+      <HintPath>..\sdk\NEOII\NEO2_device.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_emv">
+      <HintPath>..\sdk\NEOII\NEO2_emv.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_icc">
+      <HintPath>..\sdk\NEOII\NEO2_icc.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_lcd">
+      <HintPath>..\sdk\NEOII\NEO2_lcd.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_msr">
+      <HintPath>..\sdk\NEOII\NEO2_msr.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_parse">
+      <HintPath>..\sdk\NEOII\NEO2_parse.dll</HintPath>
+    </Reference>
+    <Reference Include="NEO2_pin">
+      <HintPath>..\sdk\NEOII\NEO2_pin.dll</HintPath>
+    </Reference>
+    <Reference Include="RKIUtility">
+      <HintPath>..\sdk\NEOII\RKIUtility.dll</HintPath>
+    </Reference>
+    <Reference Include="RKIWeb">
+      <HintPath>..\sdk\NEOII\RKIWeb.dll</HintPath>
+    </Reference>
+    <Reference Include="SpectrumPro_config">
+      <HintPath>..\sdk\NEOII\SpectrumPro_config.dll</HintPath>
+    </Reference>
+    <Reference Include="SpectrumPro_device">
+      <HintPath>..\sdk\NEOII\SpectrumPro_device.dll</HintPath>
+    </Reference>
+    <Reference Include="SpectrumPro_emv">
+      <HintPath>..\sdk\NEOII\SpectrumPro_emv.dll</HintPath>
+    </Reference>
+    <Reference Include="SpectrumPro_icc">
+      <HintPath>..\sdk\NEOII\SpectrumPro_icc.dll</HintPath>
+    </Reference>
+    <Reference Include="SpectrumPro_msr">
+      <HintPath>..\sdk\NEOII\SpectrumPro_msr.dll</HintPath>
+    </Reference>
+    <Reference Include="SpectrumPro_parse">
+      <HintPath>..\sdk\NEOII\SpectrumPro_parse.dll</HintPath>
+    </Reference>
+    <Reference Include="SpectrumPro_pin">
+      <HintPath>..\sdk\NEOII\SpectrumPro_pin.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Annotations, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -111,6 +170,27 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="VP3300_config">
+      <HintPath>..\sdk\VP3300\VP3300_config.dll</HintPath>
+    </Reference>
+    <Reference Include="VP3300_ctls">
+      <HintPath>..\sdk\VP3300\VP3300_ctls.dll</HintPath>
+    </Reference>
+    <Reference Include="VP3300_device">
+      <HintPath>..\sdk\VP3300\VP3300_device.dll</HintPath>
+    </Reference>
+    <Reference Include="VP3300_emv">
+      <HintPath>..\sdk\VP3300\VP3300_emv.dll</HintPath>
+    </Reference>
+    <Reference Include="VP3300_icc">
+      <HintPath>..\sdk\VP3300\VP3300_icc.dll</HintPath>
+    </Reference>
+    <Reference Include="VP3300_msr">
+      <HintPath>..\sdk\VP3300\VP3300_msr.dll</HintPath>
+    </Reference>
+    <Reference Include="VP3300_parse">
+      <HintPath>..\sdk\VP3300\VP3300_parse.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data.Entity\Device.cs" />
@@ -125,19 +205,26 @@
     <Compile Include="Models\TimerEventArgs.cs" />
     <Compile Include="Models\UpdateEventArgs.cs" />
     <Compile Include="Services\IDTech\DeviceData.cs" />
+    <Compile Include="Services\IDTech\Device_VP3300.cs" />
     <Compile Include="Services\IDTech\Device_Augusta.cs" />
     <Compile Include="Services\IDTech\Device_IDTech.cs" />
+    <Compile Include="Services\IDTech\Device_VP5300.cs" />
     <Compile Include="Services\IDTech\IDTech_Models.cs" />
     <Compile Include="Interfaces\IDevice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\IDTech\UnknownDevice.cs" />
     <Compile Include="Services\IPA.SerialReader.cs" />
+    <Compile Include="Services\Transaction.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="NEO2_Devices.xml" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy $(TargetPath) ..\..\..\sdk\$(TargetFileName)</PostBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
   </PropertyGroup>
 </Project>

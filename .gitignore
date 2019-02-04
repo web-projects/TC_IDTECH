@@ -27,5 +27,8 @@ CommonInterface/bin/
 CommonInterface/obj/
 DeviceConfiguration/bin/
 DeviceConfiguration/obj/
+/sdk/*.dll
+/auto-generated/*.dll
 
 run/TerminalData.*
+

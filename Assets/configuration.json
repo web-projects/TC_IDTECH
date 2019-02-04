@@ -1,0 +1,58 @@
+{
+  "config_meta": {
+    "Type": "device",
+    "Production": false,
+    "Customer": {
+      "Company": "TrustCommerce",
+      "Contact": "",
+      "Id": 100
+    },
+    "Id": 0,
+    "Notes": "",
+    "Version": "1.0.0.0",
+    "Terminal_type": ""
+  },
+  "hardware": {
+    "Serial_num": "",
+    "Contactless_available": ""
+  },
+  "general_configuration": {
+    "Contact": {
+      "capk": [
+      ],
+      "aid": [
+      ],
+      "terminal_ics_type": "",
+      "terminal_data": "",
+    },
+    "msr_settings": [
+    ],
+    "Terminal_info": {
+      "firmware_ver": "",
+      "contact_emv_kernel_ver": "",
+      "contact_emv_kernel_checksum": "",
+      "contact_emv_kernel_configuration_checksum": ""
+    },
+    "Encryption": {
+      "data_encryption_type": "",
+      "msr_encryption_enabled": false,
+      "icc_encryption_enabled": false
+    }
+  },
+  "user_configuration": {
+    "expiration_masking": true,
+    "pan_clear_digits": 4,
+    "swipe_force_mask": {
+      "track1": false,
+      "track2": true,
+      "track3": false,
+      "track3card0": true
+    },
+    "swipe_mask": {
+      "track1": true,
+      "track2": false,
+      "track3": true
+    },
+    "last_update_timestamp": ""
+  }
+}

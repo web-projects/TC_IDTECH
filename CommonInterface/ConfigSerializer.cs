@@ -29,11 +29,32 @@ namespace IPA.CommonInterface
                 JsonSerializer serializer = new JsonSerializer();
                 string path = System.IO.Directory.GetCurrentDirectory(); 
                 fileName = path + "\\" + JSON_CONFIG;
-                string FILE_CFG = File.ReadAllText(fileName);
-                //byte[] data = File.ReadAllBytes(fileName);
-                //var FILE_CFG = Encoding.UTF8.GetString(data);
 
-                terminalCfg = JsonConvert.DeserializeObject<TerminalConfiguration>(FILE_CFG);
+                if(File.Exists(fileName))
+                {
+                    string FILE_CFG = File.ReadAllText(fileName);
+                    terminalCfg = JsonConvert.DeserializeObject<TerminalConfiguration>(FILE_CFG);
+                }
+                else
+                {
+                    var assembly = System.Reflection.Assembly.GetExecutingAssembly();
+                    var resourceName = "IPA.CommonInterface.Assets." + JSON_CONFIG;
+                    string [] resources = this.GetType().Assembly.GetManifestResourceNames();
+
+                    string resourceContent = "";
+
+                    using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                    {
+                        if(stream != null)
+                        {
+                            using (StreamReader reader = new StreamReader(stream))
+                            {
+                                resourceContent = reader.ReadToEnd();
+                                terminalCfg = JsonConvert.DeserializeObject<TerminalConfiguration>(resourceContent);
+                            }
+                        }
+                    }
+                }
 
                 if(terminalCfg != null)
                 {

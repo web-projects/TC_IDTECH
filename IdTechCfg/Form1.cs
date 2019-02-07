@@ -194,23 +194,33 @@ namespace IPA.MainApp
 
         void SetupLogging()
         {
-            bool loggingEnabled = false;
-            var configLogging = ConfigurationManager.AppSettings["IPA.DAL.Application.Client.Logging"] ?? "false";
-            bool.TryParse(configLogging, out loggingEnabled);
-            if(loggingEnabled)
+            var logLevels = ConfigurationManager.AppSettings["IPA.DAL.Application.Client.LogLevel"].Split('|') ?? null;
+            if(logLevels.Length > 0)
             {
                 string fullName = Assembly.GetEntryAssembly().Location;
                 string logname = System.IO.Path.GetFileNameWithoutExtension(fullName) + ".log";
                 string path = System.IO.Directory.GetCurrentDirectory(); 
                 string filepath = path + "\\" + logname;
-                Logger.SetFileLoggerName(filepath);
+
+                int levels = 0;
+                foreach(var item in logLevels)
+                {
+                    foreach(var level in LogLevels.LogLevelsDictonary.Where(x => x.Value.Equals(item)).Select(x => x.Key))
+                    {
+                        levels += (int)level;
+                    }
+                }
+
+                Logger.SetFileLoggerConfiguration(filepath, levels);
+
                 Logger.info( "LOGGING INITIALIZED.");
+
                 //Logger.info( "LOG ARG1:", "1111");
                 //Logger.info( "LOG ARG1:{0}, ARG2:{1}", "1111", "2222");
-                //Logger.debug("THIS IS A DEBUG STRING");
-                //Logger.warning("THIS IS A WARNING");
-                //Logger.error("THIS IS AN ERROR");
-                //Logger.fatal("THIS IS FATAL");
+                Logger.debug("THIS IS A DEBUG STRING");
+                Logger.warning("THIS IS A WARNING");
+                Logger.error("THIS IS AN ERROR");
+                Logger.fatal("THIS IS FATAL");
             }
         }
 

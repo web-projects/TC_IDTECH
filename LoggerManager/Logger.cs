@@ -9,6 +9,7 @@ namespace IPA.LoggerManager
 {
     public static class Logger
     {
+        private static int logLevel;
         private static string dbLoggerPath = "";
         private static string fileLoggerPath = "";
         private static string eventLoggerPath = "";
@@ -17,8 +18,9 @@ namespace IPA.LoggerManager
         public static LogBase fileLogger = null;
         private static LogBase eventLogger = null;
 
-        public static void SetFileLoggerName(string filepath)
+        public static void SetFileLoggerConfiguration(string filepath, int level)
         {
+            logLevel = level;
             fileLoggerPath = filepath;
         }
 
@@ -35,43 +37,48 @@ namespace IPA.LoggerManager
         // DEBUG LOGGING
         public static void debug(string message, LogTarget target = LogTarget.File)
         {
-            switch(target)
+            LOGLEVELS result = (LOGLEVELS)(logLevel & (int)LOGLEVELS.DEBUG);
+
+            if(result == LOGLEVELS.DEBUG)
             {
-                case LogTarget.File:
+                switch(target)
                 {
-                    if(fileLoggerPath != string.Empty)
+                    case LogTarget.File:
                     {
-                        if(fileLogger == null)
+                        if(fileLoggerPath != string.Empty)
                         {
-                            fileLogger = new FileLogger(fileLoggerPath);
+                            if(fileLogger == null)
+                            {
+                                fileLogger = new FileLogger(fileLoggerPath);
+                            }
+                            fileLogger.debug(message);
                         }
-                        fileLogger.debug(message);
+                        break;
                     }
-                    break;
-                }
-                case LogTarget.Database:
-                {
-                    if(dbLoggerPath != string.Empty)
+                    case LogTarget.Database:
                     {
-                        if(dbLogger == null)
+                        if(dbLoggerPath != string.Empty)
                         {
-                            dbLogger = new DBLogger(dbLoggerPath);
+                            if(dbLogger == null)
+                            {
+                                dbLogger = new DBLogger(dbLoggerPath);
+                            }
+                            dbLogger.debug(message);
                         }
-                        dbLogger.debug(message);
+                        break;
                     }
-                    break;
-                }
-                case LogTarget.EventLog:
-                {
-                    if(eventLoggerPath != string.Empty)
+                    case LogTarget.EventLog:
                     {
-                        if(eventLogger == null)
+                        if(eventLoggerPath != string.Empty)
                         {
-                            eventLogger = new EventLogger(eventLoggerPath);
+                            if(eventLogger == null)
+                            {
+                                eventLogger = new EventLogger(eventLoggerPath);
+                            }
+                            eventLogger.debug(message);
                         }
-                        eventLogger.debug(message);
+                        break;
                     }
-                    break;
                 }
             }
         }
@@ -88,43 +95,48 @@ namespace IPA.LoggerManager
         // INFO LOGGING
         public static void info(string message, LogTarget target = LogTarget.File)
         {
-            switch(target)
+            LOGLEVELS result = (LOGLEVELS)(logLevel & (int)LOGLEVELS.INFO);
+
+            if(result == LOGLEVELS.INFO)
             {
-                case LogTarget.File:
+                switch(target)
                 {
-                    if(fileLoggerPath != string.Empty)
+                    case LogTarget.File:
                     {
-                        if(fileLogger == null)
+                        if(fileLoggerPath != string.Empty)
                         {
-                            fileLogger = new FileLogger(fileLoggerPath);
+                            if(fileLogger == null)
+                            {
+                                fileLogger = new FileLogger(fileLoggerPath);
+                            }
+                            fileLogger.info(message);
                         }
-                        fileLogger.info(message);
+                        break;
                     }
-                    break;
-                }
-                case LogTarget.Database:
-                {
-                    if(dbLoggerPath != string.Empty)
+                    case LogTarget.Database:
                     {
-                        if(dbLogger == null)
+                        if(dbLoggerPath != string.Empty)
                         {
-                            dbLogger = new DBLogger(dbLoggerPath);
+                            if(dbLogger == null)
+                            {
+                                dbLogger = new DBLogger(dbLoggerPath);
+                            }
+                            dbLogger.info(message);
                         }
-                        dbLogger.info(message);
+                        break;
                     }
-                    break;
-                }
-                case LogTarget.EventLog:
-                {
-                    if(eventLoggerPath != string.Empty)
+                    case LogTarget.EventLog:
                     {
-                        if(eventLogger == null)
+                        if(eventLoggerPath != string.Empty)
                         {
-                            eventLogger = new EventLogger(eventLoggerPath);
+                            if(eventLogger == null)
+                            {
+                                eventLogger = new EventLogger(eventLoggerPath);
+                            }
+                            eventLogger.info(message);
                         }
-                        eventLogger.info(message);
+                        break;
                     }
-                    break;
                 }
             }
         }
@@ -142,43 +154,48 @@ namespace IPA.LoggerManager
         // WARNING LOGGING
         public static void warning(string message, LogTarget target = LogTarget.File)
         {
-            switch(target)
+            LOGLEVELS result = (LOGLEVELS)(logLevel & (int)LOGLEVELS.WARNING);
+
+            if(result == LOGLEVELS.WARNING)
             {
-                case LogTarget.File:
+                switch(target)
                 {
-                    if(fileLoggerPath != string.Empty)
+                    case LogTarget.File:
                     {
-                        if(fileLogger == null)
+                        if(fileLoggerPath != string.Empty)
                         {
-                            fileLogger = new FileLogger(fileLoggerPath);
+                            if(fileLogger == null)
+                            {
+                                fileLogger = new FileLogger(fileLoggerPath);
+                            }
+                            fileLogger.warning(message);
                         }
-                        fileLogger.warning(message);
+                        break;
                     }
-                    break;
-                }
-                case LogTarget.Database:
-                {
-                    if(dbLoggerPath != string.Empty)
+                    case LogTarget.Database:
                     {
-                        if(dbLogger == null)
+                        if(dbLoggerPath != string.Empty)
                         {
-                            dbLogger = new DBLogger(dbLoggerPath);
+                            if(dbLogger == null)
+                            {
+                                dbLogger = new DBLogger(dbLoggerPath);
+                            }
+                            dbLogger.warning(message);
                         }
-                        dbLogger.warning(message);
+                        break;
                     }
-                    break;
-                }
-                case LogTarget.EventLog:
-                {
-                    if(eventLoggerPath != string.Empty)
+                    case LogTarget.EventLog:
                     {
-                        if(eventLogger == null)
+                        if(eventLoggerPath != string.Empty)
                         {
-                            eventLogger = new EventLogger(eventLoggerPath);
+                            if(eventLogger == null)
+                            {
+                                eventLogger = new EventLogger(eventLoggerPath);
+                            }
+                            eventLogger.warning(message);
                         }
-                        eventLogger.warning(message);
+                        break;
                     }
-                    break;
                 }
             }
         }
@@ -195,43 +212,48 @@ namespace IPA.LoggerManager
         // ERROR LOGGING
         public static void error(string message, LogTarget target = LogTarget.File)
         {
-            switch(target)
+            LOGLEVELS result = (LOGLEVELS)(logLevel & (int)LOGLEVELS.ERROR);
+
+            if(result == LOGLEVELS.ERROR)
             {
-                case LogTarget.File:
+                switch(target)
                 {
-                    if(fileLoggerPath != string.Empty)
+                    case LogTarget.File:
                     {
-                        if(fileLogger == null)
+                        if(fileLoggerPath != string.Empty)
                         {
-                            fileLogger = new FileLogger(fileLoggerPath);
+                            if(fileLogger == null)
+                            {
+                                fileLogger = new FileLogger(fileLoggerPath);
+                            }
+                            fileLogger.error(message);
                         }
-                        fileLogger.error(message);
+                        break;
                     }
-                    break;
-                }
-                case LogTarget.Database:
-                {
-                    if(dbLoggerPath != string.Empty)
+                    case LogTarget.Database:
                     {
-                        if(dbLogger == null)
+                        if(dbLoggerPath != string.Empty)
                         {
-                            dbLogger = new DBLogger(dbLoggerPath);
+                            if(dbLogger == null)
+                            {
+                                dbLogger = new DBLogger(dbLoggerPath);
+                            }
+                            dbLogger.error(message);
                         }
-                        dbLogger.error(message);
+                        break;
                     }
-                    break;
-                }
-                case LogTarget.EventLog:
-                {
-                    if(eventLoggerPath != string.Empty)
+                    case LogTarget.EventLog:
                     {
-                        if(eventLogger == null)
+                        if(eventLoggerPath != string.Empty)
                         {
-                            eventLogger = new EventLogger(eventLoggerPath);
+                            if(eventLogger == null)
+                            {
+                                eventLogger = new EventLogger(eventLoggerPath);
+                            }
+                            eventLogger.error(message);
                         }
-                        eventLogger.error(message);
+                        break;
                     }
-                    break;
                 }
             }
         }
@@ -248,43 +270,48 @@ namespace IPA.LoggerManager
         // FATAL LOGGING
         public static void fatal(string message, LogTarget target = LogTarget.File)
         {
-            switch(target)
+            LOGLEVELS result = (LOGLEVELS)(logLevel & (int)LOGLEVELS.FATAL);
+
+            if(result == LOGLEVELS.FATAL)
             {
-                case LogTarget.File:
+                switch(target)
                 {
-                    if(fileLoggerPath != string.Empty)
+                    case LogTarget.File:
                     {
-                        if(fileLogger == null)
+                        if(fileLoggerPath != string.Empty)
                         {
-                            fileLogger = new FileLogger(fileLoggerPath);
+                            if(fileLogger == null)
+                            {
+                                fileLogger = new FileLogger(fileLoggerPath);
+                            }
+                            fileLogger.fatal(message);
                         }
-                        fileLogger.fatal(message);
+                        break;
                     }
-                    break;
-                }
-                case LogTarget.Database:
-                {
-                    if(dbLoggerPath != string.Empty)
+                    case LogTarget.Database:
                     {
-                        if(dbLogger == null)
+                        if(dbLoggerPath != string.Empty)
                         {
-                            dbLogger = new DBLogger(dbLoggerPath);
+                            if(dbLogger == null)
+                            {
+                                dbLogger = new DBLogger(dbLoggerPath);
+                            }
+                            dbLogger.fatal(message);
                         }
-                        dbLogger.fatal(message);
+                        break;
                     }
-                    break;
-                }
-                case LogTarget.EventLog:
-                {
-                    if(eventLoggerPath != string.Empty)
+                    case LogTarget.EventLog:
                     {
-                        if(eventLogger == null)
+                        if(eventLoggerPath != string.Empty)
                         {
-                            eventLogger = new EventLogger(eventLoggerPath);
+                            if(eventLogger == null)
+                            {
+                                eventLogger = new EventLogger(eventLoggerPath);
+                            }
+                            eventLogger.fatal(message);
                         }
-                        eventLogger.fatal(message);
+                        break;
                     }
-                    break;
                 }
             }
         }

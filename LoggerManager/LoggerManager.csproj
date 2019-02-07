@@ -89,6 +89,7 @@
     <Compile Include="Logger.cs" />
     <Compile Include="FileLogger.cs" />
     <Compile Include="LogBase.cs" />
+    <Compile Include="LogLevels.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -34,3 +34,4 @@ This an application to test IDTech Augusta Devices.
 * 20180111 - Added Quick Chip On/Off capability.
              Cleaned up extra tag processing and rendering.
 * 20190122 - Added file logging interface.
+* 20190206 - Enhanced log manager.

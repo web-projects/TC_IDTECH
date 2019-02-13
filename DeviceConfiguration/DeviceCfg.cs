@@ -209,6 +209,14 @@ namespace IPA.DAL.RBADAL
     public void SetFormClosing(bool state)
     {
       formClosing = state;
+      if(formClosing)
+      {
+            if(deviceInformation.emvConfigSupported)
+            {
+                Debug.WriteLine("DeviceCfg::DISCONNECTING FOR device TYPE={0}", IDT_Device.getDeviceType());
+                Device.CloseDevice();
+            }
+      }
     }
     
     protected void OnNotification(object sender, Models.NotificationEventArgs args)
@@ -2640,6 +2648,7 @@ namespace IPA.DAL.RBADAL
     internal string ModelNumber;
     internal string Port;
     internal IDTECH_DEVICE_PID deviceMode;
+    internal bool emvConfigSupported;
  }
  public static class USK_DEVICE_MODE
  {

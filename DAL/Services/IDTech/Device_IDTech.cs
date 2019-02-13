@@ -1836,6 +1836,9 @@ if(empty)
         public virtual void GetEncryptionControl(ref ConfigSerializer serializer)
         {
         }
+        public virtual void CloseDevice()
+        {
+        }
         public virtual void FactoryReset()
         {
         }

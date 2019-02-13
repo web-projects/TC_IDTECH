@@ -32,7 +32,7 @@ namespace IPA.DAL.RBADAL.Services
 
         public Device_Augusta(IDTECH_DEVICE_PID mode) : base(mode)
         {
-            deviceType = IDT_DEVICE_Types.IDT_DEVICE_NONE;
+            deviceType = IDT_DEVICE_Types.IDT_DEVICE_AUGUSTA;
             deviceMode = mode;
             Debug.WriteLine("device: Augusta instantiated with PID={0}", deviceMode);
             Logger.debug( "device: August instantiated with PID={0}", deviceMode);
@@ -391,6 +391,19 @@ namespace IPA.DAL.RBADAL.Services
             {
                 Debug.WriteLine("device: GetEncryptionControl() - exception={0}", (object)exp.Message);
             }
+        }
+
+        public override void CloseDevice()
+        {
+            if (Profile.deviceIsInitialized(IDT_DEVICE_Types.IDT_DEVICE_AUGUSTA, DEVICE_INTERFACE_Types.DEVICE_INTERFACE_USB))
+            {
+                Profile.closeDevice(IDT_DEVICE_Types.IDT_DEVICE_AUGUSTA, DEVICE_INTERFACE_Types.DEVICE_INTERFACE_USB);
+            }
+            //if (Profile.deviceIsInitialized(IDT_DEVICE_Types.IDT_DEVICE_AUGUSTA_KB, DEVICE_INTERFACE_Types.DEVICE_INTERFACE_USB))
+            //{
+            //    Profile.closeDevice(IDT_DEVICE_Types.IDT_DEVICE_AUGUSTA_KB, DEVICE_INTERFACE_Types.DEVICE_INTERFACE_USB);
+            //}
+            IDT_Device.stopUSBMonitoring();
         }
 
         public override void FactoryReset()

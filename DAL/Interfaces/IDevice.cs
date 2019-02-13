@@ -70,6 +70,7 @@ namespace IPA.DAL.RBADAL.Interfaces
         void ValidateCapKList(ref ConfigSerializer serializer);
         void GetMSRSettings(ref ConfigSerializer serializer);
         void GetEncryptionControl(ref ConfigSerializer serializer);
+        void CloseDevice();
         void FactoryReset();
         #endregion
     }

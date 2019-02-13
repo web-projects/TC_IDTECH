@@ -297,39 +297,43 @@ if (deviceID.ToLower().Contains("usb\\") && ((deviceID.Contains($"VID_{IDTECH}")
 
         public string [] GetTerminalData(ref ConfigSerializer serializer, ref int exponent)
         {
-            return deviceInterface.GetTerminalData(ref serializer, ref exponent);
+            return deviceInterface?.GetTerminalData(ref serializer, ref exponent);
         }
         public void ValidateTerminalData(ref ConfigSerializer serializer)
         {
-            deviceInterface.ValidateTerminalData(ref serializer);
+            deviceInterface?.ValidateTerminalData(ref serializer);
         }
         public void GetAidList(ref ConfigSerializer serializer)
         {
-            deviceInterface.GetAidList(ref serializer);
+            deviceInterface?.GetAidList(ref serializer);
         }
         public void ValidateAidList(ref ConfigSerializer serializer)
         {
-            deviceInterface.ValidateAidList(ref serializer);
+            deviceInterface?.ValidateAidList(ref serializer);
         }
         public void GetCapKList(ref ConfigSerializer serializer)
         {
-            deviceInterface.GetCapKList(ref serializer);
+            deviceInterface?.GetCapKList(ref serializer);
         }
         public void ValidateCapKList(ref ConfigSerializer serializer)
         {
-            deviceInterface.ValidateCapKList(ref serializer);
+            deviceInterface?.ValidateCapKList(ref serializer);
         }
         public void GetMSRSettings(ref ConfigSerializer serializer)
         {
-            deviceInterface.GetMSRSettings(ref serializer);
+            deviceInterface?.GetMSRSettings(ref serializer);
         }
         public void GetEncryptionControl(ref ConfigSerializer serializer)
         {
-            deviceInterface.GetEncryptionControl(ref serializer);
+            deviceInterface?.GetEncryptionControl(ref serializer);
+        }
+        public void CloseDevice()
+        {
+            deviceInterface?.CloseDevice();
         }
         public void FactoryReset()
         {
-            deviceInterface.FactoryReset();
+            deviceInterface?.FactoryReset();
         }
         #endregion
 

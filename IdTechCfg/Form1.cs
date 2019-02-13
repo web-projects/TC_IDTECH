@@ -187,40 +187,47 @@ namespace IPA.MainApp
                 }
                 catch(Exception ex)
                 {
-                    Debug.WriteLine("main: Form1_FormClosing() - exception={0}", (object) ex.Message);
+                    Logger.error("main: Form1_FormClosing() - exception={0}", (object) ex.Message);
                 }
             }
         }
 
         void SetupLogging()
         {
-            var logLevels = ConfigurationManager.AppSettings["IPA.DAL.Application.Client.LogLevel"].Split('|') ?? null;
-            if(logLevels.Length > 0)
+            try
             {
-                string fullName = Assembly.GetEntryAssembly().Location;
-                string logname = System.IO.Path.GetFileNameWithoutExtension(fullName) + ".log";
-                string path = System.IO.Directory.GetCurrentDirectory(); 
-                string filepath = path + "\\" + logname;
-
-                int levels = 0;
-                foreach(var item in logLevels)
+                var logLevels = ConfigurationManager.AppSettings["IPA.DAL.Application.Client.LogLevel"]?.Split('|') ?? new string[0];
+                if(logLevels.Length > 0)
                 {
-                    foreach(var level in LogLevels.LogLevelsDictonary.Where(x => x.Value.Equals(item)).Select(x => x.Key))
+                    string fullName = Assembly.GetEntryAssembly().Location;
+                    string logname = System.IO.Path.GetFileNameWithoutExtension(fullName) + ".log";
+                    string path = System.IO.Directory.GetCurrentDirectory(); 
+                    string filepath = path + "\\" + logname;
+
+                    int levels = 0;
+                    foreach(var item in logLevels)
                     {
-                        levels += (int)level;
+                        foreach(var level in LogLevels.LogLevelsDictonary.Where(x => x.Value.Equals(item)).Select(x => x.Key))
+                        {
+                            levels += (int)level;
+                        }
                     }
+
+                    Logger.SetFileLoggerConfiguration(filepath, levels);
+
+                    Logger.info( "LOGGING INITIALIZED.");
+
+                    //Logger.info( "LOG ARG1:", "1111");
+                    //Logger.info( "LOG ARG1:{0}, ARG2:{1}", "1111", "2222");
+                    Logger.debug("THIS IS A DEBUG STRING");
+                    Logger.warning("THIS IS A WARNING");
+                    Logger.error("THIS IS AN ERROR");
+                    Logger.fatal("THIS IS FATAL");
                 }
-
-                Logger.SetFileLoggerConfiguration(filepath, levels);
-
-                Logger.info( "LOGGING INITIALIZED.");
-
-                //Logger.info( "LOG ARG1:", "1111");
-                //Logger.info( "LOG ARG1:{0}, ARG2:{1}", "1111", "2222");
-                Logger.debug("THIS IS A DEBUG STRING");
-                Logger.warning("THIS IS A WARNING");
-                Logger.error("THIS IS AN ERROR");
-                Logger.fatal("THIS IS FATAL");
+            }
+            catch(Exception e)
+            {
+                Logger.error("main: SetupLogging() - exception={0}", (object) e.Message);
             }
         }
 
@@ -303,7 +310,7 @@ namespace IPA.MainApp
 
         protected void OnDeviceNotificationUI(object sender, DeviceNotificationEventArgs args)
         {
-            Debug.WriteLine("main: notification type={0}", args.NotificationType);
+            Logger.debug("main: notification type={0}", args.NotificationType);
 
             switch (args.NotificationType)
             {
@@ -557,7 +564,7 @@ namespace IPA.MainApp
             }
             catch(Exception ex)
             {
-                Debug.WriteLine("main: SetConfiguration() exception={0}", (object)ex.Message);
+                Logger.error("main: SetConfiguration() exception={0}", (object)ex.Message);
             }
         }
 
@@ -684,7 +691,7 @@ namespace IPA.MainApp
                         }
                         catch(Exception ex)
                         {
-                            Debug.WriteLine("main: InitalizeDevice() exception={0}", (object)ex.Message);
+                            Logger.error("main: InitalizeDevice() exception={0}", (object)ex.Message);
                         }
                     }
 

@@ -19,6 +19,7 @@ using IPA.Core.Shared.Helpers.StatusCode;
 using IPA.Core.Shared.Enums;
 using IPA.DAL.RBADAL.Services;
 using IPA.DAL.RBADAL.Services.Devices.IDTech.Models;
+using IPA.LoggerManager;
 
 namespace IPA.DAL.RBADAL
 {
@@ -45,6 +46,7 @@ namespace IPA.DAL.RBADAL
     private bool attached;
     private bool connected;
     private bool formClosing;
+    private bool firmwareUpdate;
 
     private readonly object discoveryLock = new object();
 
@@ -152,6 +154,7 @@ namespace IPA.DAL.RBADAL
                 // Initialize Universal SDK
                 IDT_Device.setCallback(MessageCallBack);
                 IDT_Device.startUSBMonitoring();
+                Logger.debug("DeviceCfg::DeviceInit(): - device TYPE={0}", IDT_Device.getDeviceType());
 
                 string [] message = { "COMPLETED" };
                 NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_INITIALIZE_DEVICE, Message = message });
@@ -209,6 +212,14 @@ namespace IPA.DAL.RBADAL
     public void SetFormClosing(bool state)
     {
       formClosing = state;
+      if(formClosing)
+      {
+            if(deviceInformation.emvConfigSupported)
+            {
+                Debug.WriteLine("DeviceCfg::DISCONNECTING FOR device TYPE={0}", IDT_Device.getDeviceType());
+                Device.CloseDevice();
+            }
+      }
     }
     
     protected void OnNotification(object sender, Models.NotificationEventArgs args)
@@ -513,7 +524,7 @@ namespace IPA.DAL.RBADAL
         case DeviceState.ToConnect:
         {
           deviceType = type;
-          Debug.WriteLine("device connecting: {0}", (object) deviceType.ToString());
+          Debug.WriteLine("DeviceCfg::Callback: device connecting: {0}", (object) deviceType.ToString());
           break;
         }
 
@@ -521,31 +532,44 @@ namespace IPA.DAL.RBADAL
         {
           deviceType = type;
           string deviceName = IDTechSDK.Profile.IDT_DEVICE_String(type, deviceConnect);
-          Debug.WriteLine("device connected: {0}", (object) deviceName);
+          Debug.WriteLine("DeviceCfg::Callback: device connected: {0}", (object) deviceName);
 
-          // Populate Device Configuration
-          new Thread(() =>
+          if(!connected && !firmwareUpdate)
           {
-             Thread.CurrentThread.IsBackground = false;
+              // Populate Device Configuration
+              new Thread(() =>
+              {
+                 Thread.CurrentThread.IsBackground = false;
 
-             // Disable EMV QC
-             if(deviceName.Contains("HID"))
-             {
-                SetEmvQCMode(false);
-             }
+                 // Disable EMV QC
+                 if(deviceName.Contains("HID"))
+                 {
+                    SetEmvQCMode(false);
+                 }
 
-             // Get Device Configuration
-             SetDeviceConfig();
+                 // Get Device Configuration
+                 SetDeviceConfig();
 
-             Thread.Sleep(100);
-             connected = true;
+                 Thread.Sleep(100);
+                 connected = true;
 
-             // Get Device Information
-             GetDeviceInformation();
+                 // Get Device Information
+                 GetDeviceInformation();
 
-          }).Start();
+              }).Start();
+          }
 
           break;
+        }
+
+        case DeviceState.Disconnected:
+        {
+            if(!firmwareUpdate)
+            {
+                connected = false;
+                DeviceRemovedHandler();
+            }
+            break;
         }
 
         case DeviceState.DefaultDeviceTypeChange:
@@ -557,15 +581,15 @@ namespace IPA.DAL.RBADAL
         {
             if (cardData.Notification == EVENT_NOTIFICATION_Types.EVENT_NOTIFICATION_Card_Not_Seated)
             {
-                Debug.WriteLine("Notification: ICC Card not Seated\n");
+                Debug.WriteLine("DeviceCfg::Callback: Notification: ICC Card not Seated\n");
             }
             if (cardData.Notification == EVENT_NOTIFICATION_Types.EVENT_NOTIFICATION_Card_Seated)
             {
-                Debug.WriteLine("Notification: ICC Card Seated\n");
+                Debug.WriteLine("DeviceCfg::Callback: Notification: ICC Card Seated\n");
             }
             if (cardData.Notification == EVENT_NOTIFICATION_Types.EVENT_NOTIFICATION_Swipe_Card)
             {
-                Debug.WriteLine("Notification: MSR Swipe Card\n");
+                Debug.WriteLine("DeviceCfg::Callback: Notification: MSR Swipe Card\n");
             }
 
             break;
@@ -634,19 +658,19 @@ namespace IPA.DAL.RBADAL
 
         case DeviceState.DataReceived: 
         {
-          Debug.WriteLine("{0} IN : {1}", Utils.GetTimeStamp(), Common.getHexStringFromBytes(data));
+          Debug.WriteLine("DeviceCfg::Callback: {0} IN : {1}", Utils.GetTimeStamp(), Common.getHexStringFromBytes(data));
           break;
         }
 
         case DeviceState.DataSent:
         {
-          Debug.WriteLine("{0} OUT: {1}", Utils.GetTimeStamp(), Common.getHexStringFromBytes(data));
+          Debug.WriteLine("DeviceCfg::Callback: {0} OUT: {1}", Utils.GetTimeStamp(), Common.getHexStringFromBytes(data));
           break;
         }
 
         case DeviceState.CommandTimeout:
         {
-          Debug.WriteLine("Command Timeout\n");
+          Debug.WriteLine("DeviceCfg::Callback: Command Timeout\n");
           break;
         }
 
@@ -701,19 +725,19 @@ namespace IPA.DAL.RBADAL
         case DeviceState.MSRDecodeError:
         {
           //SoftwareController.MSR_LED_RED_SOLID();
-          Debug.WriteLine("MSR Decode Error\n");
+          Debug.WriteLine("DeviceCfg::Callback: MSR Decode Error\n");
           break;
         }
 
         case DeviceState.SwipeTimeout:
         {
-          Debug.WriteLine("Swipe Timeout\n");
+          Debug.WriteLine("DeviceCfg::Callback: Swipe Timeout\n");
           break;
         }
 
         case DeviceState.TransactionCancelled:
         {
-          Debug.WriteLine("TransactionCancelled.");
+          Debug.WriteLine("DeviceCfg::Callback: TransactionCancelled.");
           //Debug.WriteLine("");
           //Debug.WriteLine(DeviceTerminalInfo.getDisplayMessage(DeviceTerminalInfo.MSC_ID_WELCOME));
           break;
@@ -721,7 +745,7 @@ namespace IPA.DAL.RBADAL
 
         case DeviceState.DeviceTimeout:
         {
-          Debug.WriteLine("Device Timeout\n");
+          Debug.WriteLine("DeviceCfg::Callback: Device Timeout\n");
           break;
         }
 
@@ -733,13 +757,68 @@ namespace IPA.DAL.RBADAL
           }
 
           string text =  IDTechSDK.errorCode.getErrorString(transactionResultCode);
-          Debug.WriteLine("Transaction Failed: {0}\r\n", (object) text);
+          Debug.WriteLine("DeviceCfg::Callback: Transaction Failed: {0}\r\n", (object) text);
 
           // Allow for GUI Recovery
           string [] message = { "" };
           message[0] = "***** TRANSACTION FAILED: " + text + " *****";
           NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_PROCESS_CARDDATA_ERROR, Message = message });
           break;
+        }
+
+        case DeviceState.FirmwareUpdate:
+        {
+            switch (transactionResultCode)
+            {
+                case RETURN_CODE.RETURN_CODE_FW_STARTING_UPDATE:
+                {
+                    Logger.debug("device: starting Firmware Update");
+                    break;
+                }
+                case RETURN_CODE.RETURN_CODE_DO_SUCCESS:
+                {
+                    Logger.debug("device: firmware Update Successful");
+                    new Thread(() =>
+                    {
+                        Thread.CurrentThread.IsBackground = false;
+                        firmwareUpdate = false;
+
+                        // Get Device Configuration
+                        SetDeviceFirmwareVersion();
+
+                    }).Start();
+
+                    break;
+                }
+                case RETURN_CODE.RETURN_CODE_APPLYING_FIRMWARE_UPDATE:
+                {
+                    Logger.debug("device: applying Firmware Update....");
+                    break;
+                }
+                case RETURN_CODE.RETURN_CODE_ENTERING_BOOTLOADER_MODE:
+                {
+                    Logger.debug("device: entering Bootloader Mode....");
+                    break;
+                }
+                case RETURN_CODE.RETURN_CODE_BLOCK_TRANSFER_SUCCESS:
+                {
+                    int start = data[0];
+                    int end = data[1];
+                    if (data.Length == 4)
+                    {
+                        start = data[0] * 0x100 + data[1];
+                        end = data[2] * 0x100 + data[3];
+                    }
+                    Logger.debug("device: sent block {0} of {1}", start.ToString(), end.ToString());
+                    break;
+                }
+                default:
+                {
+                    Logger.debug("device: firmware Update Error Code: 0x{0:X} : {1}", (ushort)transactionResultCode, IDTechSDK.errorCode.getErrorString(transactionResultCode));
+                    break;
+                }
+            }
+            break;
         }
       }
     }
@@ -1952,6 +2031,13 @@ namespace IPA.DAL.RBADAL
       return result;
     }
 
+    private void SetDeviceFirmwareVersion()
+    {
+        deviceInformation.FirmwareVersion  = Device.GetFirmwareVersion();
+        string [] message = { deviceInformation.FirmwareVersion };
+        NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_FIRMWARE_UPDATE_COMPLETE, Message = message });
+    }
+
     #endregion
 
     /********************************************************************************************************/
@@ -2640,6 +2726,7 @@ namespace IPA.DAL.RBADAL
     internal string ModelNumber;
     internal string Port;
     internal IDTECH_DEVICE_PID deviceMode;
+    internal bool emvConfigSupported;
  }
  public static class USK_DEVICE_MODE
  {

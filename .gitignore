@@ -32,3 +32,5 @@ DeviceConfiguration/obj/
 
 run/TerminalData.*
 
+/LoggerManager/bin/Debug
+/LoggerManager/obj/Debug

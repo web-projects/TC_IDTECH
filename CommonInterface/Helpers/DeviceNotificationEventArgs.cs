@@ -20,6 +20,7 @@ namespace IPA.CommonInterface.Helpers
         NT_SHOW_TERMINAL_DATA         = 10,
         NT_SHOW_JSON_CONFIG           = 11,
         NT_ENABLE_MODE_BUTTON         = 12,
+        NT_FIRMWARE_UPDATE_COMPLETE   = 13,
     }
 
     [Serializable]

@@ -278,6 +278,9 @@ namespace IPA.DAL.RBADAL.Services
         public void GetEncryptionControl(ref ConfigSerializer serializer)
         {
         }
+        public virtual void CloseDevice()
+        {
+        }
         public virtual void FactoryReset()
         {
         }

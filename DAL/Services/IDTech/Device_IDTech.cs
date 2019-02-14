@@ -802,7 +802,7 @@ namespace IPA.DAL.RBADAL.Services
             return deviceInfo;
         }
 
-        public string GetFirmwareVersion()
+        public virtual string GetFirmwareVersion()
         {
             // declare variables
             string firmwareVersion = null;
@@ -1834,6 +1834,9 @@ if(empty)
         {
         }
         public virtual void GetEncryptionControl(ref ConfigSerializer serializer)
+        {
+        }
+        public virtual void CloseDevice()
         {
         }
         public virtual void FactoryReset()

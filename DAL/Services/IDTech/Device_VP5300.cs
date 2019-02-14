@@ -23,7 +23,7 @@ namespace IPA.DAL.RBADAL.Services
 
         public Device_VP5300(IDTECH_DEVICE_PID mode) : base(mode)
         {
-            deviceType = IDT_DEVICE_Types.IDT_DEVICE_SPECTRUM_PRO;
+            deviceType = IDT_DEVICE_Types.IDT_DEVICE_NEO2;
             deviceMode = mode;
             Debug.WriteLine("device: VP5300 instantiated with PID={0}", deviceMode);
         }
@@ -42,7 +42,7 @@ namespace IPA.DAL.RBADAL.Services
         private bool PopulateDeviceInfo()
         {
             string serialNumber = "";
-            RETURN_CODE rt = IDT_SpectrumPro.SharedController.config_getSerialNumber(ref serialNumber);
+            RETURN_CODE rt = IDT_NEO2.SharedController.config_getSerialNumber(ref serialNumber);
 
             if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
             {
@@ -55,7 +55,7 @@ namespace IPA.DAL.RBADAL.Services
             }
 
             string firmwareVersion = "";
-            rt = IDT_SpectrumPro.SharedController.device_getFirmwareVersion(ref firmwareVersion);
+            rt = IDT_NEO2.SharedController.device_getFirmwareVersion(ref firmwareVersion);
 
             if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
             {
@@ -93,6 +93,24 @@ namespace IPA.DAL.RBADAL.Services
             var configStatus = new IDTSetStatus { Success = true };
             // WIP: no resets for these device types
             return configStatus;
+        }
+
+        public override string GetFirmwareVersion()
+        {
+            string firmwareVersion = "";
+            RETURN_CODE rt = IDT_NEO2.SharedController.device_getFirmwareVersion(ref firmwareVersion);
+            if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
+            {
+                //deviceInfo.FirmwareVersion = ParseFirmwareVersion(firmwareVersion);
+                //firmwareVersion = deviceInfo.FirmwareVersion;
+                deviceInfo.FirmwareVersion = firmwareVersion;
+                Debug.WriteLine("device INFO[Firmware Version]  : {0}", (object) deviceInfo.FirmwareVersion);
+            }
+            else
+            {
+                Debug.WriteLine("device: GetDeviceFirmwareVersion() - failed to get Firmware version reason={0}", rt);
+            }
+            return firmwareVersion;
         }
 
         public override string ParseFirmwareVersion(string firmwareInfo)
@@ -139,5 +157,14 @@ namespace IPA.DAL.RBADAL.Services
 
             return base.GetDeviceInfo();
         }
+
+         public override void CloseDevice()
+         {
+            if (Profile.deviceIsInitialized(IDT_DEVICE_Types.IDT_DEVICE_NEO2, DEVICE_INTERFACE_Types.DEVICE_INTERFACE_USB))
+            {
+                Profile.closeDevice(IDT_DEVICE_Types.IDT_DEVICE_NEO2, DEVICE_INTERFACE_Types.DEVICE_INTERFACE_USB);
+            }
+            IDT_Device.stopUSBMonitoring();
+         }
     }
 }

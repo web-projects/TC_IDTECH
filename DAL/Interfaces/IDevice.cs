@@ -39,6 +39,7 @@ namespace IPA.DAL.RBADAL.Interfaces
         ///Signature Signature();
         bool UpdateDevice(DeviceUpdateType updateType);
         string GetSerialNumber();
+        string GetFirmwareVersion();
         DeviceInfo GetDeviceInfo();
         bool Reset();
         ///Task CardRead(string paymentAmount, string promptText, string availableReaders, List<TCCustAttributeItem> attributes, EntryModeType entryModeType);
@@ -70,6 +71,7 @@ namespace IPA.DAL.RBADAL.Interfaces
         void ValidateCapKList(ref ConfigSerializer serializer);
         void GetMSRSettings(ref ConfigSerializer serializer);
         void GetEncryptionControl(ref ConfigSerializer serializer);
+        void CloseDevice();
         void FactoryReset();
         #endregion
     }

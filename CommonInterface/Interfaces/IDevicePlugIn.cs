@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using IPA.CommonInterface.Helpers;
 
-namespace IPA.CommonInterface
+namespace IPA.CommonInterface.Interfaces
 {
   public interface IDevicePlugIn
   {

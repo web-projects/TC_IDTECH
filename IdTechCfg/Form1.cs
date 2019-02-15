@@ -13,6 +13,7 @@ using HidLibrary;
 
 // Include DeviceConfiguration.dll in the References list
 using IPA.CommonInterface;
+using IPA.CommonInterface.Interfaces;
 using IPA.CommonInterface.Helpers;
 using System.Collections;
 using IPA.LoggerManager;

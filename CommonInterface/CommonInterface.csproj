@@ -56,13 +56,13 @@
     <Compile Include="Factory\TerminalDataFactory.cs" />
     <Compile Include="Helpers\DeviceNotificationEventArgs.cs" />
     <Compile Include="Helpers\Enumerations.cs" />
-    <Compile Include="IConfigurationWrapper.cs" />
+    <Compile Include="Interfaces\IConfigurationWrapper.cs" />
     <Compile Include="Configuration\Msr.cs" />
     <Compile Include="Configuration\Aid.cs" />
     <Compile Include="Configuration\TerminalData.cs" />
     <Compile Include="Configuration\TerminalInfo.cs" />
     <Compile Include="Configuration\Capk.cs" />
-    <Compile Include="IDevicePlugIn.cs" />
+    <Compile Include="Interfaces\IDevicePlugIn.cs" />
     <Compile Include="ConfigSerializer.cs" />
     <Compile Include="Configuration\MsrConfigItem.cs" />
     <Compile Include="PaymentXO.cs" />

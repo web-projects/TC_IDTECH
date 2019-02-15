@@ -12,6 +12,7 @@ using HidLibrary;
 using IDTechSDK;
 
 using IPA.CommonInterface;
+using IPA.CommonInterface.Interfaces;
 using IPA.CommonInterface.Helpers;
 using IPA.DAL;
 using IPA.DAL.RBADAL.Services.Devices.IDTech;

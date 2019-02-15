@@ -1,10 +1,12 @@
-﻿using IPA.CommonInterface;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using IPA.CommonInterface;
+using IPA.CommonInterface.Interfaces;
 
 namespace IPA.MainApp
 {

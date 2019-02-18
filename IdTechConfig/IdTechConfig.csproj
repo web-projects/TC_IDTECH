@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{62AF8551-65F6-4570-917A-177EAEB9539C}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>IPA.IdTechCfg</RootNamespace>
-    <AssemblyName>IdTechCfg</AssemblyName>
+    <RootNamespace>IPA.IdTechConfig</RootNamespace>
+    <AssemblyName>IdTechConfig</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

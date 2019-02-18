@@ -199,14 +199,13 @@ namespace IPA.DAL.RBADAL
       }
 
       // Get Configuration
-      string [] config = new string[5];
-        
-      config[0] = deviceInformation.SerialNumber;
-      config[1] = deviceInformation.FirmwareVersion;
-      config[2] = deviceInformation.ModelName;
-      config[3] = deviceInformation.ModelNumber;
-      config[4] = deviceInformation.Port;
-   
+      string [] config = { deviceInformation.SerialNumber,
+                           deviceInformation.FirmwareVersion,
+                           deviceInformation.ModelName,
+                           deviceInformation.ModelNumber,
+                           deviceInformation.Port
+      };
+
       return config;
     }
 
@@ -1617,7 +1616,7 @@ namespace IPA.DAL.RBADAL
       }
       else
       {
-          result = "Fail Error Code: " + "0x" + String.Format("{0:X}", (ushort)rt) + ": " + IDTechSDK.errorCode.getErrorString(rt);
+          result = String.Format("Fail Error Code=0x{0:X4} : {1}.", (ushort)rt, IDTechSDK.errorCode.getErrorString(rt));
       }
 
       return result;
@@ -1633,13 +1632,13 @@ namespace IPA.DAL.RBADAL
 
       if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
       {
-          result = (String.Format("{0:X}", (int)(response)));
+          result = String.Format("{0:X}", (int)(response));
           Debug.WriteLine("Get Clear PAN Digits Response: " + (int)(response));
       }
       else
       {
-          result = "Get Clear PAN Digits Fail Error Code: " + "0x" + String.Format("{0:X}", (ushort)rt) + ": " + IDTechSDK.errorCode.getErrorString(rt);
-          Debug.WriteLine("Get Clear PAN Digits Fail Error Code: " + "0x" + String.Format("{0:X}", (ushort)rt));
+          result = String.Format("Fail Error Code=0x{0:X4} : {1}.", (ushort)rt, IDTechSDK.errorCode.getErrorString(rt));
+          Debug.WriteLine("Get Clear PAN Digits {0}", (object)result);
       }
 
       return result;
@@ -1700,8 +1699,8 @@ namespace IPA.DAL.RBADAL
         }
         else
         {
-            result = "Swipe Force Encryption  Fail Error Code: " + "0x" + String.Format("{0:X}", (ushort)rt);
-            Debug.WriteLine("Get Swipe Force Encryption  Fail Error Code: " + "0x" + String.Format("{0:X}", (ushort)rt));
+            result = String.Format("Fail Error Code=0x{0:X4} : {1}.", (ushort)rt, IDTechSDK.errorCode.getErrorString(rt));
+            Debug.WriteLine("Swipe Force Encryption {0}", (object)result);
         }
 
         return result;
@@ -1751,8 +1750,8 @@ namespace IPA.DAL.RBADAL
       }
       else
       {
-          result += "Get Mask Option  Fail Error Code: " + "0x" + String.Format("{0:X}", (ushort)rt);
-          Debug.WriteLine("Get Mask Option  Fail Error Code: " + "0x" + String.Format("{0:X}", (ushort)rt));
+          result += String.Format("Fail Error Code=0x{0:X4} : {1}.", (ushort)rt, IDTechSDK.errorCode.getErrorString(rt));
+          Debug.WriteLine(String.Format("Get Mask Option Fail Error Code: 0x{0:X4}", (ushort)rt));
       }
 
       return result;
@@ -1887,7 +1886,8 @@ namespace IPA.DAL.RBADAL
       }
       else
       {
-          result = "Set Expiration Mask Fail Error: " + "0x" + String.Format("{0:X}", (ushort)rt) + ": " + IDTechSDK.errorCode.getErrorString(rt);
+          result = String.Format("Fail Error: 0x{0:X4} - {1}", (ushort)rt, IDTechSDK.errorCode.getErrorString(rt));
+          Debug.WriteLine("Set Expiration Mask {0}", (object)result);
       }
 
       return result;
@@ -1920,8 +1920,8 @@ namespace IPA.DAL.RBADAL
       }
       else
       {
-          result = "Get Clear PAN Digits Fail Error Code: " + "0x" + String.Format("{0:X}", (ushort)rt) + ": " + IDTechSDK.errorCode.getErrorString(rt);
-          Debug.WriteLine("Get Clear PAN Digits Fail Error Code: " + "0x" + String.Format("{0:X}", (ushort)rt));
+          result = String.Format("Get Clear PAN Digits Fail Error Code: 0x{0:X4} - {1}", (ushort)rt, IDTechSDK.errorCode.getErrorString(rt));
+          Debug.WriteLine(result);
       }
 
       return result;
@@ -1976,8 +1976,8 @@ namespace IPA.DAL.RBADAL
         }
         else
         {
-            result = "Swipe Force Encryption Fail Error Code: " + "0x" + String.Format("{0:X}", (ushort)rt);
-            Debug.WriteLine("Set Swipe Force Encryption  Fail Error Code: " + "0x" + String.Format("{0:X}", (ushort)rt));
+            result = string.Format("Fail Error Code=0x{0:X4} : {1}.", (ushort)rt, IDTechSDK.errorCode.getErrorString(rt));
+            Debug.WriteLine("Swipe Force Encryption {0}", (object)result);
         }
 
         return result;
@@ -2025,8 +2025,8 @@ namespace IPA.DAL.RBADAL
       }
       else
       {
-          result += "Get Mask Option  Fail Error Code: " + "0x" + String.Format("{0:X}", (ushort)rt);
-          Debug.WriteLine("Get Mask Option  Fail Error Code: " + "0x" + String.Format("{0:X}", (ushort)rt));
+          result += string.Format("Get Mask Option  Fail Error Code: 0x{0:X4}", (ushort)rt);
+          Debug.WriteLine(string.Format("Get Mask Option  Fail Error Code: 0x{0:X4}", (ushort)rt));
       }
 
       return result;
@@ -2205,29 +2205,31 @@ namespace IPA.DAL.RBADAL
 
       if(useUniversalSDK)
       {
-          // EXPIRATION MASK
-          string expMask = GetExpirationMask();
+          try
+          {
+              // EXPIRATION MASK
+              string expMask = GetExpirationMask();
         
-          // PAN DIGITS
-          string panDigits = GetClearPANDigits();
+              // PAN DIGITS
+              string panDigits = GetClearPANDigits();
 
-          // SWIPE FORCE
-          string swipeForce = GetSwipeForceEncryption();
+              // SWIPE FORCE
+              string swipeForce = GetSwipeForceEncryption();
 
-          // SWIPE MASK
-          string swipeMask = GetSwipeMaskOption();
+              // SWIPE MASK
+              string swipeMask = GetSwipeMaskOption();
 
-          // MSR Setting
-          string msrSetting = "WIP";
+              // MSR Setting
+              string msrSetting = "WIP";
 
-          // Set Configuration
-          string [] message = { "" };
-          message[0] = expMask;
-          message[1] = panDigits;
-          message[2] = swipeForce;
-          message[3] = swipeMask;
-          message[4] = msrSetting;
-          NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_GET_DEVICE_CONFIGURATION, Message = message });
+              // Set Configuration
+              string [] message = { expMask, panDigits, swipeForce, swipeMask, msrSetting };
+              NotificationRaise(new DeviceNotificationEventArgs { NotificationType = NOTIFICATION_TYPE.NT_GET_DEVICE_CONFIGURATION, Message = message });
+          }
+          catch(Exception exp)
+          {
+             Debug.WriteLine("DeviceCfg::GetDeviceMode(): - exception={0}", (object)exp.Message);
+          }
       }
       else
       {
@@ -2672,7 +2674,7 @@ namespace IPA.DAL.RBADAL
                 }
                 else
                 {
-                    message[0] = "COMMAND EXECUTE FAILED - CODE=0x" + string.Format("{0:X}", rt);
+                    message[0] =  string.Format("COMMAND EXECUTE FAILED - CODE=0x{0:X4}", (ushort)rt);
                 }
             }
 

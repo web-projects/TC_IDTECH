@@ -926,11 +926,14 @@ namespace IPA.MainApp
 
                 string [] data = ((IEnumerable) payload).Cast<object>().Select(x => x == null ? "" : x.ToString()).ToArray();
 
-                this.lblExpMask.Text    = data[0];
-                this.lblPanDigits.Text  = data[1];
-                this.lblSwipeForce.Text = data[2];
-                this.lblSwipeMask.Text  = data[3];
-                this.lblMsrSetting.Text = data[4];
+                if(data.Length == 5)
+                {
+                    this.lblExpMask.Text    = data[0];
+                    this.lblPanDigits.Text  = data[1];
+                    this.lblSwipeForce.Text = data[2];
+                    this.lblSwipeMask.Text  = data[3];
+                    this.lblMsrSetting.Text = data[4];
+                }
 
                 // Enable Tabs
                 this.tabPage1.Enabled = true;
@@ -977,65 +980,66 @@ namespace IPA.MainApp
                     string [] values = data[2].Split(',');
 
                     // Process Individual values
-                    string [] track1 = values[0].Split(':');
-                    string [] track2 = values[1].Split(':');
-                    string [] track3 = values[2].Split(':');
-                    string [] track3Card0 = values[3].Split(':');
+                    if(values.Length == 4)
+                    {
+                        string [] track1 = values[0].Split(':');
+                        string [] track2 = values[1].Split(':');
+                        string [] track3 = values[2].Split(':');
+                        string [] track3Card0 = values[3].Split(':');
+                        string t1Value = track1[1].Trim();
+                        string t2Value = track2[1].Trim();
+                        string t3Value = track3[1].Trim();
+                        string t3Card0Value = track3Card0[1].Trim();
+                        bool t1Val = t1Value.Equals("ON", StringComparison.OrdinalIgnoreCase) ? true : false;
+                        bool t2Val = t2Value.Equals("ON", StringComparison.OrdinalIgnoreCase) ? true : false;
+                        bool t3Val = t3Value.Equals("ON", StringComparison.OrdinalIgnoreCase) ? true : false;
+                        bool t3Card0Val = t3Card0Value.Equals("ON", StringComparison.OrdinalIgnoreCase) ? true : false;
 
-                    string t1Value = track1[1].Trim();
-                    string t2Value = track2[1].Trim();
-                    string t3Value = track3[1].Trim();
-                    string t3Card0Value = track3Card0[1].Trim();
+                        // Compare to existing values
+                        if(this.cBxTrack1.Checked != t1Val) {
+                            this.cBxTrack1.Checked = t1Val;
+                        }
 
-                    bool t1Val = t1Value.Equals("ON", StringComparison.OrdinalIgnoreCase) ? true : false;
-                    bool t2Val = t2Value.Equals("ON", StringComparison.OrdinalIgnoreCase) ? true : false;
-                    bool t3Val = t3Value.Equals("ON", StringComparison.OrdinalIgnoreCase) ? true : false;
-                    bool t3Card0Val = t3Card0Value.Equals("ON", StringComparison.OrdinalIgnoreCase) ? true : false;
+                        if(this.cBxTrack2.Checked != t2Val) {
+                            this.cBxTrack2.Checked = t2Val;
+                        }
 
-                    // Compare to existing values
-                    if(this.cBxTrack1.Checked != t1Val) {
-                        this.cBxTrack1.Checked = t1Val;
-                    }
+                        if(this.cBxTrack3.Checked != t3Val) {
+                            this.cBxTrack3.Checked = t3Val;
+                        }
 
-                    if(this.cBxTrack2.Checked != t2Val) {
-                        this.cBxTrack2.Checked = t2Val;
-                    }
+                        if(this.cBxTrack3Card0.Checked != t3Card0Val) {
+                            this.cBxTrack3Card0.Checked = t3Card0Val;
+                        }
 
-                    if(this.cBxTrack3.Checked != t3Val) {
-                        this.cBxTrack3.Checked = t3Val;
-                    }
+                        // Swipe Mask
+                        values = data[3].Split(',');
 
-                    if(this.cBxTrack3Card0.Checked != t3Card0Val) {
-                        this.cBxTrack3Card0.Checked = t3Card0Val;
-                    }
+                        // Process Individual values
+                        track1 = values[0].Split(':');
+                        track2 = values[1].Split(':');
+                        track3 = values[2].Split(':');
 
-                    // Swipe Mask
-                    values = data[3].Split(',');
+                        t1Value = track1[1].Trim();
+                        t2Value = track2[1].Trim();
+                        t3Value = track3[1].Trim();
 
-                    // Process Individual values
-                    track1 = values[0].Split(':');
-                    track2 = values[1].Split(':');
-                    track3 = values[2].Split(':');
+                        t1Val = t1Value.Equals("ON", StringComparison.OrdinalIgnoreCase) ? true : false;
+                        t2Val = t2Value.Equals("ON", StringComparison.OrdinalIgnoreCase) ? true : false;
+                        t3Val = t3Value.Equals("ON", StringComparison.OrdinalIgnoreCase) ? true : false;
 
-                    t1Value = track1[1].Trim();
-                    t2Value = track2[1].Trim();
-                    t3Value = track3[1].Trim();
+                        // Compare to existing values
+                        if(this.cBxSwipeMaskTrack1.Checked != t1Val) {
+                            this.cBxSwipeMaskTrack1.Checked = t1Val;
+                        }
 
-                    t1Val = t1Value.Equals("ON", StringComparison.OrdinalIgnoreCase) ? true : false;
-                    t2Val = t2Value.Equals("ON", StringComparison.OrdinalIgnoreCase) ? true : false;
-                    t3Val = t3Value.Equals("ON", StringComparison.OrdinalIgnoreCase) ? true : false;
+                        if(this.cBxSwipeMaskTrack2.Checked != t2Val) {
+                            this.cBxSwipeMaskTrack2.Checked = t2Val;
+                        }
 
-                    // Compare to existing values
-                    if(this.cBxSwipeMaskTrack1.Checked != t1Val) {
-                        this.cBxSwipeMaskTrack1.Checked = t1Val;
-                    }
-
-                    if(this.cBxSwipeMaskTrack2.Checked != t2Val) {
-                        this.cBxSwipeMaskTrack2.Checked = t2Val;
-                    }
-
-                    if(this.cBxSwipeMaskTrack3.Checked != t3Val) {
-                        this.cBxSwipeMaskTrack3.Checked = t3Val;
+                        if(this.cBxSwipeMaskTrack3.Checked != t3Val) {
+                            this.cBxSwipeMaskTrack3.Checked = t3Val;
+                        }
                     }
 
                     // Enable Button

@@ -35,3 +35,5 @@ This an application to test IDTech Augusta Devices.
              Cleaned up extra tag processing and rendering.
 * 20190122 - Added file logging interface.
 * 20190206 - Enhanced log manager.
+* 20190214 - Firmware update feature.
+* 20190215 - Cleaned exceptions for VP5300 device.

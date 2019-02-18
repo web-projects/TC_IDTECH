@@ -14,12 +14,17 @@ namespace IPA.DAL.RBADAL.Services
 {
     class Device_VP5300 : Device_IDTech
     {
+        /********************************************************************************************************/
+        // ATTRIBUTES
+        /********************************************************************************************************/
+        #region -- attributes --
         private IDTechSDK.IDT_DEVICE_Types deviceType;
         private DEVICE_INTERFACE_Types     deviceConnect;
         private DEVICE_PROTOCOL_Types      deviceProtocol;
         private IDTECH_DEVICE_PID          deviceMode;
 
         private static DeviceInfo deviceInfo;
+        #endregion
 
         public Device_VP5300(IDTECH_DEVICE_PID mode) : base(mode)
         {
@@ -158,7 +163,7 @@ namespace IPA.DAL.RBADAL.Services
             return base.GetDeviceInfo();
         }
 
-         public override void CloseDevice()
+        public override void CloseDevice()
          {
             if (Profile.deviceIsInitialized(IDT_DEVICE_Types.IDT_DEVICE_NEO2, DEVICE_INTERFACE_Types.DEVICE_INTERFACE_USB))
             {

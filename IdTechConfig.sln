@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2047
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdTechCfg", "IdTechCfg\IdTechCfg.csproj", "{62AF8551-65F6-4570-917A-177EAEB9539C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdTechConfig", "IdTechConfig\IdTechConfig.csproj", "{62AF8551-65F6-4570-917A-177EAEB9539C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{A0695E15-75A1-48A1-8FF4-35B78DD7EFF5} = {A0695E15-75A1-48A1-8FF4-35B78DD7EFF5}
 		{D03B9C37-6BFF-4E70-BB0E-C4DEA43621C8} = {D03B9C37-6BFF-4E70-BB0E-C4DEA43621C8}

@@ -15,12 +15,17 @@ namespace IPA.CommonInterface
     [Serializable]
     public class ConfigSerializer
     {
+        /********************************************************************************************************/
+        // ATTRIBUTES
+        /********************************************************************************************************/
+        #region -- attributes --
         private const string JSON_CONFIG = "configuration.json";
         private const string TERMINAL_CONFIG = "TerminalData";
 
         public TerminalConfiguration terminalCfg;
 
         private string fileName;
+        #endregion
 
         public void ReadConfig()
         {

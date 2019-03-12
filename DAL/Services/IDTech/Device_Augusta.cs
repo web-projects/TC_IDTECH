@@ -32,7 +32,7 @@ namespace IPA.DAL.RBADAL.Services
 
         private string serialNumber = "";
         private string EMVKernelVer = "";
-        private static DeviceInfo deviceInfo;
+        private static DeviceInfo deviceInfo = null;
         #endregion
 
         public Device_Augusta(IDTECH_DEVICE_PID mode) : base(mode)
@@ -58,7 +58,7 @@ namespace IPA.DAL.RBADAL.Services
         {
             serialNumber = "";
             RETURN_CODE rt = IDT_Augusta.SharedController.config_getSerialNumber(ref serialNumber);
-            if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
+            if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
             {
                 deviceInfo.SerialNumber = serialNumber;
                 Debug.WriteLine("device INFO[Serial Number]     : {0}", (object) deviceInfo.SerialNumber);
@@ -72,10 +72,21 @@ namespace IPA.DAL.RBADAL.Services
             rt = IDT_Augusta.SharedController.device_getFirmwareVersion(ref firmwareVersion);
             if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
             {
-                deviceInfo.FirmwareVersion = ParseFirmwareVersion(firmwareVersion);
+                if(deviceMode == IDTECH_DEVICE_PID.AUGUSTA_KYB || deviceMode == IDTECH_DEVICE_PID.AUGUSTAS_KYB)
+                {
+                    var result = Regex.Match(firmwareVersion, @"^N\v\n");
+                    if(result.Success)
+                        deviceInfo.FirmwareVersion = firmwareVersion.Substring(result.Index + result.Length);
+                    else
+                        deviceInfo.FirmwareVersion = firmwareVersion.Trim();
+                    deviceInfo.Port = "USB-KB";
+                }
+                else
+                {
+                    deviceInfo.FirmwareVersion = ParseFirmwareVersion(firmwareVersion);
+                    deviceInfo.Port = firmwareVersion.Substring(firmwareVersion.IndexOf("USB", StringComparison.Ordinal), 7);
+                }
                 Debug.WriteLine("device INFO[Firmware Version]  : {0}", (object) deviceInfo.FirmwareVersion);
-
-                deviceInfo.Port = firmwareVersion.Substring(firmwareVersion.IndexOf("USB", StringComparison.Ordinal), 7);
                 Debug.WriteLine("device INFO[Port]              : {0}", (object) deviceInfo.Port);
             }
             else
@@ -87,9 +98,12 @@ namespace IPA.DAL.RBADAL.Services
             Debug.WriteLine("device INFO[Model Name]        : {0}", (object) deviceInfo.ModelName);
 
             rt = IDT_Augusta.SharedController.config_getModelNumber(ref deviceInfo.ModelNumber);
-            if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
+            if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
             {
-                deviceInfo.ModelNumber = deviceInfo?.ModelNumber?.Split(' ')[0] ?? "";
+                if(deviceMode != IDTECH_DEVICE_PID.AUGUSTA_KYB && deviceMode != IDTECH_DEVICE_PID.AUGUSTAS_KYB)
+                {
+                    deviceInfo.ModelNumber = deviceInfo?.ModelNumber?.Split(' ')[0] ?? "";
+                }
                 Debug.WriteLine("device INFO[Model Number]      : {0}", (object) deviceInfo.ModelNumber);
             }
             else
@@ -99,7 +113,7 @@ namespace IPA.DAL.RBADAL.Services
 
             EMVKernelVer = "";
             rt = IDT_Augusta.SharedController.emv_getEMVKernelVersion(ref EMVKernelVer);
-            if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
+            if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
             {
                 deviceInfo.EMVKernelVersion = EMVKernelVer;
                 Debug.WriteLine("device INFO[EMV KERNEL V.]     : {0}", (object) deviceInfo.EMVKernelVersion);
@@ -141,7 +155,7 @@ namespace IPA.DAL.RBADAL.Services
            string serialNumber = "";
            RETURN_CODE rt = IDT_Augusta.SharedController.config_getSerialNumber(ref serialNumber);
 
-          if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
+          if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
           {
               deviceInfo.SerialNumber = serialNumber;
               Debug.WriteLine("device::GetSerialNumber(): {0}", (object) deviceInfo.SerialNumber);
@@ -177,7 +191,11 @@ namespace IPA.DAL.RBADAL.Services
             {
                 return deviceInfo;
             }
-
+            else if(deviceMode == IDTECH_DEVICE_PID.AUGUSTA_KYB || deviceMode == IDTECH_DEVICE_PID.AUGUSTAS_KYB)
+            {
+                PopulateDeviceInfo();
+                return deviceInfo;
+            }
             return base.GetDeviceInfo();
         }
 
@@ -193,25 +211,25 @@ namespace IPA.DAL.RBADAL.Services
                 string response = null;
                 RETURN_CODE rt = IDT_Augusta.SharedController.device_getFirmwareVersion(ref response);
 
-                if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt && !string.IsNullOrWhiteSpace(response))
+                if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS && !string.IsNullOrWhiteSpace(response))
                 {
                     serializer.terminalCfg.general_configuration.Terminal_info.firmware_ver = response;
                 }
                 response = "";
                 rt = IDT_Augusta.SharedController.emv_getEMVKernelVersion(ref response);
-                if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt && !string.IsNullOrWhiteSpace(response))
+                if(rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS && !string.IsNullOrWhiteSpace(response))
                 {
                     serializer.terminalCfg.general_configuration.Terminal_info.contact_emv_kernel_ver = response;
                 }
                 response = "";
                 rt = IDT_Augusta.SharedController.emv_getEMVKernelCheckValue(ref response);
-                if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt && !string.IsNullOrWhiteSpace(response))
+                if(rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS && !string.IsNullOrWhiteSpace(response))
                 {
                     serializer.terminalCfg.general_configuration.Terminal_info.contact_emv_kernel_checksum = response;
                 }
                 response = "";
                 rt = IDT_Augusta.SharedController.emv_getEMVConfigurationCheckValue(ref response);
-                if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt && !string.IsNullOrWhiteSpace(response))
+                if(rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS && !string.IsNullOrWhiteSpace(response))
                 {
                     serializer.terminalCfg.general_configuration.Terminal_info.contact_emv_kernel_configuration_checksum = response;
                 }
@@ -234,7 +252,7 @@ namespace IPA.DAL.RBADAL.Services
 
                     RETURN_CODE rt = IDT_Augusta.SharedController.emv_retrieveTerminalData(ref data);
             
-                    if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt && data != null)
+                    if(rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS && data != null)
                     {
                         TerminalData td = new TerminalData(data);
                         string text = td.ConvertTLVToValuePairs();
@@ -360,7 +378,7 @@ namespace IPA.DAL.RBADAL.Services
                     //RETURN_CODE rt = IDT_Augusta.SharedController.msr_getSetting((byte)setting.function_value, ref value);
                     RETURN_CODE rt = IDT_Augusta.SharedController.msr_getSetting(Convert.ToByte(setting.function_id, 16), ref value);
 
-                    if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
+                    if(rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
                     {
                         setting.value = value.ToString("x");
                         msr_settings.Add(setting);
@@ -383,13 +401,13 @@ namespace IPA.DAL.RBADAL.Services
                 bool icc = false;
                 RETURN_CODE rt = IDT_Augusta.SharedController.config_getEncryptionControl(ref msr, ref icc);
             
-                if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
+                if(rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
                 {
                     serializer.terminalCfg.general_configuration.Encryption.msr_encryption_enabled = msr;
                     serializer.terminalCfg.general_configuration.Encryption.icc_encryption_enabled = icc;
                     byte format = 0;
                     rt = IDT_Augusta.SharedController.icc_getKeyFormatForICCDUKPT(ref format);
-                    if(RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
+                    if(rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
                     {
                         string key_format = "None";
                         switch(format)
@@ -490,7 +508,6 @@ namespace IPA.DAL.RBADAL.Services
                 Debug.WriteLine("device: FactoryReset() - exception={0}", (object)exp.Message);
             }
         }
-
         #endregion
     }
 }

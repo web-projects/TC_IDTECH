@@ -49,7 +49,7 @@ namespace IPA.DAL.RBADAL.Services
                 string serialNumber = "";
                 RETURN_CODE rt = IDT_VP3300.SharedController.config_getSerialNumber(ref serialNumber);
 
-                if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
+                if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
                 {
                     deviceInfo.SerialNumber = serialNumber.Trim('\0');
                     Debug.WriteLine("device INFO[Serial Number]     : {0}", (object) deviceInfo.SerialNumber);
@@ -81,7 +81,7 @@ namespace IPA.DAL.RBADAL.Services
                 deviceInfo.ModelNumber = "UNKNOWN";
                 /*rt = IDT_VP3300.SharedController.config_getModelNumber(ref deviceInfo.ModelNumber);
 
-                if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
+                if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
                 {
                     Debug.WriteLine("device INFO[Model Number]      : {0}", (object) deviceInfo.ModelNumber);
                 }
@@ -291,7 +291,7 @@ namespace IPA.DAL.RBADAL.Services
            string serialNumber = "";
            RETURN_CODE rt = IDT_VP3300.SharedController.config_getSerialNumber(ref serialNumber);
 
-          if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
+          if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
           {
               deviceInfo.SerialNumber = serialNumber;
               Debug.WriteLine("device::GetSerialNumber(): {0}", (object) deviceInfo.SerialNumber);

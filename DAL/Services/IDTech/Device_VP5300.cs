@@ -80,7 +80,7 @@ namespace IPA.DAL.RBADAL.Services
             Debug.WriteLine("device INFO[Model Name]        : {0}", (object) deviceInfo.ModelName);
 
             rt = IDT_SpectrumPro.SharedController.config_getModelNumber(ref deviceInfo.ModelNumber);
-            if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
+            if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
             {
                 deviceInfo.ModelNumber = deviceInfo?.ModelNumber?.Split(' ')[0] ?? "";
                 Debug.WriteLine("device INFO[Model Number]      : {0}", (object) deviceInfo.ModelNumber);
@@ -140,7 +140,7 @@ namespace IPA.DAL.RBADAL.Services
            string serialNumber = "";
            RETURN_CODE rt = IDT_VP8800.SharedController.config_getSerialNumber(ref serialNumber);
 
-          if (RETURN_CODE.RETURN_CODE_DO_SUCCESS == rt)
+          if (rt == RETURN_CODE.RETURN_CODE_DO_SUCCESS)
           {
               deviceInfo.SerialNumber = serialNumber;
               Debug.WriteLine("device::GetSerialNumber(): {0}", (object) deviceInfo.SerialNumber);

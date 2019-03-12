@@ -510,7 +510,7 @@ namespace IPA.DAL.RBADAL.Services
                 //Get the Device Firmware Version / Model
                 var firmwareModelInfo = GetFirmwareVersion();
 
-                if (firmwareModelInfo != null)
+                if (!String.IsNullOrWhiteSpace(firmwareModelInfo))
                 {
                     deviceInfo.FirmwareVersion = ParseFirmwareVersion(firmwareModelInfo);
                     deviceInfo.ModelName = firmwareModelInfo.Substring(2, firmwareModelInfo.IndexOf("USB", StringComparison.Ordinal) - 3);

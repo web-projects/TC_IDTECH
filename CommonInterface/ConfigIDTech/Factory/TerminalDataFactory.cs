@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IPA.CommonInterface.Factory
+namespace IPA.CommonInterface.ConfigIDTech.Factory
 {
     [Serializable]
     public class TerminalDataFactory

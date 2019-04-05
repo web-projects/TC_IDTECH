@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using IPA.Core.Shared.Helpers;
 using IPA.Core.Shared.Helpers.StatusCode;
 using IPA.CommonInterface;
+using IPA.CommonInterface.ConfigIDTech;
 
 namespace IPA.DAL.RBADAL.Services
 {

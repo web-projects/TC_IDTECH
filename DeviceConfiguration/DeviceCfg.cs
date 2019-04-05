@@ -14,6 +14,8 @@ using IDTechSDK;
 using IPA.CommonInterface;
 using IPA.CommonInterface.Interfaces;
 using IPA.CommonInterface.Helpers;
+using IPA.CommonInterface.ConfigIDTech;
+using IPA.CommonInterface.ConfigIDTech.Configuration;
 using IPA.DAL;
 using IPA.DAL.RBADAL.Services.Devices.IDTech;
 using IPA.Core.Shared.Helpers.StatusCode;

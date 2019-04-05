@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using IPA.DAL.RBADAL.Services;
 using IPA.CommonInterface;
+using IPA.CommonInterface.ConfigIDTech;
 
 namespace IPA.DAL.RBADAL.Interfaces
 {

@@ -7,8 +7,8 @@ using System.Management;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Threading.Tasks;
-using IPA.CommonInterface;
-///using Configuration = IPA.Core.Client.DataAccess.Helper.Config;
+using IPA.CommonInterface.Interfaces;
+using IPA.CommonInterface.ConfigIDTech;
 
 namespace IPA.DAL.RBADAL.Services
 {

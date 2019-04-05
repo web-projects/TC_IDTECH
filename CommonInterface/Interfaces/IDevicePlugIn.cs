@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using IPA.CommonInterface.Helpers;
+using IPA.CommonInterface.ConfigIDTech;
 
 namespace IPA.CommonInterface.Interfaces
 {

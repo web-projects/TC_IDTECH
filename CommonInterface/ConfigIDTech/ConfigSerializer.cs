@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using static System.Net.Mime.MediaTypeNames;
+using IPA.CommonInterface.ConfigIDTech.Factory;
+using IPA.CommonInterface.ConfigIDTech.Configuration;
 
-namespace IPA.CommonInterface
+namespace IPA.CommonInterface.ConfigIDTech
 {
     [Serializable]
     public class ConfigSerializer

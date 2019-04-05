@@ -49,22 +49,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Configuration\TerminalConfiguration.cs" />
+    <Compile Include="ConfigIDTech\Configuration\TerminalConfiguration.cs" />
     <Compile Include="CreditCard.cs" />
-    <Compile Include="Factory\AidFactory.cs" />
-    <Compile Include="Factory\CapKFactory.cs" />
-    <Compile Include="Factory\TerminalDataFactory.cs" />
+    <Compile Include="ConfigIDTech\Factory\AidFactory.cs" />
+    <Compile Include="ConfigIDTech\Factory\CapKFactory.cs" />
+    <Compile Include="ConfigIDTech\Factory\TerminalDataFactory.cs" />
     <Compile Include="Helpers\DeviceNotificationEventArgs.cs" />
     <Compile Include="Helpers\Enumerations.cs" />
     <Compile Include="Interfaces\IConfigurationWrapper.cs" />
-    <Compile Include="Configuration\Msr.cs" />
-    <Compile Include="Configuration\Aid.cs" />
-    <Compile Include="Configuration\TerminalData.cs" />
-    <Compile Include="Configuration\TerminalInfo.cs" />
-    <Compile Include="Configuration\Capk.cs" />
+    <Compile Include="ConfigIDTech\Configuration\Msr.cs" />
+    <Compile Include="ConfigIDTech\Configuration\Aid.cs" />
+    <Compile Include="ConfigIDTech\Configuration\TerminalData.cs" />
+    <Compile Include="ConfigIDTech\Configuration\TerminalInfo.cs" />
+    <Compile Include="ConfigIDTech\Configuration\Capk.cs" />
     <Compile Include="Interfaces\IDevicePlugIn.cs" />
-    <Compile Include="ConfigSerializer.cs" />
-    <Compile Include="Configuration\MsrConfigItem.cs" />
+    <Compile Include="ConfigIDTech\ConfigSerializer.cs" />
+    <Compile Include="ConfigIDTech\Configuration\MsrConfigItem.cs" />
     <Compile Include="PaymentXO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Helpers\StatusCodeEnum.cs" />

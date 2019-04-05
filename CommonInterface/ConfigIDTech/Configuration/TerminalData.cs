@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IPA.CommonInterface
+namespace IPA.CommonInterface.ConfigIDTech.Configuration
 {
     [Serializable]
     public class TerminalData

@@ -15,6 +15,8 @@ using HidLibrary;
 using IPA.CommonInterface;
 using IPA.CommonInterface.Interfaces;
 using IPA.CommonInterface.Helpers;
+using IPA.CommonInterface.ConfigIDTech;
+using IPA.CommonInterface.ConfigIDTech.Configuration;
 using System.Collections;
 using IPA.LoggerManager;
 using System.IO;

@@ -1,7 +1,9 @@
 ﻿using IDTechSDK;
 using IPA.CommonInterface;
-using IPA.CommonInterface.Factory;
 using IPA.CommonInterface.Helpers;
+using IPA.CommonInterface.ConfigIDTech;
+using IPA.CommonInterface.ConfigIDTech.Configuration;
+using IPA.CommonInterface.ConfigIDTech.Factory;
 using IPA.LoggerManager;
 using IPA.Core.Shared.Enums;
 using IPA.DAL.RBADAL.Interfaces;

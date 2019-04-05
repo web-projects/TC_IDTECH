@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace IPA.CommonInterface
+namespace IPA.CommonInterface.ConfigIDTech.Configuration
 {
     [Serializable]
     public class TerminalConfiguration

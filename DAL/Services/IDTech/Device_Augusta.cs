@@ -29,7 +29,7 @@ namespace IPA.DAL.RBADAL.Services
 
         private IDTechSDK.IDT_DEVICE_Types deviceType;
         private DEVICE_INTERFACE_Types     deviceConnect;
-        private DEVICE_PROTOCOL_Types      deviceProtocol;
+        //private DEVICE_PROTOCOL_Types      deviceProtocol;
         private IDTECH_DEVICE_PID          deviceMode;
 
         private string serialNumber = "";

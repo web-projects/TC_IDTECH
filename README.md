@@ -40,3 +40,4 @@ This an application to test IDTech Augusta Devices.
 * 20190304 - Code clean-up.
 * 20190404 - Consolidated code prior to merge.
 * 20190405 - Deleted obsolete code.
+           - Removed warnings.

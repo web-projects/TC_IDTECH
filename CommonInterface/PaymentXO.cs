@@ -50,9 +50,9 @@ namespace IPA.Core.XO.Payment
                 if (String.IsNullOrEmpty(this.Request?.PaymentTender?.BankAccountNumber) || String.IsNullOrEmpty(this.Request?.PaymentTender?.BankRoutingNumber))
                     this.ValidationMessageAdd((int)ErrorType.failtoprocess, (int)ErrorField.missingfields, $"BankRoutingNumber and BankAccountNumber: {Constants.IsRequired} when payment is checking");
                 else if (this.Request?.PaymentTender?.BankAccountNumber?.Length > 17)
-                    this.ValidationMessageAdd((int)ErrorType.failtoprocess, (int)StatusCodeEnum.IPAErrorField_InvalidAcctNo, $"BankAccountNumber must not exceed 17 digits.");
+                    this.ValidationMessageAdd((int)ErrorType.failtoprocess, (int)IPAErrorField.InvalidAcctNo, $"BankAccountNumber must not exceed 17 digits.");
                 else if (this.Request?.PaymentTender?.BankRoutingNumber?.Length > 9)
-                    this.ValidationMessageAdd((int)ErrorType.failtoprocess, (int)StatusCodeEnum.InvalidAchRouteNo, $"BankRoutingNumber must be 9 digits.");
+                    this.ValidationMessageAdd((int)ErrorType.failtoprocess, (int)IPAErrorField.InvalidAchRouteNo, $"BankRoutingNumber must be 9 digits.");
             }
             else if (this.Request?.Payment?.PaymentTypeID == (int)Shared.Enums.PaymentType.Void ||
                      this.Request?.Payment?.PaymentTypeID == (int)Shared.Enums.PaymentType.ChargeBack ||

@@ -193,7 +193,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data.Entity\Device.cs" />
     <Compile Include="Data.Entity\DeviceInfo.cs" />
     <Compile Include="Data.Entity\Manufacturer.cs" />
     <Compile Include="Data.Entity\Model.cs" />

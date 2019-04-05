@@ -201,7 +201,7 @@ namespace IPA.DAL.RBADAL.Services
         async Task IDevice.CardRead(string paymentAmount, string promptText)
         {
             if (!device.IsConnected)
-                return ;
+                return;
 
             currentPaymentAmount = paymentAmount;
             //waitForReply.Reset();
@@ -210,6 +210,7 @@ namespace IPA.DAL.RBADAL.Services
             waitForReply.WaitOne();
             //device.CloseDevice();
             //NotificationRaise(new NotificationEventArgs { NotificationType = NotificationType.DeviceEvent, DeviceEvent = DeviceEvent.CardReadComplete });
+            await Task.FromResult(0);
         }
 
         void IDevice.Process(DeviceProcess process)
@@ -655,7 +656,7 @@ namespace IPA.DAL.RBADAL.Services
                         status = EntryModeStatus.CardNotRead;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 status = EntryModeStatus.Error;
             }
@@ -1097,7 +1098,7 @@ namespace IPA.DAL.RBADAL.Services
                         osETrk1 = 0;
                     osETrk1End = search(bytes, Encoding.ASCII.GetBytes("\" ETrk2=\""), osETrk1);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
 
                 }
@@ -1708,7 +1709,7 @@ if(empty)
                     ((IDevice)this).BadRead();
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 ///                Transaction.PaymentXO.Request.CreditCard = new Core.Data.Entity.Other.CreditCard
 ///                {

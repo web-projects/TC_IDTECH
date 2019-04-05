@@ -30,46 +30,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Augusta_config, Version=1.2.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_config.dll</HintPath>
-    </Reference>
-    <Reference Include="Augusta_device, Version=1.2.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_device.dll</HintPath>
-    </Reference>
-    <Reference Include="Augusta_emv, Version=1.2.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_emv.dll</HintPath>
-    </Reference>
-    <Reference Include="Augusta_icc, Version=1.2.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_icc.dll</HintPath>
-    </Reference>
-    <Reference Include="Augusta_KB_config, Version=1.2.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_KB_config.dll</HintPath>
-    </Reference>
-    <Reference Include="Augusta_KB_device, Version=1.2.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_KB_device.dll</HintPath>
-    </Reference>
-    <Reference Include="Augusta_KB_msr, Version=1.2.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_KB_msr.dll</HintPath>
-    </Reference>
-    <Reference Include="Augusta_KB_parse_, Version=1.2.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_KB_parse_.dll</HintPath>
-    </Reference>
-    <Reference Include="Augusta_msr, Version=1.2.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_msr.dll</HintPath>
-    </Reference>
-    <Reference Include="Augusta_parse, Version=1.2.5.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\sdk\Augusta_parse.dll</HintPath>
-    </Reference>
     <Reference Include="CommonInterface">
       <HintPath>..\CommonInterface\bin\Debug\CommonInterface.dll</HintPath>
     </Reference>
@@ -81,33 +41,6 @@
     </Reference>
     <Reference Include="LoggerManager">
       <HintPath>..\LoggerManager\bin\Debug\LoggerManager.dll</HintPath>
-    </Reference>
-    <Reference Include="NEO2_config">
-      <HintPath>..\sdk\NEO2_config.dll</HintPath>
-    </Reference>
-    <Reference Include="NEO2_ctls">
-      <HintPath>..\sdk\NEO2_ctls.dll</HintPath>
-    </Reference>
-    <Reference Include="NEO2_device">
-      <HintPath>..\sdk\NEO2_device.dll</HintPath>
-    </Reference>
-    <Reference Include="NEO2_emv">
-      <HintPath>..\sdk\NEO2_emv.dll</HintPath>
-    </Reference>
-    <Reference Include="NEO2_icc">
-      <HintPath>..\sdk\NEO2_icc.dll</HintPath>
-    </Reference>
-    <Reference Include="NEO2_lcd">
-      <HintPath>..\sdk\NEO2_lcd.dll</HintPath>
-    </Reference>
-    <Reference Include="NEO2_msr">
-      <HintPath>..\sdk\NEO2_msr.dll</HintPath>
-    </Reference>
-    <Reference Include="NEO2_parse">
-      <HintPath>..\sdk\NEO2_parse.dll</HintPath>
-    </Reference>
-    <Reference Include="NEO2_pin">
-      <HintPath>..\sdk\NEO2_pin.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -136,27 +69,6 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="VP3300_config">
-      <HintPath>..\sdk\VP3300_config.dll</HintPath>
-    </Reference>
-    <Reference Include="VP3300_ctls">
-      <HintPath>..\sdk\VP3300_ctls.dll</HintPath>
-    </Reference>
-    <Reference Include="VP3300_device">
-      <HintPath>..\sdk\VP3300_device.dll</HintPath>
-    </Reference>
-    <Reference Include="VP3300_emv">
-      <HintPath>..\sdk\VP3300_emv.dll</HintPath>
-    </Reference>
-    <Reference Include="VP3300_icc">
-      <HintPath>..\sdk\VP3300_icc.dll</HintPath>
-    </Reference>
-    <Reference Include="VP3300_msr">
-      <HintPath>..\sdk\VP3300_msr.dll</HintPath>
-    </Reference>
-    <Reference Include="VP3300_parse">
-      <HintPath>..\sdk\VP3300_parse.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DeviceCfg.cs" />

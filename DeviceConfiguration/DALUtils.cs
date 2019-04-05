@@ -484,7 +484,7 @@ namespace IPA.DAL.RBADAL
                         osETrk1 = 0;
                     osETrk1End = search(bytes, Encoding.ASCII.GetBytes("\" ETrk2=\""), osETrk1);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
 
                 }

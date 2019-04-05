@@ -76,7 +76,7 @@ namespace IPA.Core.Data.Entity.Other
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // Failure to get the description from an enumeration should not short circuit the caller.
             }

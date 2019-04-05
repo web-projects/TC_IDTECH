@@ -109,8 +109,9 @@ namespace IPA.DAL.RBADAL.Services
         void IDevice.ClearBuffer()
         {
         }
-        async Task IDevice.CardRead(string paymentAmount, string promptText)
+        Task IDevice.CardRead(string paymentAmount, string promptText)
         {
+            return Task.CompletedTask;
         }
 
         void IDevice.Process(DeviceProcess process)

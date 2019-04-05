@@ -85,6 +85,7 @@ namespace IPA.DAL.RBADAL
 
       // Create Device info object
       deviceInformation = new DeviceInformation();
+      deviceInformation.emvConfigSupported = false;
 
       // Device Discovery
       //useUniversalSDK = DeviceDiscovery();
@@ -2106,8 +2107,7 @@ namespace IPA.DAL.RBADAL
 
         // we need to start listening again for more data
         device.ReadReport(OnReport);*/
-        Device.CardRead(amount, "HELLO");
-      }
+       }
     }
 
     private void RaiseTimerExpired(Core.Client.Dal.Models.TimerEventArgs e)

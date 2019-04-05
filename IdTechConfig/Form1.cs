@@ -96,7 +96,7 @@ namespace IPA.MainApp
             bool.TryParse(show_settings_tab, out tc_show_settings_tab);
             if(!tc_show_settings_tab)
             {
-                tabControlMain.TabPages.Remove(SettingstabPage);
+                MaintabControl.TabPages.Remove(SettingstabPage);
             }
 
             // Raw Mode Tab
@@ -104,7 +104,7 @@ namespace IPA.MainApp
             bool.TryParse(show_raw_mode_tab, out tc_show_raw_mode_tab);
             if(!tc_show_raw_mode_tab)
             {
-                tabControlMain.TabPages.Remove(RawModetabPage);
+                MaintabControl.TabPages.Remove(RawModetabPage);
             }
 
             // Terminal Data Tab
@@ -112,7 +112,7 @@ namespace IPA.MainApp
             bool.TryParse(show_terminal_data_tab, out tc_show_terminal_data_tab);
             if(!tc_show_terminal_data_tab)
             {
-                tabControlMain.TabPages.Remove(TerminalDatatabPage);
+                MaintabControl.TabPages.Remove(TerminalDatatabPage);
             }
 
             // Json Tab
@@ -120,7 +120,7 @@ namespace IPA.MainApp
             bool.TryParse(show_json_tab, out tc_show_json_tab);
             if(!tc_show_json_tab)
             {
-                tabControlMain.TabPages.Remove(JsontabPage);
+                MaintabControl.TabPages.Remove(JsontabPage);
             }
 
             // Application Always on Top
@@ -143,7 +143,7 @@ namespace IPA.MainApp
             int.TryParse(minimum_transaction_length, out tc_minimum_transaction_length);
 
             // Original Forecolor
-            TEXTBOX_FORE_COLOR = txtCardData.ForeColor;
+            TEXTBOX_FORE_COLOR = ApplicationtxtCardData.ForeColor;
 
             // Setup Logging
             SetupLogging();
@@ -402,7 +402,7 @@ namespace IPA.MainApp
                 this.ApplicationlblModelName.Text = "";
                 this.ApplicationlblModelNumber.Text = "";
                 this.ApplicationlblPort.Text = "";
-                this.txtCardData.Text = "";
+                this.ApplicationtxtCardData.Text = "";
 
                 // Disable Tab(s)
                 this.ApplicationtabPage.Enabled = false;
@@ -411,8 +411,8 @@ namespace IPA.MainApp
                 this.TerminalDatatabPage.Enabled = false;
                 this.JsontabPage.Enabled = false;
 
-                this.txtCardData.Text = "";
-                this.txtCardData.ForeColor = this.txtCardData.BackColor;
+                this.ApplicationtxtCardData.Text = "";
+                this.ApplicationtxtCardData.ForeColor = this.ApplicationtxtCardData.BackColor;
                 this.ApplicationbtnShowTags.Text = "TAGS";
                 this.ApplicationbtnShowTags.Enabled = false;
                 this.ApplicationbtnShowTags.Visible = false;
@@ -455,7 +455,7 @@ namespace IPA.MainApp
                 this.ApplicationlblModelName.Text = "";
                 this.ApplicationlblModelNumber.Text = "";
                 this.ApplicationlblPort.Text = "";
-                this.txtCardData.Text = "";
+                this.ApplicationtxtCardData.Text = "";
             }
         }
 
@@ -468,7 +468,7 @@ namespace IPA.MainApp
             this.ApplicationlblModelName.Text = "";
             this.ApplicationlblModelNumber.Text = "";
             this.ApplicationlblPort.Text = "";
-            this.txtCardData.Text = "";
+            this.ApplicationtxtCardData.Text = "";
 
             try
             {
@@ -532,10 +532,10 @@ namespace IPA.MainApp
                 // KB Mode
                 if (dev_usb_mode == DEV_USB_MODE.USB_KYB_MODE)
                 {
-                    tabControlMain.SelectedTab = this.ApplicationtabPage;
-                    this.txtCardData.ReadOnly = false;
-                    this.txtCardData.GotFocus += CardDataTextBoxGotFocus;
-                    this.txtCardData.ForeColor = this.txtCardData.BackColor;
+                    MaintabControl.SelectedTab = this.ApplicationtabPage;
+                    this.ApplicationtxtCardData.ReadOnly = false;
+                    this.ApplicationtxtCardData.GotFocus += CardDataTextBoxGotFocus;
+                    this.ApplicationtxtCardData.ForeColor = this.ApplicationtxtCardData.BackColor;
 
                     stopWatch = new Stopwatch();
                     stopWatch.Start();
@@ -545,15 +545,15 @@ namespace IPA.MainApp
 
                     this.Invoke(new MethodInvoker(() =>
                     {
-                        this.txtCardData.Focus();
+                        this.ApplicationtxtCardData.Focus();
                     }));
                 }
                 else
                 {
                     TransactionTimer?.Stop();
-                    this.txtCardData.ForeColor = TEXTBOX_FORE_COLOR;
-                    this.txtCardData.ReadOnly = true;
-                    this.txtCardData.GotFocus -= CardDataTextBoxGotFocus;
+                    this.ApplicationtxtCardData.ForeColor = TEXTBOX_FORE_COLOR;
+                    this.ApplicationtxtCardData.ReadOnly = true;
+                    this.ApplicationtxtCardData.GotFocus -= CardDataTextBoxGotFocus;
                 }
             }
             catch(Exception ex)
@@ -580,20 +580,20 @@ namespace IPA.MainApp
                 int minTransactionLen = tc_minimum_transaction_length;
                 if (isNonAugusta)
                     minTransactionLen = 120;
-                if(this.txtCardData.Text.Length > minTransactionLen)
+                if(this.ApplicationtxtCardData.Text.Length > minTransactionLen)
                 {
                     this.Invoke(new MethodInvoker(() =>
                     {
-                        string data = txtCardData.Text;
+                        string data = ApplicationtxtCardData.Text;
                         if (isNonAugusta)
                         {
-                            txtCardData.Text = "*** TRANSACTION DATA CAPTURED : MSR ***";
+                            ApplicationtxtCardData.Text = "*** TRANSACTION DATA CAPTURED : MSR ***";
                         }
                         else
                         {
-                            txtCardData.Text = "*** TRANSACTION DATA CAPTURED : EMV ***";
+                            ApplicationtxtCardData.Text = "*** TRANSACTION DATA CAPTURED : EMV ***";
                         }
-                        this.txtCardData.ForeColor = TEXTBOX_FORE_COLOR;
+                        this.ApplicationtxtCardData.ForeColor = TEXTBOX_FORE_COLOR;
                         // Set TAGS to display
                         SetTagData(data, false);
                     }));
@@ -603,12 +603,12 @@ namespace IPA.MainApp
                     // This could be an MSR fallback transaction
                     this.Invoke(new MethodInvoker(() =>
                     {
-                        string data = txtCardData.Text;
+                        string data = ApplicationtxtCardData.Text;
                         if(data.Length > 0)
                         {
                             string message = devicePlugin.GetErrorMessage(data);
-                            txtCardData.Text = message;
-                            this.txtCardData.ForeColor = TEXTBOX_FORE_COLOR;
+                            ApplicationtxtCardData.Text = message;
+                            this.ApplicationtxtCardData.ForeColor = TEXTBOX_FORE_COLOR;
                             Debug.WriteLine("main: card data=[{0}]", (object) data);
                         }
                         else
@@ -626,9 +626,9 @@ namespace IPA.MainApp
             Debug.WriteLine("main: transaction timer raised ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
             this.Invoke(new MethodInvoker(() =>
             {
-                if(!string.IsNullOrEmpty(this.txtCardData.Text))
+                if(!string.IsNullOrEmpty(this.ApplicationtxtCardData.Text))
                 {
-                    Debug.WriteLine("main: card data length=[0}", this.txtCardData.Text.Length);
+                    Debug.WriteLine("main: card data length=[0}", this.ApplicationtxtCardData.Text.Length);
                 }
             }));
         }
@@ -675,10 +675,10 @@ namespace IPA.MainApp
                         {
                             this.Invoke(new MethodInvoker(() =>
                             {
-                                if(tabControlMain.Contains(JsontabPage))
+                                if(MaintabControl.Contains(JsontabPage))
                                 {
                                     this.JsonpicBoxWait.Visible = true;
-                                    this.tabControlMain.SelectedTab = this.JsontabPage;
+                                    this.MaintabControl.SelectedTab = this.JsontabPage;
                                 }
                             }));
                         }
@@ -712,22 +712,22 @@ namespace IPA.MainApp
             {
                 this.Invoke(new MethodInvoker(() =>
                 {
-                    tabControlMain.SelectedTab = this.ApplicationtabPage;
-                    if(tabControlMain.Contains(SettingstabPage))
+                    MaintabControl.SelectedTab = this.ApplicationtabPage;
+                    if(MaintabControl.Contains(SettingstabPage))
                     {
-                        tabControlMain.TabPages.Remove(SettingstabPage);
+                        MaintabControl.TabPages.Remove(SettingstabPage);
                     }
-                    if(tabControlMain.Contains(RawModetabPage))
+                    if(MaintabControl.Contains(RawModetabPage))
                     {
-                        tabControlMain.TabPages.Remove(RawModetabPage);
+                        MaintabControl.TabPages.Remove(RawModetabPage);
                     }
-                    if(tabControlMain.Contains(TerminalDatatabPage))
+                    if(MaintabControl.Contains(TerminalDatatabPage))
                     {
-                        tabControlMain.TabPages.Remove(TerminalDatatabPage);
+                        MaintabControl.TabPages.Remove(TerminalDatatabPage);
                     }
-                    if(tabControlMain.Contains(JsontabPage))
+                    if(MaintabControl.Contains(JsontabPage))
                     {
-                        tabControlMain.TabPages.Remove(JsontabPage);
+                        MaintabControl.TabPages.Remove(JsontabPage);
                     }
                 }));
             }
@@ -797,7 +797,7 @@ namespace IPA.MainApp
                         if(tlv[0].Equals("5A"))
                         {
                             cardnumber = tlv[1];
-                            txtCardData.Text += "\r\nCARD NUMBER: " + cardnumber;
+                            ApplicationtxtCardData.Text += "\r\nCARD NUMBER: " + cardnumber;
                         }
                     }
                     else
@@ -805,7 +805,7 @@ namespace IPA.MainApp
                         if(tlv[0].Equals("DFEF5B"))
                         {
                             cardnumber = tlv[1];
-                            txtCardData.Text += "\r\nCARD NUMBER: " + cardnumber;
+                            ApplicationtxtCardData.Text += "\r\nCARD NUMBER: " + cardnumber;
                         }
                     }
                 }
@@ -830,10 +830,10 @@ namespace IPA.MainApp
                     bool.TryParse((string) data[4], out updateView);
                     if(updateView)
                     {
-                        this.txtCardData.Text = (string) data[0];
+                        this.ApplicationtxtCardData.Text = (string) data[0];
                         this.ApplicationbtnCardRead.Enabled = (dev_usb_mode == DEV_USB_MODE.USB_HID_MODE) ? true : false;
 
-                        this.txtCardData.ForeColor = TEXTBOX_FORE_COLOR;
+                        this.ApplicationtxtCardData.ForeColor = TEXTBOX_FORE_COLOR;
 
                         // Set TAGS to display
                         bool isHIDMode = true;
@@ -881,7 +881,7 @@ namespace IPA.MainApp
             MethodInvoker mi = () =>
             {
                 //string [] data = ((IEnumerable) payload).Cast<object>().Select(x => x == null ? "" : x.ToString()).ToArray();
-                this.txtCardData.Text = payload.ToString();
+                this.ApplicationtxtCardData.Text = payload.ToString();
                 this.ApplicationbtnCardRead.Enabled = (dev_usb_mode == DEV_USB_MODE.USB_HID_MODE) ? true : false;
 
                 // Enable Tab(s)
@@ -1080,30 +1080,30 @@ namespace IPA.MainApp
                         if (this.JsonpicBoxWait.Visible == true)
                         {
                             this.JsonpicBoxWait.Visible = false;
-                            tabControlMain.SelectedTab = this.ApplicationtabPage;
+                            MaintabControl.SelectedTab = this.ApplicationtabPage;
                         }
 
                         // Only have btnCardRead for HID devices.  KB devices always read cards.
                         this.ApplicationbtnCardRead.Enabled = (split[1].Contains("HID")); 
                         dev_usb_mode = (data[0].Contains("HID")) ? DEV_USB_MODE.USB_KYB_MODE : DEV_USB_MODE.USB_HID_MODE;
 
-                        if (tabControlMain.Contains(SettingstabPage))
+                        if (MaintabControl.Contains(SettingstabPage))
                         {
-                            tabControlMain.TabPages.Remove(SettingstabPage);
+                            MaintabControl.TabPages.Remove(SettingstabPage);
                         }
-                        if (tabControlMain.Contains(RawModetabPage))
+                        if (MaintabControl.Contains(RawModetabPage))
                         {
-                            tabControlMain.TabPages.Remove(RawModetabPage);
+                            MaintabControl.TabPages.Remove(RawModetabPage);
                         }
-                        if (tabControlMain.Contains(TerminalDatatabPage))
+                        if (MaintabControl.Contains(TerminalDatatabPage))
                         {
-                            tabControlMain.TabPages.Remove(TerminalDatatabPage);
+                            MaintabControl.TabPages.Remove(TerminalDatatabPage);
                         }
-                        if (tabControlMain.Contains(JsontabPage))
+                        if (MaintabControl.Contains(JsontabPage))
                         {
-                            tabControlMain.TabPages.Remove(JsontabPage);
+                            MaintabControl.TabPages.Remove(JsontabPage);
                         }
-                        tabControlMain.SelectedTab = this.ApplicationtabPage;
+                        MaintabControl.SelectedTab = this.ApplicationtabPage;
                     }
                     else if (data[0].Contains("HID") || data[0].Contains("UNKNOWN"))
                     {
@@ -1120,28 +1120,28 @@ namespace IPA.MainApp
                         if(this.JsonpicBoxWait.Visible == true)
                         {
                             this.JsonpicBoxWait.Visible = false;
-                            tabControlMain.SelectedTab = this.ApplicationtabPage;
+                            MaintabControl.SelectedTab = this.ApplicationtabPage;
                         }
 
                         this.ApplicationbtnCardRead.Enabled = false;
 
-                        if(tabControlMain.Contains(SettingstabPage))
+                        if(MaintabControl.Contains(SettingstabPage))
                         {
-                            tabControlMain.TabPages.Remove(SettingstabPage);
+                            MaintabControl.TabPages.Remove(SettingstabPage);
                         }
-                        if(tabControlMain.Contains(RawModetabPage))
+                        if(MaintabControl.Contains(RawModetabPage))
                         {
-                            tabControlMain.TabPages.Remove(RawModetabPage);
+                            MaintabControl.TabPages.Remove(RawModetabPage);
                         }
-                        if(tabControlMain.Contains(TerminalDatatabPage))
+                        if(MaintabControl.Contains(TerminalDatatabPage))
                         {
-                            tabControlMain.TabPages.Remove(TerminalDatatabPage);
+                            MaintabControl.TabPages.Remove(TerminalDatatabPage);
                         }
-                        if(tabControlMain.Contains(JsontabPage))
+                        if(MaintabControl.Contains(JsontabPage))
                         {
-                            tabControlMain.TabPages.Remove(JsontabPage);
+                            MaintabControl.TabPages.Remove(JsontabPage);
                         }
-                        tabControlMain.SelectedTab = this.ApplicationtabPage;
+                        MaintabControl.SelectedTab = this.ApplicationtabPage;
                     }
                     else
                     {
@@ -1149,22 +1149,22 @@ namespace IPA.MainApp
 
                         this.ApplicationbtnCardRead.Enabled = true;
 
-                        if(!tabControlMain.Contains(SettingstabPage) && tc_show_settings_tab)
+                        if(!MaintabControl.Contains(SettingstabPage) && tc_show_settings_tab)
                         {
-                            tabControlMain.TabPages.Add(SettingstabPage);
+                            MaintabControl.TabPages.Add(SettingstabPage);
                         }
-                        if(!tabControlMain.Contains(RawModetabPage) && tc_show_raw_mode_tab)
+                        if(!MaintabControl.Contains(RawModetabPage) && tc_show_raw_mode_tab)
                         {
-                            tabControlMain.TabPages.Add(RawModetabPage);
+                            MaintabControl.TabPages.Add(RawModetabPage);
                         }
-                        if(!tabControlMain.Contains(TerminalDatatabPage) && tc_show_terminal_data_tab)
+                        if(!MaintabControl.Contains(TerminalDatatabPage) && tc_show_terminal_data_tab)
                         {
-                            tabControlMain.TabPages.Add(TerminalDatatabPage);
+                            MaintabControl.TabPages.Add(TerminalDatatabPage);
                         }
-                        if(!tabControlMain.Contains(JsontabPage) && tc_show_json_tab)
+                        if(!MaintabControl.Contains(JsontabPage) && tc_show_json_tab)
                         {
-                            tabControlMain.TabPages.Add(JsontabPage);
-                            tabControlMain.SelectedTab = this.JsontabPage;
+                            MaintabControl.TabPages.Add(JsontabPage);
+                            MaintabControl.SelectedTab = this.JsontabPage;
                             this.JsontabPage.Enabled = true;
                             this.JsonpicBoxWait.Visible = true;
                         }
@@ -1225,7 +1225,7 @@ namespace IPA.MainApp
                         if(tc_show_terminal_data_tab)
                         {
                             string [] data = ((IEnumerable) payload).Cast<object>().Select(x => x == null ? "" : x.ToString()).ToArray();
-                            this.TerminalDatatext1.Text = data[0];
+                            this.TerminalDatatextBox1.Text = data[0];
                         }
                     }
                     catch (Exception exp)
@@ -1258,7 +1258,7 @@ namespace IPA.MainApp
                         {
                             string [] filename = ((IEnumerable) payload).Cast<object>().Select(x => x == null ? "" : x.ToString()).ToArray();
                             this.JsontextBox1.Text = File.ReadAllText(filename[0]);
-                            tabControlMain.SelectedTab = this.JsontabPage;
+                            MaintabControl.SelectedTab = this.JsontabPage;
                             this.JsonpicBoxWait.Visible = false;
                         }
                     }
@@ -1280,7 +1280,7 @@ namespace IPA.MainApp
             else if(this.JsonpicBoxWait.Visible == true)
             {
                 this.JsonpicBoxWait.Visible = false;
-                tabControlMain.SelectedTab = this.ApplicationtabPage;
+                MaintabControl.SelectedTab = this.ApplicationtabPage;
             }
         }
 
@@ -1420,8 +1420,8 @@ namespace IPA.MainApp
                 // Start a new collection
                 if(stopWatch.ElapsedMilliseconds > tc_transaction_collection_timeout)
                 {
-                    this.txtCardData.Text = "";
-                    this.txtCardData.ForeColor = this.txtCardData.BackColor;
+                    this.ApplicationtxtCardData.Text = "";
+                    this.ApplicationtxtCardData.ForeColor = this.ApplicationtxtCardData.BackColor;
                     this.ApplicationbtnShowTags.Enabled = false;
                     this.ApplicationbtnShowTags.Visible = false;
                     this.ApplicationlistView1.Visible = false;
@@ -1434,12 +1434,12 @@ namespace IPA.MainApp
 
         private void CardDataTextBoxGotFocus(object sender, EventArgs args)
         {
-            HideCaret(this.txtCardData.Handle);
+            HideCaret(this.ApplicationtxtCardData.Handle);
         }
 
         private void OnSelectedIndexChanged(object sender, EventArgs e)
         {
-            if (tabControlMain.SelectedTab.Name.Equals("SettingstabPage"))
+            if (MaintabControl.SelectedTab.Name.Equals("SettingstabPage"))
             {
                 // Configuration Mode
                 this.Invoke(new MethodInvoker(() =>
@@ -1449,7 +1449,7 @@ namespace IPA.MainApp
                     this.SettingspicBoxWait.Visible = true;
                 }));
             }
-            else if (tabControlMain.SelectedTab.Name.Equals("RawModetabPage"))
+            else if (MaintabControl.SelectedTab.Name.Equals("RawModetabPage"))
             {
                 // Raw Mode TabPage: set focus to command field
                 this.Invoke(new MethodInvoker(() =>
@@ -1481,11 +1481,11 @@ namespace IPA.MainApp
             this.ApplicationlistView1.Visible = false;
 
             // Clear field
-            this.txtCardData.Text = "";
-            this.txtCardData.ForeColor = this.txtCardData.BackColor;
+            this.ApplicationtxtCardData.Text = "";
+            this.ApplicationtxtCardData.ForeColor = this.ApplicationtxtCardData.BackColor;
 
             // Set Focus to reader input
-            this.txtCardData.Focus();
+            this.ApplicationtxtCardData.Focus();
 
             // MSR Read
             new Thread(() =>
@@ -1517,7 +1517,7 @@ namespace IPA.MainApp
             // Disable MODE Button
             this.ApplicationbtnMode.Enabled = false;
             // Clear Card Data
-            this.txtCardData.Text = "";
+            this.ApplicationtxtCardData.Text = "";
         }
 
         private void OnConfigureClick(object sender, EventArgs e)
@@ -1595,9 +1595,9 @@ namespace IPA.MainApp
 
         private void OnCloseJsonClick(object sender, EventArgs e)
         {
-            if(tc_show_json_tab && tabControlMain.Contains(JsontabPage))
+            if(tc_show_json_tab && MaintabControl.Contains(JsontabPage))
             {
-                tabControlMain.TabPages.Remove(JsontabPage);
+                MaintabControl.TabPages.Remove(JsontabPage);
             }
         }
 

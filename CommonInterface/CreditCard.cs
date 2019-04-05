@@ -76,9 +76,10 @@ namespace IPA.Core.Data.Entity.Other
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 // Failure to get the description from an enumeration should not short circuit the caller.
+                System.Diagnostics.Debug.WriteLine("ParseEMVTags() - Exception {0}", ex.Message);
             }
             return result;
         }

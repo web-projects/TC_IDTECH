@@ -17,20 +17,18 @@
 /.vs
 
 # Ignore build files
-/bin/*
-/obj/*
-DAL/bin/
-DAL/obj/
-IdTechCfg/bin/
-IdTechCfg/obj/
 CommonInterface/bin/
 CommonInterface/obj/
+DAL/bin/
+DAL/obj/
 DeviceConfiguration/bin/
 DeviceConfiguration/obj/
+IdTechCfg/bin/
+IdTechCfg/obj/
+LoggerManager/bin/
+LoggerManager/obj/
+
 /sdk/*.dll
 /auto-generated/*.dll
 
 run/TerminalData.*
-
-/LoggerManager/bin/Debug
-/LoggerManager/obj/Debug

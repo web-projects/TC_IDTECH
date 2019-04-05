@@ -31,11 +31,11 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Application));
             this.MainpictureBox1 = new System.Windows.Forms.PictureBox();
             this.JsontabPage = new System.Windows.Forms.TabPage();
+            this.JsonpicBoxWait = new System.Windows.Forms.PictureBox();
             this.JsonbuttonClose = new System.Windows.Forms.Button();
             this.JsontextBox1 = new System.Windows.Forms.TextBox();
-            this.JsonpicBoxWait = new System.Windows.Forms.PictureBox();
             this.TerminalDatatabPage = new System.Windows.Forms.TabPage();
-            this.TerminalDatatext1 = new System.Windows.Forms.TextBox();
+            this.TerminalDatatextBox1 = new System.Windows.Forms.TextBox();
             this.RawModetabPage = new System.Windows.Forms.TabPage();
             this.RawModebtnExecute = new System.Windows.Forms.Button();
             this.RawModepanel1 = new System.Windows.Forms.Panel();
@@ -43,6 +43,7 @@
             this.RawModetxtCommand = new System.Windows.Forms.TextBox();
             this.RawModelabel1 = new System.Windows.Forms.Label();
             this.SettingstabPage = new System.Windows.Forms.TabPage();
+            this.SettingspicBoxWait = new System.Windows.Forms.PictureBox();
             this.SettingsbtnConfigure = new System.Windows.Forms.Button();
             this.Settingspanel1 = new System.Windows.Forms.Panel();
             this.SettingscBxSwipeMaskTrack3 = new System.Windows.Forms.CheckBox();
@@ -58,11 +59,10 @@
             this.SettingscBxTrack2 = new System.Windows.Forms.CheckBox();
             this.SettingscBxTrack1 = new System.Windows.Forms.CheckBox();
             this.Settingslabel3 = new System.Windows.Forms.Label();
-            this.SettingspicBoxWait = new System.Windows.Forms.PictureBox();
             this.ApplicationtabPage = new System.Windows.Forms.TabPage();
             this.ApplicationlistView1 = new System.Windows.Forms.ListView();
-            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.ApplicationcolumnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.ApplicationcolumnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.ApplicationbtnShowTags = new System.Windows.Forms.Button();
             this.ApplicationbtnMode = new System.Windows.Forms.Button();
             this.ApplicationlblPort = new System.Windows.Forms.Label();
@@ -77,8 +77,8 @@
             this.Applicationlabel2 = new System.Windows.Forms.Label();
             this.Applicationpanel1 = new System.Windows.Forms.Panel();
             this.Applicationlabel1 = new System.Windows.Forms.Label();
-            this.txtCardData = new System.Windows.Forms.TextBox();
-            this.tabControlMain = new System.Windows.Forms.TabControl();
+            this.ApplicationtxtCardData = new System.Windows.Forms.TextBox();
+            this.MaintabControl = new System.Windows.Forms.TabControl();
             ((System.ComponentModel.ISupportInitialize)(this.MainpictureBox1)).BeginInit();
             this.JsontabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.JsonpicBoxWait)).BeginInit();
@@ -86,11 +86,11 @@
             this.RawModetabPage.SuspendLayout();
             this.RawModepanel1.SuspendLayout();
             this.SettingstabPage.SuspendLayout();
-            this.Settingspanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SettingspicBoxWait)).BeginInit();
+            this.Settingspanel1.SuspendLayout();
             this.ApplicationtabPage.SuspendLayout();
             this.Applicationpanel1.SuspendLayout();
-            this.tabControlMain.SuspendLayout();
+            this.MaintabControl.SuspendLayout();
             this.SuspendLayout();
             // 
             // MainpictureBox1
@@ -114,6 +114,22 @@
             this.JsontabPage.Text = "Json";
             this.JsontabPage.UseVisualStyleBackColor = true;
             // 
+            // JsonpicBoxWait
+            // 
+            this.JsonpicBoxWait.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.JsonpicBoxWait.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.JsonpicBoxWait.Image = ((System.Drawing.Image)(resources.GetObject("JsonpicBoxWait.Image")));
+            this.JsonpicBoxWait.Location = new System.Drawing.Point(0, 0);
+            this.JsonpicBoxWait.Name = "JsonpicBoxWait";
+            this.JsonpicBoxWait.Size = new System.Drawing.Size(693, 522);
+            this.JsonpicBoxWait.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.JsonpicBoxWait.TabIndex = 2;
+            this.JsonpicBoxWait.TabStop = false;
+            this.JsonpicBoxWait.Visible = false;
+            this.JsonpicBoxWait.WaitOnLoad = true;
+            // 
             // JsonbuttonClose
             // 
             this.JsonbuttonClose.Location = new System.Drawing.Point(305, 479);
@@ -134,25 +150,9 @@
             this.JsontextBox1.Size = new System.Drawing.Size(682, 443);
             this.JsontextBox1.TabIndex = 4;
             // 
-            // JsonpicBoxWait
-            // 
-            this.JsonpicBoxWait.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.JsonpicBoxWait.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.JsonpicBoxWait.Image = ((System.Drawing.Image)(resources.GetObject("JsonpicBoxWait.Image")));
-            this.JsonpicBoxWait.Location = new System.Drawing.Point(0, 0);
-            this.JsonpicBoxWait.Name = "JsonpicBoxWait";
-            this.JsonpicBoxWait.Size = new System.Drawing.Size(693, 522);
-            this.JsonpicBoxWait.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
-            this.JsonpicBoxWait.TabIndex = 2;
-            this.JsonpicBoxWait.TabStop = false;
-            this.JsonpicBoxWait.Visible = false;
-            this.JsonpicBoxWait.WaitOnLoad = true;
-            // 
             // TerminalDatatabPage
             // 
-            this.TerminalDatatabPage.Controls.Add(this.TerminalDatatext1);
+            this.TerminalDatatabPage.Controls.Add(this.TerminalDatatextBox1);
             this.TerminalDatatabPage.Location = new System.Drawing.Point(4, 22);
             this.TerminalDatatabPage.Name = "TerminalDatatabPage";
             this.TerminalDatatabPage.Size = new System.Drawing.Size(692, 518);
@@ -160,15 +160,15 @@
             this.TerminalDatatabPage.Text = "Terminal Data";
             this.TerminalDatatabPage.UseVisualStyleBackColor = true;
             // 
-            // TerminalDatatext1
+            // TerminalDatatextBox1
             // 
-            this.TerminalDatatext1.Location = new System.Drawing.Point(5, 17);
-            this.TerminalDatatext1.Multiline = true;
-            this.TerminalDatatext1.Name = "TerminalDatatext1";
-            this.TerminalDatatext1.ReadOnly = true;
-            this.TerminalDatatext1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.TerminalDatatext1.Size = new System.Drawing.Size(682, 443);
-            this.TerminalDatatext1.TabIndex = 4;
+            this.TerminalDatatextBox1.Location = new System.Drawing.Point(5, 17);
+            this.TerminalDatatextBox1.Multiline = true;
+            this.TerminalDatatextBox1.Name = "TerminalDatatextBox1";
+            this.TerminalDatatextBox1.ReadOnly = true;
+            this.TerminalDatatextBox1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.TerminalDatatextBox1.Size = new System.Drawing.Size(682, 443);
+            this.TerminalDatatextBox1.TabIndex = 4;
             // 
             // RawModetabPage
             // 
@@ -240,6 +240,22 @@
             this.SettingstabPage.Text = "Settings";
             this.SettingstabPage.UseVisualStyleBackColor = true;
             this.SettingstabPage.Enter += new System.EventHandler(this.OnConfigurationControlActive);
+            // 
+            // SettingspicBoxWait
+            // 
+            this.SettingspicBoxWait.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.SettingspicBoxWait.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.SettingspicBoxWait.Image = ((System.Drawing.Image)(resources.GetObject("SettingspicBoxWait.Image")));
+            this.SettingspicBoxWait.Location = new System.Drawing.Point(14, 12);
+            this.SettingspicBoxWait.Name = "SettingspicBoxWait";
+            this.SettingspicBoxWait.Size = new System.Drawing.Size(678, 487);
+            this.SettingspicBoxWait.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+            this.SettingspicBoxWait.TabIndex = 2;
+            this.SettingspicBoxWait.TabStop = false;
+            this.SettingspicBoxWait.Visible = false;
+            this.SettingspicBoxWait.WaitOnLoad = true;
             // 
             // SettingsbtnConfigure
             // 
@@ -397,22 +413,6 @@
             this.Settingslabel3.TabIndex = 0;
             this.Settingslabel3.Text = "Swipe Force Mask:";
             // 
-            // SettingspicBoxWait
-            // 
-            this.SettingspicBoxWait.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.SettingspicBoxWait.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.SettingspicBoxWait.Image = ((System.Drawing.Image)(resources.GetObject("SettingspicBoxWait.Image")));
-            this.SettingspicBoxWait.Location = new System.Drawing.Point(14, 12);
-            this.SettingspicBoxWait.Name = "SettingspicBoxWait";
-            this.SettingspicBoxWait.Size = new System.Drawing.Size(678, 487);
-            this.SettingspicBoxWait.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
-            this.SettingspicBoxWait.TabIndex = 2;
-            this.SettingspicBoxWait.TabStop = false;
-            this.SettingspicBoxWait.Visible = false;
-            this.SettingspicBoxWait.WaitOnLoad = true;
-            // 
             // ApplicationtabPage
             // 
             this.ApplicationtabPage.Controls.Add(this.ApplicationlistView1);
@@ -429,7 +429,7 @@
             this.ApplicationtabPage.Controls.Add(this.Applicationlabel3);
             this.ApplicationtabPage.Controls.Add(this.Applicationlabel2);
             this.ApplicationtabPage.Controls.Add(this.Applicationpanel1);
-            this.ApplicationtabPage.Controls.Add(this.txtCardData);
+            this.ApplicationtabPage.Controls.Add(this.ApplicationtxtCardData);
             this.ApplicationtabPage.Location = new System.Drawing.Point(4, 22);
             this.ApplicationtabPage.Name = "ApplicationtabPage";
             this.ApplicationtabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -441,8 +441,8 @@
             // ApplicationlistView1
             // 
             this.ApplicationlistView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2});
+            this.ApplicationcolumnHeader1,
+            this.ApplicationcolumnHeader2});
             this.ApplicationlistView1.GridLines = true;
             this.ApplicationlistView1.Location = new System.Drawing.Point(8, 234);
             this.ApplicationlistView1.Name = "ApplicationlistView1";
@@ -452,13 +452,13 @@
             this.ApplicationlistView1.View = System.Windows.Forms.View.Details;
             this.ApplicationlistView1.Visible = false;
             // 
-            // columnHeader1
+            // ApplicationcolumnHeader1
             // 
-            this.columnHeader1.Text = "TAG";
+            this.ApplicationcolumnHeader1.Text = "TAG";
             // 
-            // columnHeader2
+            // ApplicationcolumnHeader2
             // 
-            this.columnHeader2.Text = "VALUE";
+            this.ApplicationcolumnHeader2.Text = "VALUE";
             // 
             // ApplicationbtnShowTags
             // 
@@ -590,31 +590,31 @@
             this.Applicationlabel1.TabIndex = 1;
             this.Applicationlabel1.Text = "Serial Number:";
             // 
-            // txtCardData
+            // ApplicationtxtCardData
             // 
-            this.txtCardData.Location = new System.Drawing.Point(11, 234);
-            this.txtCardData.Multiline = true;
-            this.txtCardData.Name = "txtCardData";
-            this.txtCardData.ReadOnly = true;
-            this.txtCardData.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtCardData.Size = new System.Drawing.Size(671, 231);
-            this.txtCardData.TabIndex = 12;
-            this.txtCardData.UseSystemPasswordChar = true;
-            this.txtCardData.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OnCardDataKeyEvent);
+            this.ApplicationtxtCardData.Location = new System.Drawing.Point(11, 234);
+            this.ApplicationtxtCardData.Multiline = true;
+            this.ApplicationtxtCardData.Name = "ApplicationtxtCardData";
+            this.ApplicationtxtCardData.ReadOnly = true;
+            this.ApplicationtxtCardData.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.ApplicationtxtCardData.Size = new System.Drawing.Size(671, 231);
+            this.ApplicationtxtCardData.TabIndex = 12;
+            this.ApplicationtxtCardData.UseSystemPasswordChar = true;
+            this.ApplicationtxtCardData.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OnCardDataKeyEvent);
             // 
-            // tabControlMain
+            // MaintabControl
             // 
-            this.tabControlMain.Controls.Add(this.ApplicationtabPage);
-            this.tabControlMain.Controls.Add(this.SettingstabPage);
-            this.tabControlMain.Controls.Add(this.RawModetabPage);
-            this.tabControlMain.Controls.Add(this.TerminalDatatabPage);
-            this.tabControlMain.Controls.Add(this.JsontabPage);
-            this.tabControlMain.Location = new System.Drawing.Point(12, 53);
-            this.tabControlMain.Name = "tabControlMain";
-            this.tabControlMain.SelectedIndex = 0;
-            this.tabControlMain.Size = new System.Drawing.Size(700, 544);
-            this.tabControlMain.TabIndex = 14;
-            this.tabControlMain.SelectedIndexChanged += new System.EventHandler(this.OnSelectedIndexChanged);
+            this.MaintabControl.Controls.Add(this.ApplicationtabPage);
+            this.MaintabControl.Controls.Add(this.SettingstabPage);
+            this.MaintabControl.Controls.Add(this.RawModetabPage);
+            this.MaintabControl.Controls.Add(this.TerminalDatatabPage);
+            this.MaintabControl.Controls.Add(this.JsontabPage);
+            this.MaintabControl.Location = new System.Drawing.Point(12, 53);
+            this.MaintabControl.Name = "MaintabControl";
+            this.MaintabControl.SelectedIndex = 0;
+            this.MaintabControl.Size = new System.Drawing.Size(700, 544);
+            this.MaintabControl.TabIndex = 14;
+            this.MaintabControl.SelectedIndexChanged += new System.EventHandler(this.OnSelectedIndexChanged);
             // 
             // Application
             // 
@@ -622,7 +622,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(721, 609);
             this.Controls.Add(this.MainpictureBox1);
-            this.Controls.Add(this.tabControlMain);
+            this.Controls.Add(this.MaintabControl);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Application";
@@ -639,14 +639,14 @@
             this.RawModepanel1.ResumeLayout(false);
             this.RawModepanel1.PerformLayout();
             this.SettingstabPage.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.SettingspicBoxWait)).EndInit();
             this.Settingspanel1.ResumeLayout(false);
             this.Settingspanel1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.SettingspicBoxWait)).EndInit();
             this.ApplicationtabPage.ResumeLayout(false);
             this.ApplicationtabPage.PerformLayout();
             this.Applicationpanel1.ResumeLayout(false);
             this.Applicationpanel1.PerformLayout();
-            this.tabControlMain.ResumeLayout(false);
+            this.MaintabControl.ResumeLayout(false);
             this.ResumeLayout(false);
 
     }
@@ -655,29 +655,28 @@
 
     // MAIN ARTIFACTS
     private System.Windows.Forms.PictureBox MainpictureBox1;
-    private System.Windows.Forms.TabControl tabControlMain;
+    private System.Windows.Forms.TabControl MaintabControl;
 
     // TAB: APPLICATION
     private System.Windows.Forms.TabPage ApplicationtabPage;
     private System.Windows.Forms.Panel Applicationpanel1;
     private System.Windows.Forms.ListView ApplicationlistView1;
-    private System.Windows.Forms.ColumnHeader columnHeader1;
-    private System.Windows.Forms.ColumnHeader columnHeader2;
-    private System.Windows.Forms.Label ApplicationlblPort;
-    private System.Windows.Forms.Label ApplicationlblModelNumber;
-    private System.Windows.Forms.Label ApplicationlblModelName;
-    private System.Windows.Forms.Label ApplicationlblFirmwareVersion;
-    private System.Windows.Forms.Label ApplicationlblSerialNumber;
-    private System.Windows.Forms.Label Applicationlabel5;
-    private System.Windows.Forms.Label Applicationlabel4;
-    private System.Windows.Forms.Label Applicationlabel3;
-    private System.Windows.Forms.Label Applicationlabel2;
+    private System.Windows.Forms.ColumnHeader ApplicationcolumnHeader1;
+    private System.Windows.Forms.ColumnHeader ApplicationcolumnHeader2;
     private System.Windows.Forms.Label Applicationlabel1;
-    private System.Windows.Forms.TextBox txtCardData;
-    private System.Windows.Forms.Button ApplicationbtnCardRead;
+    private System.Windows.Forms.Label Applicationlabel2;
+    private System.Windows.Forms.Label Applicationlabel3;
+    private System.Windows.Forms.Label Applicationlabel4;
+    private System.Windows.Forms.Label Applicationlabel5;
+    private System.Windows.Forms.Label ApplicationlblSerialNumber;
+    private System.Windows.Forms.Label ApplicationlblFirmwareVersion;
+    private System.Windows.Forms.Label ApplicationlblModelName;
+    private System.Windows.Forms.Label ApplicationlblModelNumber;
+    private System.Windows.Forms.Label ApplicationlblPort;
+    private System.Windows.Forms.TextBox ApplicationtxtCardData;
     private System.Windows.Forms.Button ApplicationbtnShowTags;
+    private System.Windows.Forms.Button ApplicationbtnCardRead;
     private System.Windows.Forms.Button ApplicationbtnMode;
-
     // TAB: SETTINGS
     private System.Windows.Forms.TabPage SettingstabPage;
     private System.Windows.Forms.Panel Settingspanel1;
@@ -704,12 +703,9 @@
     private System.Windows.Forms.TextBox RawModetxtCommand;
     private System.Windows.Forms.Panel RawModepanel1;
     private System.Windows.Forms.Label RawModelabel1;
-
-
     // TAB: TERMINALDATA
     private System.Windows.Forms.TabPage TerminalDatatabPage;
-    private System.Windows.Forms.TextBox TerminalDatatext1;
-
+    private System.Windows.Forms.TextBox TerminalDatatextBox1;
     // TAB: JSON
     private System.Windows.Forms.TabPage JsontabPage;
     private System.Windows.Forms.TextBox JsontextBox1;

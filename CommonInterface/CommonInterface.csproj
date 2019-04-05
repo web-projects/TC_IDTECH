@@ -41,6 +41,9 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -50,10 +53,22 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConfigIDTech\Configuration\TerminalConfiguration.cs" />
+    <Compile Include="ConfigSphere\ConfigSerializer.cs" />
+    <Compile Include="ConfigSphere\Configuration\Aid.cs" />
+    <Compile Include="ConfigSphere\Configuration\Capk.cs" />
+    <Compile Include="ConfigSphere\Configuration\Msr.cs" />
+    <Compile Include="ConfigSphere\Configuration\MsrConfigItem.cs" />
+    <Compile Include="ConfigSphere\Configuration\TerminalConfiguration.cs" />
+    <Compile Include="ConfigSphere\Configuration\TerminalData.cs" />
+    <Compile Include="ConfigSphere\Configuration\TerminalInfo.cs" />
+    <Compile Include="ConfigSphere\Factory\AidFactory.cs" />
+    <Compile Include="ConfigSphere\Factory\CapKFactory.cs" />
+    <Compile Include="ConfigSphere\Factory\TerminalDataFactory.cs" />
     <Compile Include="CreditCard.cs" />
     <Compile Include="ConfigIDTech\Factory\AidFactory.cs" />
     <Compile Include="ConfigIDTech\Factory\CapKFactory.cs" />
     <Compile Include="ConfigIDTech\Factory\TerminalDataFactory.cs" />
+    <Compile Include="Helpers\ConfigurationModes.cs" />
     <Compile Include="Helpers\DeviceNotificationEventArgs.cs" />
     <Compile Include="Helpers\Enumerations.cs" />
     <Compile Include="Interfaces\IConfigurationWrapper.cs" />

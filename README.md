@@ -39,3 +39,4 @@ This an application to test IDTech Augusta Devices.
 * 20190215 - Cleaned exceptions for VP5300 device.
 * 20190304 - Code clean-up.
 * 20190404 - Consolidated code prior to merge.
+* 20190405 - Deleted obsolete code.
